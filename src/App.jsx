@@ -245,10 +245,19 @@ function ComboBuilder({ menuItems, onAddCombo }) {
 
 // ── Order Form ────────────────────────────────────────────────────────────────
 function OrderForm({ cartItems, comboItems, onSuccess, onCancel }) {
+  // Detect what's in the cart
+  const hasMealPrep = cartItems.some((i) => i.category === "Meal Prep" || i.category === "Sides") || comboItems.length > 0;
+  const hasCatering = cartItems.some((i) => i.category === "Catering" || i.category === "Private Dinners");
+  const isMixed = hasMealPrep && hasCatering;
+
   const [form, setForm] = useState({
     customer_name: "", customer_email: "", customer_phone: "",
-    event_date: "", event_time: "",
-    guest_count: "", entree_count: "", appetizer_count: "", side_count: "",
+    // Meal prep fields
+    delivery_date: "", delivery_time: "", diner_count: "",
+    // Catering fields
+    event_date: "", event_time: "", guest_count: "",
+    // Shared
+    entree_count: "", appetizer_count: "", side_count: "",
     dietary_notes: "",
   });
   const [submitting, setSubmitting] = useState(false);
@@ -260,8 +269,10 @@ function OrderForm({ cartItems, comboItems, onSuccess, onCancel }) {
     if (!form.customer_name.trim()) e.customer_name = "Name is required";
     if (!form.customer_email.trim()) e.customer_email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(form.customer_email)) e.customer_email = "Enter a valid email";
-    if (!form.event_date) e.event_date = "Please choose a date";
-    if (!form.guest_count || Number(form.guest_count) < 1) e.guest_count = "Enter number of guests";
+    if (hasMealPrep && !form.delivery_date) e.delivery_date = "Please choose a delivery date";
+    if (hasMealPrep && (!form.diner_count || Number(form.diner_count) < 1)) e.diner_count = "Enter number of diners";
+    if (hasCatering && !form.event_date) e.event_date = "Please choose an event date";
+    if (hasCatering && (!form.guest_count || Number(form.guest_count) < 1)) e.guest_count = "Enter number of guests";
     return e;
   };
 
@@ -270,19 +281,29 @@ function OrderForm({ cartItems, comboItems, onSuccess, onCancel }) {
     if (Object.keys(e).length) { setErrors(e); return; }
     setSubmitting(true);
     try {
-      const regularItems = cartItems.map((i) => ({ id: i.id, name: i.name, price: i.price, qty: i.qty }));
+      const regularItems = cartItems.map((i) => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, category: i.category }));
       const combosSummary = comboItems.map((c) => ({
         type: "combo", label: c.label, badge: c.badge,
         entrees: c.entrees.map((i) => i.name),
         sides: c.sides.map((i) => i.name),
         rawTotal: c.rawTotal, discountedTotal: c.discountedTotal, savings: c.savings,
       }));
+      // Use event_date for catering, delivery_date for meal prep; prefer catering date if mixed
+      const primaryDate = hasCatering ? form.event_date : form.delivery_date;
+      const primaryTime = hasCatering ? form.event_time : form.delivery_time;
+      const primaryCount = hasCatering ? Number(form.guest_count) : Number(form.diner_count);
+
       const payload = {
-        customer_name: form.customer_name.trim(), customer_email: form.customer_email.trim(),
-        customer_phone: form.customer_phone.trim() || null, event_date: form.event_date,
-        event_time: form.event_time || null, guest_count: Number(form.guest_count) || null,
-        entree_count: Number(form.entree_count) || null, appetizer_count: Number(form.appetizer_count) || null,
-        side_count: Number(form.side_count) || null, dietary_notes: form.dietary_notes.trim() || null,
+        customer_name: form.customer_name.trim(),
+        customer_email: form.customer_email.trim(),
+        customer_phone: form.customer_phone.trim() || null,
+        event_date: primaryDate,
+        event_time: primaryTime || null,
+        guest_count: primaryCount || null,
+        entree_count: Number(form.entree_count) || null,
+        appetizer_count: Number(form.appetizer_count) || null,
+        side_count: Number(form.side_count) || null,
+        dietary_notes: form.dietary_notes.trim() || null,
         items: [...regularItems, ...combosSummary],
         status: "new",
       };
@@ -291,13 +312,21 @@ function OrderForm({ cartItems, comboItems, onSuccess, onCancel }) {
         headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("Supabase error:", errText);
+        throw new Error();
+      }
       onSuccess(form.customer_name);
     } catch { setErrors({ submit: "Something went wrong. Please try again or contact us directly." }); }
     finally { setSubmitting(false); }
   };
 
   const err = (k) => errors[k] ? <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#E76F51", marginTop: "4px" }}>{errors[k]}</div> : null;
+
+  const sectionHeader = (title) => (
+    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600, margin: "24px 0 16px", paddingBottom: "8px", borderBottom: "1px solid #EEE8DF" }}>{title}</div>
+  );
 
   const allItems = [
     ...cartItems.map((i) => ({ key: i.id, thumb: getImage(i), name: i.name, sub: `$${i.price} × ${i.qty}` })),
@@ -311,6 +340,7 @@ function OrderForm({ cartItems, comboItems, onSuccess, onCancel }) {
         <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", lineHeight: 1.6 }}>Fill in your details and Heather will be in touch to confirm pricing.</div>
       </div>
 
+      {/* Order Summary */}
       {allItems.length > 0 && (
         <div style={{ background: "#FEFAF4", borderRadius: "12px", border: "1px solid #EEE8DF", padding: "16px", marginBottom: "24px" }}>
           <div style={{ ...labelStyle, marginBottom: "12px" }}>Your Order</div>
@@ -329,26 +359,46 @@ function OrderForm({ cartItems, comboItems, onSuccess, onCancel }) {
         </div>
       )}
 
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600, marginBottom: "16px", paddingBottom: "8px", borderBottom: "1px solid #EEE8DF" }}>Contact Information</div>
+      {/* Contact Info */}
+      {sectionHeader("Contact Information")}
       <Field label="Full Name *"><input style={inputStyle} placeholder="Jane Smith" value={form.customer_name} onChange={(e) => set("customer_name", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("customer_name")}</Field>
       <Field label="Email Address *"><input style={inputStyle} type="email" placeholder="jane@email.com" value={form.customer_email} onChange={(e) => set("customer_email", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("customer_email")}</Field>
       <Field label="Phone Number"><input style={inputStyle} type="tel" placeholder="(555) 123-4567" value={form.customer_phone} onChange={(e) => set("customer_phone", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
 
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600, margin: "24px 0 16px", paddingBottom: "8px", borderBottom: "1px solid #EEE8DF" }}>Event Details</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-        <Field label="Event Date *"><input style={inputStyle} type="date" value={form.event_date} min={new Date().toISOString().split("T")[0]} onChange={(e) => set("event_date", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("event_date")}</Field>
-        <Field label="Preferred Time"><input style={inputStyle} type="time" value={form.event_time} onChange={(e) => set("event_time", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
-      </div>
-      <Field label="Number of Guests *"><input style={inputStyle} type="number" min="1" placeholder="e.g. 25" value={form.guest_count} onChange={(e) => set("guest_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("guest_count")}</Field>
+      {/* Meal Prep Section */}
+      {hasMealPrep && (
+        <>
+          {sectionHeader(isMixed ? "🥡 Meal Prep Delivery" : "Delivery Details")}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            <Field label="Delivery Date *"><input style={inputStyle} type="date" value={form.delivery_date} min={new Date().toISOString().split("T")[0]} onChange={(e) => set("delivery_date", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("delivery_date")}</Field>
+            <Field label="Delivery Time"><input style={inputStyle} type="time" value={form.delivery_time} onChange={(e) => set("delivery_time", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
+          </div>
+          <Field label="Number of Diners *"><input style={inputStyle} type="number" min="1" placeholder="e.g. 4" value={form.diner_count} onChange={(e) => set("diner_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("diner_count")}</Field>
+        </>
+      )}
 
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600, margin: "24px 0 16px", paddingBottom: "8px", borderBottom: "1px solid #EEE8DF" }}>Courses Needed</div>
+      {/* Catering Section */}
+      {hasCatering && (
+        <>
+          {sectionHeader(isMixed ? "🍽️ Catering Event" : "Event Details")}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            <Field label="Event Date *"><input style={inputStyle} type="date" value={form.event_date} min={new Date().toISOString().split("T")[0]} onChange={(e) => set("event_date", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("event_date")}</Field>
+            <Field label="Preferred Time"><input style={inputStyle} type="time" value={form.event_time} onChange={(e) => set("event_time", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
+          </div>
+          <Field label="Number of Guests *"><input style={inputStyle} type="number" min="1" placeholder="e.g. 25" value={form.guest_count} onChange={(e) => set("guest_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("guest_count")}</Field>
+        </>
+      )}
+
+      {/* Courses */}
+      {sectionHeader("Courses Needed")}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
         <Field label="Entrées"><input style={inputStyle} type="number" min="0" placeholder="0" value={form.entree_count} onChange={(e) => set("entree_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
         <Field label="Appetizers"><input style={inputStyle} type="number" min="0" placeholder="0" value={form.appetizer_count} onChange={(e) => set("appetizer_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
         <Field label="Sides"><input style={inputStyle} type="number" min="0" placeholder="0" value={form.side_count} onChange={(e) => set("side_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
       </div>
 
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600, margin: "24px 0 16px", paddingBottom: "8px", borderBottom: "1px solid #EEE8DF" }}>Dietary Notes & Allergies</div>
+      {/* Dietary Notes */}
+      {sectionHeader("Dietary Notes & Allergies")}
       <Field label="Any allergies or dietary restrictions?"><textarea style={{ ...inputStyle, height: "100px", resize: "vertical" }} placeholder="e.g. 3 guests are gluten-free, 1 is allergic to shellfish…" value={form.dietary_notes} onChange={(e) => set("dietary_notes", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
 
       {errors.submit && <div style={{ background: "#FEF0ED", border: "1px solid #E76F51", borderRadius: "10px", padding: "12px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#E76F51", marginBottom: "16px" }}>{errors.submit}</div>}
