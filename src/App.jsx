@@ -844,6 +844,8 @@ export default function FlavorFuzionWebsite() {
                   <div style={{ display: "flex", flexDirection: "column", gap: "28px", marginBottom: "40px" }}>
                     {[
                       { emoji: "📧", label: "Email", value: "FlavorFuzionbyHJ@gmail.com" },
+                      { emoji: "📞", label: "Phone", value: "774-205-3071" },
+                      { emoji: "📸", label: "Instagram", value: "@flavorfuzionbyhj" },
                       { emoji: "🌐", label: "Website", value: "byheatherjaney.com" },
                       { emoji: "📍", label: "Service Area", value: "Available for local & destination events" },
                       { emoji: "⏰", label: "Response Time", value: "Within 24 hours" },
@@ -934,6 +936,10 @@ export default function FlavorFuzionWebsite() {
           </div>
           <div style={{ borderTop: "1px solid rgba(74,107,74,0.3)", paddingTop: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
             <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8" }}>© 2026 Flavor Fuzion by Heather Janey. All rights reserved.</div>
+            <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+              <a href="https://instagram.com/flavorfuzionbyhj" target="_blank" rel="noopener noreferrer" className="jost" style={{ fontSize: "12px", color: "#A0C8A8", textDecoration: "none" }}>📸 @flavorfuzionbyhj</a>
+              <a href="tel:7742053071" className="jost" style={{ fontSize: "12px", color: "#A0C8A8", textDecoration: "none" }}>📞 774-205-3071</a>
+            </div>
             <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8" }}>Food is Life, Life is Good 🍽️</div>
           </div>
         </div>
