@@ -268,7 +268,7 @@ export default function FlavorFuzionWebsite() {
         <div style={{ display: "flex", gap: "36px", alignItems: "center" }}>
           {PAGES.map((page) => (
             page === "Menu" ? (
-              <a key={page} className="nav-link" href="https://flavor-fuzion.vercel.app">
+              <a key={page} className="nav-link" href="https://flavor-fuzion-app.vercel.app">
                 {page}
               </a>
             ) : (
@@ -279,7 +279,7 @@ export default function FlavorFuzionWebsite() {
             )
           ))}
           <button className="btn-primary" style={{ padding: "10px 24px", fontSize: "12px" }}
-            onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+            onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
             Order Now
           </button>
         </div>
@@ -380,7 +380,7 @@ export default function FlavorFuzionWebsite() {
                 </p>
                 <div className="fade-up-4" style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
                   <button className="btn-primary"
-                    onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                    onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
                     Browse the Menu
                   </button>
                   <button className="btn-outline" onClick={() => setActivePage("About")}>
@@ -438,7 +438,7 @@ export default function FlavorFuzionWebsite() {
                       }}>{s.tag}</div>
                       <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, color: "#fff", marginBottom: "14px" }}>{s.title}</h3>
                       <p className="jost" style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, fontWeight: 300 }}>{s.description}</p>
-                      <button onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}
+                      <button onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}
                         style={{
                           marginTop: "28px",
                           background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)",
@@ -529,7 +529,7 @@ export default function FlavorFuzionWebsite() {
                 Browse the full menu and place your order online.
               </p>
               <button className="btn-primary" style={{ fontSize: "14px", padding: "16px 40px" }}
-                onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
                 Visit the Menu & Order
               </button>
               </div>
@@ -598,7 +598,7 @@ export default function FlavorFuzionWebsite() {
                 Heather's menu changes weekly to feature the freshest seasonal ingredients. Browse everything and place your order online.
               </p>
               <button className="btn-primary" style={{ fontSize: "14px", padding: "16px 40px" }}
-                onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
                 Browse Full Menu & Order →
               </button>
             </div>
@@ -647,7 +647,7 @@ export default function FlavorFuzionWebsite() {
                         ))}
                       </ul>
                       <button className="btn-primary" style={{ width: "100%", textAlign: "center", fontSize: "12px", padding: "12px" }}
-                        onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                        onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
                         Order Now →
                       </button>
                     </div>
@@ -666,7 +666,7 @@ export default function FlavorFuzionWebsite() {
                   Heather updates her menu every week based on seasonal availability and customer favorites. Visit the ordering app to see what's fresh this week!
                 </p>
                 <button className="btn-primary"
-                  onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                  onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
                   See This Week's Menu
                 </button>
               </div>
@@ -787,7 +787,7 @@ export default function FlavorFuzionWebsite() {
                 Let's create something delicious together.
               </p>
               <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
-                <button className="btn-primary" onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>Order Now</button>
+                <button className="btn-primary" onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>Order Now</button>
                 <button className="btn-outline" onClick={() => setActivePage("Contact")}>Get in Touch</button>
               </div>
             </div>
@@ -858,7 +858,7 @@ export default function FlavorFuzionWebsite() {
                       Browse the full menu and place your order directly through our online ordering app.
                     </p>
                     <button className="btn-primary"
-                      onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                      onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
                       Go to Ordering App →
                     </button>
                   </div>
