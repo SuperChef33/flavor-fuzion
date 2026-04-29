@@ -268,10 +268,9 @@ export default function FlavorFuzionWebsite() {
         <div style={{ display: "flex", gap: "36px", alignItems: "center" }}>
           {PAGES.map((page) => (
             page === "Menu" ? (
-              <button key={page} className="nav-link"
-                onClick={() => window.location.href = "https://flavor-fuzion.vercel.app"}>
+              <a key={page} className="nav-link" href="https://flavor-fuzion.vercel.app">
                 {page}
-              </button>
+              </a>
             ) : (
               <button key={page} className={`nav-link ${activePage === page ? "active" : ""}`}
                 onClick={() => setActivePage(page)}>
