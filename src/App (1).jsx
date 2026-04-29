@@ -267,19 +267,13 @@ export default function FlavorFuzionWebsite() {
         {/* Desktop Nav */}
         <div style={{ display: "flex", gap: "36px", alignItems: "center" }}>
           {PAGES.map((page) => (
-            page === "Menu" ? (
-              <a key={page} className="nav-link" href="https://flavor-fuzion-app.vercel.app">
-                {page}
-              </a>
-            ) : (
-              <button key={page} className={`nav-link ${activePage === page ? "active" : ""}`}
-                onClick={() => setActivePage(page)}>
-                {page}
-              </button>
-            )
+            <button key={page} className={`nav-link ${activePage === page ? "active" : ""}`}
+              onClick={() => setActivePage(page)}>
+              {page}
+            </button>
           ))}
           <button className="btn-primary" style={{ padding: "10px 24px", fontSize: "12px" }}
-            onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
+            onClick={() => { window.location.href = "https://flavor-fuzion-app.vercel.app"; }}>
             Order Now
           </button>
         </div>
