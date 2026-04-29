@@ -267,10 +267,17 @@ export default function FlavorFuzionWebsite() {
         {/* Desktop Nav */}
         <div style={{ display: "flex", gap: "36px", alignItems: "center" }}>
           {PAGES.map((page) => (
-            <button key={page} className={`nav-link ${activePage === page ? "active" : ""}`}
-              onClick={() => setActivePage(page)}>
-              {page}
-            </button>
+            page === "Menu" ? (
+              <button key={page} className="nav-link"
+                onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                {page}
+              </button>
+            ) : (
+              <button key={page} className={`nav-link ${activePage === page ? "active" : ""}`}
+                onClick={() => setActivePage(page)}>
+                {page}
+              </button>
+            )
           ))}
           <button className="btn-primary" style={{ padding: "10px 24px", fontSize: "12px" }}
             onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
