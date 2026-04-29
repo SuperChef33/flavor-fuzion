@@ -269,7 +269,7 @@ export default function FlavorFuzionWebsite() {
           {PAGES.map((page) => (
             page === "Menu" ? (
               <button key={page} className="nav-link"
-                onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                onClick={() => window.location.href = "https://flavor-fuzion.vercel.app"}>
                 {page}
               </button>
             ) : (
