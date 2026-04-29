@@ -694,10 +694,10 @@ export default function FlavorFuzionWebsite() {
             </div>
 
 
-            {/* Parallax Image - Cooking */}
+            {/* Parallax Image - Dessert */}
             <div style={{
               height: "400px",
-              backgroundImage: "url('https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=1800&q=80')",
+              backgroundImage: "url('https://images.unsplash.com/photo-1488477181946-6428a0291777?w=1800&q=80')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
