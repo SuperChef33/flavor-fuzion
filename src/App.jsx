@@ -1,674 +1,965 @@
 import { useState, useEffect } from "react";
 
-const SUPABASE_URL = "https://vqhhwukvheezunccehzm.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_aMDffSz8hpfjHjsD7_jq3g_ux_IKJKV";
+// ── Color Palette ─────────────────────────────────────────────────────────────
+// Emerald: #50C878 / #3DDC84
+// Gold:    #B8860B / #DAA520
+// Purple:  #4A1B6B / #7B3FA0
+// Cream:   #FEFAF0
+// Dark:    #0F1A0F
 
-// ── Combo definitions ─────────────────────────────────────────────────────────
-const COMBO_TIERS = [
-  { id: "3x3", label: "3 Entrées + 3 Sides", entrees: 3, sides: 3, discount: 0.05, badge: "5% OFF", color: "#F4A261" },
-  { id: "4x4", label: "4 Entrées + 4 Sides", entrees: 4, sides: 4, discount: 0.06, badge: "6% OFF", color: "#52B788" },
-  { id: "5x5", label: "5 Entrées + 5 Sides", entrees: 5, sides: 5, discount: 0.07, badge: "7% OFF", color: "#CDB4DB" },
+const PAGES = ["Home", "Menu", "About", "Contact"];
+
+const services = [
+  {
+    emoji: "🥗",
+    title: "Meal Prep",
+    description: "Fresh, healthy meals prepared weekly and delivered to your door. Eat well without the stress of cooking every night.",
+    color: "linear-gradient(160deg, #4A1B6B 0%, #6B2E8A 100%)",
+    tag: "Weekly Plans Available",
+  },
+  {
+    emoji: "🍽️",
+    title: "Catering",
+    description: "From intimate gatherings to large corporate events, Heather crafts custom menus that leave lasting impressions.",
+    color: "linear-gradient(160deg, #5A2280 0%, #1A7A5E 100%)",
+    tag: "Custom Menus Available",
+  },
+  {
+    emoji: "🕯️",
+    title: "Private Dinners",
+    description: "An exclusive chef's table experience in the comfort of your own home. Custom menus, plated service, unforgettable evenings.",
+    color: "linear-gradient(160deg, #1A7A5E 0%, #50C878 100%)",
+    tag: "By Appointment",
+  },
 ];
 
-const PLACEHOLDERS = {
-  "Herb-Crusted Salmon Bowl": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&q=80",
-  "Mediterranean Chicken":   "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80",
-  "Vegan Lentil Curry":      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&q=80",
-  "BBQ Feast Package":       "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&q=80",
-  "Elegant Brunch Spread":   "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=600&q=80",
-  "Taco & Tequila Bar":      "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80",
-  "Date Night for Two":      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80",
-  "Dinner Party Experience": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&q=80",
-  "Garlic Roasted Potatoes": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&q=80",
-  "Steamed Jasmine Rice":    "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=600&q=80",
-  "Sautéed Garlic Broccolini": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=600&q=80",
-  "Mac & Cheese":            "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?w=600&q=80",
-  "Roasted Sweet Potatoes":  "https://images.unsplash.com/photo-1596797038530-2c107aa9a5e0?w=600&q=80",
-  "Garden Side Salad":       "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80",
-};
-const FALLBACK = "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=600&q=80";
+const testimonials = [
+  { name: "Greg K.", text: "Chef Heather is exceptionally talented and client-focused. She's created many exceptional meals for our family, and also catered in-home events. She has a great attention to detail, and her food is delicious! Highly recommended!", stars: 5 },
+  { name: "Alex S.", text: "If I could give 6 stars, I would. Heather is the best! Her food is absolutely delicious and she is a dream to work with. She always gets what I'm looking for and delivers it perfectly!", stars: 5 },
+  { name: "Ms. Lindor", text: "The food is absolutely amazing and delicious. Heather is also professional and a life saver! Heather was able to prepare meals for me for the entire week. I can't wait to receive my next order!", stars: 5 },
+  { name: "Robinson R.", text: "Chef Heather Janey is a master of the culinary arts world! Everything I've ordered comes out EXACTLY how I WANTED! I recommend this chef to anyone who's a foodie! Will be ordering soon again!", stars: 5 },
+];
 
-const tagColors = {
-  "GF": "#52B788", "Vegan": "#52B788", "High Protein": "#E76F51",
-  "Popular": "#E9C46A", "Crowd Fave": "#E9C46A", "Romantic": "#CDB4DB",
-  "Custom Menu": "#BDE0FE", "Premium": "#BDE0FE",
-  "Vegetarian Option": "#52B788", "GF Option": "#52B788",
-};
+export default function FlavorFuzionWebsite() {
+  const [activePage, setActivePage] = useState("Home");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
 
-const CATEGORIES = ["All", "Meal Prep", "Catering", "Private Dinners", "🍱 Combos"];
-
-function getImage(item) { return item.image_url || PLACEHOLDERS[item.name] || FALLBACK; }
-
-const inputStyle = {
-  width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8",
-  borderRadius: "10px", fontFamily: "'DM Sans', sans-serif", fontSize: "14px",
-  color: "#1A1208", background: "#FEFAF4", outline: "none", transition: "border-color 0.2s",
-};
-const labelStyle = {
-  fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 500,
-  letterSpacing: "0.06em", textTransform: "uppercase", color: "#B5A48C",
-  marginBottom: "6px", display: "block",
-};
-function Field({ label, children }) {
-  return <div style={{ marginBottom: "18px" }}><label style={labelStyle}>{label}</label>{children}</div>;
-}
-
-// ── Combo Builder ─────────────────────────────────────────────────────────────
-function ComboBuilder({ menuItems, onAddCombo }) {
-  const [selectedTier, setSelectedTier] = useState(null);
-  const [selectedEntrees, setSelectedEntrees] = useState([]);
-  const [selectedSides, setSelectedSides]     = useState([]);
-  const [added, setAdded] = useState(false);
-
-  const entrees = menuItems.filter((i) => i.category === "Meal Prep");
-  const sides   = menuItems.filter((i) => i.category === "Sides");
-
-  const tier = COMBO_TIERS.find((t) => t.id === selectedTier);
-
-  const toggleItem = (item, list, setList, max) => {
-    const exists = list.find((i) => i.id === item.id);
-    if (exists) { setList(list.filter((i) => i.id !== item.id)); return; }
-    if (list.length >= max) return;
-    setList([...list, item]);
-  };
-
-  const rawTotal = [
-    ...selectedEntrees.map((i) => Number(i.price)),
-    ...selectedSides.map((i) => Number(i.price)),
-  ].reduce((s, p) => s + p, 0);
-
-  const discountedTotal = tier ? rawTotal * (1 - tier.discount) : rawTotal;
-  const savings = rawTotal - discountedTotal;
-
-  const isComplete = tier &&
-    selectedEntrees.length === tier.entrees &&
-    selectedSides.length === tier.sides;
-
-  const handleAdd = () => {
-    if (!isComplete) return;
-    onAddCombo({
-      id: `combo-${Date.now()}`,
-      type: "combo",
-      label: tier.label,
-      entrees: selectedEntrees,
-      sides: selectedSides,
-      rawTotal,
-      discountedTotal,
-      savings,
-      discount: tier.discount,
-      badge: tier.badge,
+  useEffect(() => {
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+    // Capture install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstallBanner(true);
     });
-    setSelectedTier(null);
-    setSelectedEntrees([]);
-    setSelectedSides([]);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2500);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activePage]);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') setShowInstallBanner(false);
+    setInstallPrompt(null);
   };
 
-  const SelectableCard = ({ item, selected, onToggle, disabled }) => (
-    <div onClick={() => !disabled && onToggle(item)}
-      style={{
-        display: "flex", alignItems: "center", gap: "12px",
-        padding: "12px", borderRadius: "12px", cursor: disabled && !selected ? "not-allowed" : "pointer",
-        border: `2px solid ${selected ? "#1A1208" : "#EEE8DF"}`,
-        background: selected ? "#1A120808" : "#fff",
-        opacity: disabled && !selected ? 0.45 : 1,
-        transition: "all 0.2s",
+  return (
+    <div style={{ fontFamily: "'Georgia', serif", background: "#FEFAF0", color: "#0F1A0F", minHeight: "100vh", width: "100%", overflowX: "hidden" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
+
+        body { overflow-x: hidden; }
+
+        .nav-link {
+          font-family: 'Jost', sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #FEFAF0;
+          cursor: pointer;
+          padding: 6px 0;
+          border-bottom: 1px solid transparent;
+          transition: border-color 0.2s, color 0.2s;
+          text-decoration: none;
+          background: none;
+          border-top: none;
+          border-left: none;
+          border-right: none;
+        }
+        .nav-link:hover { border-bottom-color: #B8860B; color: #DAA520; }
+        .nav-link.active { border-bottom-color: #B8860B; color: #DAA520; }
+
+        .btn-primary {
+          background: linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%);
+          color: #0F1A0F;
+          border: none;
+          padding: 14px 32px;
+          border-radius: 100px;
+          font-family: 'Jost', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+          display: inline-block;
+          text-decoration: none;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,168,76,0.4); }
+
+        .btn-outline {
+          background: transparent;
+          color: #DAA520;
+          border: 2px solid #DAA520;
+          padding: 13px 32px;
+          border-radius: 100px;
+          font-family: 'Jost', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: inline-block;
+          text-decoration: none;
+        }
+        .btn-outline:hover { background: linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%); color: #0F1A0F; border-color: transparent; box-shadow: 0 8px 24px rgba(218,165,32,0.5); transform: translateY(-2px); }
+
+        .service-card:first-child { border-radius: 24px 0 0 24px; }
+        .service-card:last-child { border-radius: 0 24px 24px 0; }
+        .service-card { border-radius: 0;
+          overflow: hidden;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          cursor: pointer;
+        }
+        .service-card:hover { transform: translateY(-8px); box-shadow: 0 32px 80px rgba(0,0,0,0.15); }
+
+        .gold {
+          background: linear-gradient(135deg, #8B6914 0%, #DAA520 25%, #F5D060 50%, #DAA520 75%, #8B6914 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .gold-stars {
+          background: linear-gradient(135deg, #DAA520, #F5D060, #DAA520);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .section-tag {
+          font-family: 'Jost', sans-serif;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          background: linear-gradient(135deg, #8B6914 0%, #DAA520 25%, #F5D060 50%, #DAA520 75%, #8B6914 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 12px;
+          display: block;
+        }
+
+        .playfair { font-family: 'Playfair Display', serif; }
+        .jost { font-family: 'Jost', sans-serif; }
+
+        .testimonial-card {
+          background: #fff;
+          border-radius: 20px;
+          padding: 32px;
+          border: 1px solid #EEE8DF;
+          transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .testimonial-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.08); }
+
+        .form-input {
+          width: 100%;
+          padding: 14px 18px;
+          border: 1.5px solid #D4C9B8;
+          border-radius: 12px;
+          font-family: 'Jost', sans-serif;
+          font-size: 15px;
+          color: #0F1A0F;
+          background: #fff;
+          outline: none;
+          transition: border-color 0.2s;
+          margin-bottom: 16px;
+        }
+        .form-input:focus { border-color: #50C878; }
+
+        .divider {
+          width: 60px;
+          height: 3px;
+          background: linear-gradient(90deg, #50C878, #B8860B);
+          border-radius: 100px;
+          margin: 16px 0 32px;
+        }
+
+        .hero-pattern {
+          position: absolute;
+          inset: 0;
+          background-image: 
+            radial-gradient(circle at 20% 50%, rgba(80,200,120,0.2) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(123,63,160,0.1) 0%, transparent 40%),
+            radial-gradient(circle at 60% 80%, rgba(218,165,32,0.12) 0%, transparent 40%);
+        }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.8s ease forwards; }
+        .fade-up-2 { animation: fadeUp 0.8s ease 0.2s both; }
+        .fade-up-3 { animation: fadeUp 0.8s ease 0.4s both; }
+        .fade-up-4 { animation: fadeUp 0.8s ease 0.6s both; }
+
+        @media (max-width: 768px) {
+          .hero-title { font-size: 52px !important; }
+          .services-grid { grid-template-columns: 1fr !important; }
+          .testimonials-grid { grid-template-columns: 1fr !important; }
+          .about-grid { grid-template-columns: 1fr !important; }
+          .contact-grid { grid-template-columns: 1fr !important; }
+          .footer-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+
+      {/* ── Navigation ── */}
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        background: scrolled ? "rgba(15,26,15,0.96)" : "#0F1A0F",
+        backdropFilter: "blur(12px)",
+        borderBottom: scrolled ? "1px solid rgba(201,168,76,0.2)" : "none",
+        padding: "0 80px",
+        height: "72px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        transition: "all 0.3s",
       }}>
-      <img src={getImage(item)} alt={item.name} onError={(e) => { e.target.src = FALLBACK; }}
-        style={{ width: "48px", height: "48px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 }} />
-      <div style={{ flex: 1 }}>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "16px", fontWeight: 600, lineHeight: 1.2 }}>{item.name}</div>
-        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C" }}>${item.price} / serving</div>
+        <div onClick={() => setActivePage("Home")} style={{ cursor: "pointer" }}>
+          <img
+            src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png"
+            alt="Flavor Fuzion by Heather Janey"
+            style={{ height: "52px", width: "auto", display: "block", objectFit: "contain" }}
+          />
+        </div>
+
+        {/* Desktop Nav */}
+        <div style={{ display: "flex", gap: "36px", alignItems: "center" }}>
+          {PAGES.map((page) => (
+            <button key={page} className={`nav-link ${activePage === page ? "active" : ""}`}
+              onClick={() => setActivePage(page)}>
+              {page}
+            </button>
+          ))}
+          <button className="btn-primary" style={{ padding: "10px 24px", fontSize: "12px" }}
+            onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+            Order Now
+          </button>
+        </div>
+      </nav>
+
+      {/* ── Install Banner ── */}
+      {showInstallBanner && (
+        <div style={{
+          position: "fixed", bottom: "24px", left: "50%",
+          transform: "translateX(-50%)",
+          background: "#0F1A0F",
+          border: "1px solid rgba(218,165,32,0.4)",
+          borderRadius: "16px",
+          padding: "16px 24px",
+          display: "flex", alignItems: "center", gap: "16px",
+          zIndex: 200,
+          boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
+          maxWidth: "480px", width: "90%",
+        }}>
+          <img src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png"
+            alt="" style={{ width: "44px", height: "44px", objectFit: "contain", flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#FEFAF0", marginBottom: "2px" }}>Add Flavor Fuzion to your phone</div>
+            <div className="jost" style={{ fontSize: "11px", color: "#A0C8A8" }}>Install for quick access, no App Store needed!</div>
+          </div>
+          <button onClick={handleInstall} style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "100px", padding: "8px 18px", fontFamily: "'Jost', sans-serif", fontSize: "12px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+            Install ↓
+          </button>
+          <button onClick={() => setShowInstallBanner(false)} style={{ background: "none", border: "none", color: "#A0C8A8", cursor: "pointer", fontSize: "18px", padding: "0", flexShrink: 0 }}>✕</button>
+        </div>
+      )}
+
+      {/* ── Pages ── */}
+      <div style={{ paddingTop: "72px" }}>
+
+        {/* ════════════════════════════════════════════════════
+            HOME PAGE
+        ════════════════════════════════════════════════════ */}
+        {activePage === "Home" && (
+          <div>
+            {/* Hero */}
+            <div style={{
+              background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)",
+              minHeight: "92vh",
+              position: "relative",
+              display: "flex", alignItems: "center",
+              overflow: "hidden",
+            }}>
+              <div className="hero-pattern" />
+
+              {/* Symbol Watermark Left */}
+              <img
+                src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/symbol.svg"
+                alt=""
+                style={{
+                  position: "absolute",
+                  left: "120px", top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "420px", height: "auto",
+                  opacity: 0.08,
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  zIndex: 1,
+                }}
+              />
+              {/* Symbol Watermark Right */}
+              <img
+                src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/symbol.svg"
+                alt=""
+                style={{
+                  position: "absolute",
+                  right: "120px", top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "420px", height: "auto",
+                  opacity: 0.08,
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  zIndex: 1,
+                }}
+              />
+
+              <div style={{ position: "relative", zIndex: 2, padding: "80px 80px", width: "100%", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <span className="section-tag fade-up">Food is Life, Life is Good</span>
+                <h1 className="playfair hero-title fade-up-2" style={{
+                  fontSize: "80px", fontWeight: 700,
+                  color: "#FEFAF0", lineHeight: 1.05,
+                  letterSpacing: "-0.02em", marginBottom: "24px",
+                }}>
+                  Bold flavors,<br />
+                  <em className="gold">made with love</em>
+                </h1>
+                <p className="jost fade-up-3" style={{
+                  fontSize: "17px", color: "#FEFAF0",
+                  lineHeight: 1.8, maxWidth: "560px", marginBottom: "40px",
+                  fontWeight: 400,
+                }}>
+                  Chef Heather Janey brings bold, worldly flavors to your table in the Boston and South Shore Massachusetts areas, Feel Good Food made with love, for every occasion.
+                </p>
+                <div className="fade-up-4" style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
+                  <button className="btn-primary"
+                    onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                    Browse the Menu
+                  </button>
+                  <button className="btn-outline" onClick={() => setActivePage("About")}>
+                    Meet Heather
+                  </button>
+                </div>
+
+                {/* Stats */}
+                <div style={{ display: "flex", gap: "48px", marginTop: "72px", flexWrap: "wrap", justifyContent: "center", alignItems: "flex-end" }}>
+                  {[["500+", "Meals Prepped"], ["100+", "Events Catered"]].map(([num, label]) => (
+                    <div key={label} style={{ textAlign: "center" }}>
+                      <div className="playfair gold" style={{ fontSize: "36px", fontWeight: 700 }}>{num}</div>
+                      <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "4px" }}>{label}</div>
+                    </div>
+                  ))}
+                  <div style={{ textAlign: "center" }}>
+                    <div className="playfair gold" style={{ fontSize: "36px", fontWeight: 700 }}>5.0 ★★★★★</div>
+                    <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "4px" }}>on Google</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            {/* Parallax Image 1 - Food Spread */}
+            <div style={{
+              height: "400px",
+              backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1800&q=80')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundAttachment: "fixed",
+            }} />
+            {/* Services Section */}
+            <div style={{ padding: "100px 80px", background: "#FEFAF0" }}>
+              <div>
+              <div style={{ textAlign: "center", marginBottom: "60px" }}>
+                <span className="section-tag">What We Offer</span>
+                <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, lineHeight: 1.2 }}>
+                  A culinary experience<br /><em>for every occasion</em>
+                </h2>
+                <div className="divider" style={{ margin: "16px auto 0" }} />
+              </div>
+
+              <div className="services-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px" }}>
+                {services.map((s) => (
+                  <div key={s.title} className="service-card"
+                    style={{ background: s.color }}>
+                    <div style={{ padding: "48px 36px" }}>
+                      <div style={{ fontSize: "48px", marginBottom: "20px" }}>{s.emoji}</div>
+                      <div className="jost" style={{
+                        display: "inline-block", background: "rgba(255,255,255,0.15)",
+                        color: "#fff", padding: "4px 12px", borderRadius: "100px",
+                        fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
+                        textTransform: "uppercase", marginBottom: "16px",
+                      }}>{s.tag}</div>
+                      <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, color: "#fff", marginBottom: "14px" }}>{s.title}</h3>
+                      <p className="jost" style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, fontWeight: 300 }}>{s.description}</p>
+                      <button onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}
+                        style={{
+                          marginTop: "28px",
+                          background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)",
+                          color: "#0F1A0F", border: "none",
+                          padding: "10px 20px", borderRadius: "100px",
+                          fontFamily: "'Jost', sans-serif", fontSize: "12px",
+                          fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                          cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s",
+                          boxShadow: "0 4px 16px rgba(218,165,32,0.4)",
+                        }}
+                        onMouseOver={(e) => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 8px 24px rgba(218,165,32,0.6)"; }}
+                        onMouseOut={(e) => { e.target.style.transform = "none"; e.target.style.boxShadow = "0 4px 16px rgba(218,165,32,0.4)"; }}>
+                        Order Now →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              </div>
+            </div>
+
+
+            {/* Parallax Image 2 - Fine Dining */}
+            <div style={{
+              height: "400px",
+              backgroundImage: "url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=80')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundAttachment: "fixed",
+            }} />
+            {/* Tagline Banner */}
+            <div style={{
+              background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)",
+              padding: "80px 40px", textAlign: "center",
+              position: "relative", overflow: "hidden",
+            }}>
+              <div style={{ position: "relative", zIndex: 1 }}>
+              <div className="playfair" style={{ fontSize: "48px", fontWeight: 400, color: "#FEFAF0", fontStyle: "italic", marginBottom: "16px" }}>
+                "Food is Life, Life is Good"
+              </div>
+              <div className="jost" style={{ fontSize: "14px", color: "rgba(254,250,240,0.7)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+               , Heather Janey
+              </div>
+              </div>
+            </div>
+
+
+            {/* Parallax Image 3 - Meal Prep */}
+            <div style={{
+              height: "400px",
+              backgroundImage: "url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1800&q=80')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundAttachment: "fixed",
+            }} />
+            {/* Testimonials */}
+            <div style={{ padding: "100px 80px", background: "#0F1A0F" }}>
+              <div>
+              <div style={{ textAlign: "center", marginBottom: "60px" }}>
+                <span className="section-tag">What People Say</span>
+                <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, color: "#FEFAF0" }}>
+                  Loved by every <em>table</em>
+                </h2>
+                <div className="divider" style={{ margin: "16px auto 0" }} />
+              </div>
+              <div className="testimonials-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
+                {testimonials.map((t) => (
+                  <div key={t.name} className="testimonial-card">
+                    <div className="gold-stars" style={{ fontSize: "20px", marginBottom: "16px" }}>{"★".repeat(t.stars)}</div>
+                    <p className="jost" style={{ fontSize: "15px", color: "#3D3020", lineHeight: 1.7, fontStyle: "italic", marginBottom: "20px", fontWeight: 300 }}>"{t.text}"</p>
+                    <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#50C878", letterSpacing: "0.06em" }}>, {t.name}</div>
+                  </div>
+                ))}
+              </div>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div style={{ background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)", padding: "100px 80px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+              <img src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/symbol.svg"
+                alt="" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "480px", height: "auto", opacity: 0.06, pointerEvents: "none", userSelect: "none" }} />
+              <div style={{ position: "relative", zIndex: 1 }}>
+              <span className="section-tag">Ready to Order?</span>
+              <h2 className="playfair" style={{ fontSize: "52px", fontWeight: 600, color: "#FEFAF0", marginBottom: "20px" }}>
+                Let's create something<br /><em className="gold">delicious together</em>
+              </h2>
+              <p className="jost" style={{ fontSize: "16px", color: "#A0C8A8", marginBottom: "40px", fontWeight: 300 }}>
+                Browse the full menu and place your order online.
+              </p>
+              <button className="btn-primary" style={{ fontSize: "14px", padding: "16px 40px" }}
+                onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                Visit the Menu & Order
+              </button>
+              </div>
+            </div>
+
+            {/* Add to Phone Section */}
+            <div style={{ background: "#0F1A0F", padding: "80px 80px", textAlign: "center", borderTop: "1px solid rgba(218,165,32,0.2)" }}>
+              <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+                <div style={{ fontSize: "48px", marginBottom: "16px" }}>📱</div>
+                <span className="section-tag">No App Store Needed</span>
+                <h2 className="playfair" style={{ fontSize: "40px", fontWeight: 600, color: "#FEFAF0", marginBottom: "16px" }}>
+                  Add us to your <em className="gold">home screen</em>
+                </h2>
+                <p className="jost" style={{ fontSize: "15px", color: "#A0C8A8", lineHeight: 1.8, marginBottom: "32px", fontWeight: 300 }}>
+                  Get instant access to Flavor Fuzion right from your phone, just like a real app, completely free!
+                </p>
+
+                {/* Instructions */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "36px", textAlign: "left" }}>
+                  <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "16px", padding: "24px", border: "1px solid rgba(218,165,32,0.2)" }}>
+                    <div style={{ fontSize: "28px", marginBottom: "10px" }}>🍎</div>
+                    <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#DAA520", marginBottom: "8px", letterSpacing: "0.06em" }}>iPhone / iPad</div>
+                    <ol style={{ paddingLeft: "16px", listStyleType: "decimal" }}>
+                      {["Open in Safari", "Tap the Share button ↑", "Tap \"Add to Home Screen\"", "Tap \"Add\", done!"].map((step) => (
+                        <li key={step} className="jost" style={{ fontSize: "13px", color: "#A0C8A8", marginBottom: "4px", fontWeight: 300 }}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                  <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "16px", padding: "24px", border: "1px solid rgba(218,165,32,0.2)" }}>
+                    <div style={{ fontSize: "28px", marginBottom: "10px" }}>🤖</div>
+                    <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#DAA520", marginBottom: "8px", letterSpacing: "0.06em" }}>Android</div>
+                    <ol style={{ paddingLeft: "16px", listStyleType: "decimal" }}>
+                      {["Open in Chrome", "Tap the menu ⋮", "Tap \"Add to Home Screen\"", "Tap \"Add\", done!"].map((step) => (
+                        <li key={step} className="jost" style={{ fontSize: "13px", color: "#A0C8A8", marginBottom: "4px", fontWeight: 300 }}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                </div>
+
+                {installPrompt && (
+                  <button onClick={handleInstall} style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "100px", padding: "14px 36px", fontFamily: "'Jost', sans-serif", fontSize: "14px", fontWeight: 700, cursor: "pointer", letterSpacing: "0.08em", boxShadow: "0 8px 24px rgba(218,165,32,0.4)" }}>
+                    ↓ Install Flavor Fuzion
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════════════
+            MENU PAGE
+        ════════════════════════════════════════════════════ */}
+        {activePage === "Menu" && (
+          <div>
+            {/* Hero */}
+            <div style={{
+              background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)",
+              padding: "100px 40px 80px",
+              textAlign: "center",
+            }}>
+              <span className="section-tag">Fresh & Seasonal</span>
+              <h1 className="playfair" style={{ fontSize: "64px", fontWeight: 700, color: "#FEFAF0", marginBottom: "20px" }}>
+                Our <em className="gold">Menu</em>
+              </h1>
+              <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.75)", maxWidth: "500px", margin: "0 auto 40px", fontWeight: 300, lineHeight: 1.7 }}>
+                Heather's menu changes weekly to feature the freshest seasonal ingredients. Browse everything and place your order online.
+              </p>
+              <button className="btn-primary" style={{ fontSize: "14px", padding: "16px 40px" }}
+                onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                Browse Full Menu & Order →
+              </button>
+            </div>
+
+
+            {/* Parallax Image 1 - Food Spread */}
+            <div style={{
+              height: "400px",
+              backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1800&q=80')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundAttachment: "fixed",
+            }} />
+            {/* Service Categories */}
+            <div style={{ padding: "80px 80px", background: "#FEFAF0" }}>
+              <div>
+              <div style={{ textAlign: "center", marginBottom: "60px" }}>
+                <span className="section-tag">What's Available</span>
+                <h2 className="playfair" style={{ fontSize: "44px", fontWeight: 600 }}>
+                  Something for <em>every appetite</em>
+                </h2>
+                <div className="divider" style={{ margin: "16px auto 0" }} />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "28px" }}>
+                {[
+                  { title: "Meal Prep", desc: "Weekly meals planned and prepped for you. Pick your proteins, sides, and dietary needs. Delivered fresh.", emoji: "🥗", color: "#50C878", items: ["Herb-Crusted Salmon Bowl", "Mediterranean Chicken", "Vegan Lentil Curry", "And more weekly specials…"] },
+                  { title: "Catering", desc: "Full-service catering for any size event. BBQ feasts, elegant brunches, taco bars and more.", emoji: "🍽️", color: "#4A1B6B", items: ["BBQ Feast Package", "Elegant Brunch Spread", "Taco & Tequila Bar", "Custom menus available"] },
+                  { title: "Private Dinners", desc: "An intimate chef's table experience at home. Multi-course tasting menus designed just for you.", emoji: "🕯️", color: "#7A5C0A", items: ["Date Night for Two", "Dinner Party Experience", "Custom tasting menus", "Wine pairing available"] },
+                  { title: "Combos & Deals", desc: "Save more with our combo meal prep packages. Mix and match entrées and sides at a discount.", emoji: "💎", color: "#0A2018", items: ["3 Entrées + 3 Sides (5% off)", "4 Entrées + 4 Sides (6% off)", "5 Entrées + 5 Sides (7% off)", "Build your own combo"] },
+                ].map((cat) => (
+                  <div key={cat.title} style={{ background: "#fff", borderRadius: "20px", overflow: "hidden", border: "1px solid #EEE8DF", transition: "transform 0.3s, box-shadow 0.3s" }}
+                    onMouseOver={(e) => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.1)"; }}
+                    onMouseOut={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+                    <div style={{ background: cat.color, padding: "32px 28px" }}>
+                      <div style={{ fontSize: "40px", marginBottom: "12px" }}>{cat.emoji}</div>
+                      <h3 className="playfair" style={{ fontSize: "26px", fontWeight: 600, color: "#fff" }}>{cat.title}</h3>
+                    </div>
+                    <div style={{ padding: "24px 28px" }}>
+                      <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E", lineHeight: 1.6, marginBottom: "16px", fontWeight: 300 }}>{cat.desc}</p>
+                      <ul style={{ listStyle: "none", marginBottom: "20px" }}>
+                        {cat.items.map((item) => (
+                          <li key={item} className="jost" style={{ fontSize: "13px", color: "#3D3020", padding: "4px 0", borderBottom: "1px solid #F5F0E8", display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span className="gold" style={{ fontSize: "10px" }}>◆</span> {item}
+                          </li>
+                        ))}
+                      </ul>
+                      <button className="btn-primary" style={{ width: "100%", textAlign: "center", fontSize: "12px", padding: "12px" }}
+                        onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                        Order Now →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              </div>
+            </div>
+
+            {/* Note */}
+            <div style={{ padding: "60px 80px", textAlign: "center", background: "#F5F0E8" }}>
+              <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+                <div style={{ fontSize: "32px", marginBottom: "16px" }}>📅</div>
+                <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, marginBottom: "12px" }}>Menu changes weekly</h3>
+                <p className="jost" style={{ fontSize: "15px", color: "#6B5E4E", lineHeight: 1.7, fontWeight: 300, marginBottom: "24px" }}>
+                  Heather updates her menu every week based on seasonal availability and customer favorites. Visit the ordering app to see what's fresh this week!
+                </p>
+                <button className="btn-primary"
+                  onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                  See This Week's Menu
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════════════
+            ABOUT PAGE
+        ════════════════════════════════════════════════════ */}
+        {activePage === "About" && (
+          <div>
+            {/* Hero */}
+            <div style={{
+              background: "linear-gradient(135deg, #4A1B6B 0%, #0F1A0F 100%)",
+              padding: "100px 40px 80px",
+            }}>
+              <div style={{ padding: "0" }}>
+                <span className="section-tag">The Chef Behind the Magic</span>
+                <h1 className="playfair" style={{ fontSize: "64px", fontWeight: 700, color: "#FEFAF0" }}>
+                  Meet <em className="gold">Heather</em>
+                </h1>
+              </div>
+            </div>
+
+
+            {/* Parallax Image - Cooking */}
+            <div style={{
+              height: "400px",
+              backgroundImage: "url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1800&q=80')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundAttachment: "fixed",
+            }} />
+            {/* About Content */}
+            <div style={{ padding: "80px 80px", background: "#FEFAF0" }}>
+              <div>
+              <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
+                {/* Heather's Photo */}
+                <div style={{
+                  borderRadius: "24px",
+                  overflow: "hidden",
+                  aspectRatio: "3/4",
+                }}>
+                  <img
+                    src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/FB_IMG_1558214697556.jpg"
+                    alt="Chef Heather Janey"
+                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
+                  />
+                </div>
+
+                {/* Story */}
+                <div>
+                  <span className="section-tag">My Story</span>
+                  <h2 className="playfair" style={{ fontSize: "40px", fontWeight: 600, marginBottom: "12px", lineHeight: 1.2 }}>
+                    Cooking has always been<br /><em>my love language</em>
+                  </h2>
+                  <div className="divider" />
+                  <p className="jost" style={{ fontSize: "15px", color: "#4A3728", lineHeight: 1.8, marginBottom: "20px", fontWeight: 300 }}>
+                    I'm Heather Janey, a personal chef and caterer based in the Boston and South Shore Massachusetts areas with a passion for creating healthy, eclectic dishes bursting with big, bold flavors that truly satisfy the soul. Flavor Fuzion was first cooked up in 2016 in New York City, born from a simple but powerful belief: that food made with love has the power to bring people together. Since then, my "Feel Good Food" philosophy has been growing stronger every single day.
+                  </p>
+                  <p className="jost" style={{ fontSize: "15px", color: "#4A3728", lineHeight: 1.8, marginBottom: "20px", fontWeight: 300 }}>
+                    My style of cooking is a direct reflection of who I am, beautifully diverse. I'm African American and Italian, with a little Irish and a dash of Scottish thrown in for good measure. Growing up, my kitchen was a cultural adventure: my mother's traditional Italian and Irish recipes on one side, and my dad's family's finger-licking good Soul Food on the other. Even as a baby I was never shy about trying new flavors, I preferred lobster over Gerber! 🦞
+                  </p>
+                  <p className="jost" style={{ fontSize: "15px", color: "#4A3728", lineHeight: 1.8, marginBottom: "32px", fontWeight: 300 }}>
+                    At its heart, Flavor Fuzion was born from my love of the unique. I draw inspiration from ingredients and culinary traditions from all over the world, fusing regional flavors together in ways that are unexpected, exciting, and deeply satisfying. I consider myself an <em>Interpretive Chef</em>, dedicated to giving every client a one-of-a-kind, worldly inspired, boldly flavored experience they won't soon forget. Thank you for visiting, we can't wait to cook in your kitchen! 🍽️
+                  </p>
+                  <button className="btn-primary" onClick={() => setActivePage("Contact")}>
+                    Work With Me →
+                  </button>
+                </div>
+              </div>
+              </div>
+            </div>
+
+
+            {/* Parallax Image - Kitchen */}
+            <div style={{
+              height: "400px",
+              backgroundImage: "url('https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=1800&q=80')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundAttachment: "fixed",
+            }} />
+            {/* Values */}
+            <div style={{ padding: "80px 80px", background: "#F5F0E8" }}>
+              <div>
+                <div style={{ textAlign: "center", marginBottom: "60px" }}>
+                  <span className="section-tag">What I Stand For</span>
+                  <h2 className="playfair" style={{ fontSize: "44px", fontWeight: 600 }}>
+                    My <em>philosophy</em>
+                  </h2>
+                  <div className="divider" style={{ margin: "16px auto 0" }} />
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "32px" }}>
+                  {[
+                    { emoji: "🌿", title: "Fresh Ingredients", desc: "I source seasonal, high-quality ingredients from local markets whenever possible." },
+                    { emoji: "❤️", title: "Made with Love", desc: "Every dish is prepared with care and intention, you can taste the difference." },
+                    { emoji: "✨", title: "Creative Cuisine", desc: "I blend bold flavors and unexpected combinations to create memorable experiences." },
+                    { emoji: "🤝", title: "Personal Service", desc: "I work closely with every client to understand their tastes and needs." },
+                  ].map((v) => (
+                    <div key={v.title} style={{ textAlign: "center", padding: "32px 20px" }}>
+                      <div style={{ fontSize: "40px", marginBottom: "16px" }}>{v.emoji}</div>
+                      <h3 className="playfair" style={{ fontSize: "20px", fontWeight: 600, marginBottom: "10px" }}>{v.title}</h3>
+                      <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E", lineHeight: 1.6, fontWeight: 300 }}>{v.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div style={{ background: "#0F1A0F", padding: "80px 40px", textAlign: "center" }}>
+              <h2 className="playfair" style={{ fontSize: "44px", fontWeight: 600, color: "#FEFAF0", marginBottom: "16px" }}>
+                Ready to experience<br /><em className="gold">Flavor Fuzion?</em>
+              </h2>
+              <p className="jost" style={{ fontSize: "15px", color: "#A0C8A8", marginBottom: "32px", fontWeight: 300 }}>
+                Let's create something delicious together.
+              </p>
+              <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
+                <button className="btn-primary" onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>Order Now</button>
+                <button className="btn-outline" onClick={() => setActivePage("Contact")}>Get in Touch</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════════════
+            CONTACT PAGE
+        ════════════════════════════════════════════════════ */}
+        {activePage === "Contact" && (
+          <div>
+            {/* Hero */}
+            <div style={{
+              background: "linear-gradient(135deg, #7A5C0A 0%, #0F1A0F 100%)",
+              padding: "100px 40px 80px",
+            }}>
+              <div style={{ padding: "0" }}>
+                <span className="section-tag">Let's Connect</span>
+                <h1 className="playfair" style={{ fontSize: "64px", fontWeight: 700, color: "#FEFAF0" }}>
+                  Get in <em className="gold">Touch</em>
+                </h1>
+                <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.7)", maxWidth: "500px", marginTop: "16px", fontWeight: 300, lineHeight: 1.7 }}>
+                  Have a question about catering, meal prep, or a private dinner? Heather would love to hear from you.
+                </p>
+              </div>
+            </div>
+
+            {/* Contact Content */}
+            <div style={{ padding: "80px 80px" }}>
+              <div className="contact-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px" }}>
+
+                {/* Contact Info */}
+                <div>
+                  <span className="section-tag">Contact Information</span>
+                  <h2 className="playfair" style={{ fontSize: "36px", fontWeight: 600, marginBottom: "12px" }}>
+                    We'd love to <em>hear from you</em>
+                  </h2>
+                  <div className="divider" />
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "28px", marginBottom: "40px" }}>
+                    {[
+                      { emoji: "📧", label: "Email", value: "FlavorFuzionbyHJ@gmail.com" },
+                      { emoji: "🌐", label: "Website", value: "byheatherjaney.com" },
+                      { emoji: "📍", label: "Service Area", value: "Available for local & destination events" },
+                      { emoji: "⏰", label: "Response Time", value: "Within 24 hours" },
+                    ].map((info) => (
+                      <div key={info.label} style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+                        <div style={{
+                          width: "48px", height: "48px", borderRadius: "12px",
+                          background: "linear-gradient(135deg, #50C878, #4A1B6B)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: "20px", flexShrink: 0,
+                        }}>{info.emoji}</div>
+                        <div>
+                          <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "4px" }}>{info.label}</div>
+                          <div className="jost" style={{ fontSize: "15px", color: "#2A1A0A", fontWeight: 400 }}>{info.value}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Order CTA */}
+                  <div style={{ background: "linear-gradient(135deg, #50C878, #4A1B6B)", borderRadius: "20px", padding: "32px" }}>
+                    <div className="playfair" style={{ fontSize: "22px", fontWeight: 600, color: "#FEFAF0", marginBottom: "8px" }}>
+                      Ready to order?
+                    </div>
+                    <p className="jost" style={{ fontSize: "13px", color: "rgba(254,250,240,0.75)", marginBottom: "20px", fontWeight: 300, lineHeight: 1.6 }}>
+                      Browse the full menu and place your order directly through our online ordering app.
+                    </p>
+                    <button className="btn-primary"
+                      onClick={() => window.open("https://flavor-fuzion.vercel.app", "_blank")}>
+                      Go to Ordering App →
+                    </button>
+                  </div>
+                </div>
+
+                {/* Contact Form */}
+                <div>
+                  <span className="section-tag">Send a Message</span>
+                  <h2 className="playfair" style={{ fontSize: "36px", fontWeight: 600, marginBottom: "12px" }}>
+                    Have a <em>question?</em>
+                  </h2>
+                  <div className="divider" />
+
+                  <ContactForm />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <div style={{
-        width: "22px", height: "22px", borderRadius: "50%", flexShrink: 0,
-        border: `2px solid ${selected ? "#1A1208" : "#D4C9B8"}`,
-        background: selected ? "#1A1208" : "transparent",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        color: "#fff", fontSize: "12px",
-      }}>{selected ? "✓" : ""}</div>
+
+      {/* ── Footer ── */}
+      <footer style={{ background: "#0A120A", padding: "60px 80px 32px", borderTop: "1px solid rgba(201,168,76,0.2)", position: "relative", overflow: "hidden" }}>
+        <img src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/symbol.svg"
+          alt="" style={{ position: "absolute", bottom: "-20px", right: "40px", width: "300px", height: "auto", opacity: 0.06, pointerEvents: "none", userSelect: "none" }} />
+        <div style={{ padding: "0" }}>
+          <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "60px", marginBottom: "48px" }}>
+            <div>
+              <img
+                src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png"
+                alt="Flavor Fuzion by Heather Janey"
+                style={{ height: "60px", width: "auto", display: "block", objectFit: "contain", marginBottom: "16px" }}
+              />
+              <p className="jost" style={{ fontSize: "13px", color: "#A0C8A8", lineHeight: 1.7, fontWeight: 300, maxWidth: "280px" }}>
+                Professional personal chef services including meal prep, catering, private dinners, and cooking lessons.
+              </p>
+            </div>
+            <div>
+              <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "20px" }} className="gold jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" }}>Navigation</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {PAGES.map((page) => (
+                  <button key={page} onClick={() => setActivePage(page)}
+                    className="jost" style={{ background: "none", border: "none", color: "#A0C8A8", fontSize: "14px", cursor: "pointer", textAlign: "left", fontWeight: 300, transition: "color 0.2s", padding: 0 }}
+                    onMouseOver={(e) => e.target.style.color = "#DAA520"}
+                    onMouseOut={(e) => e.target.style.color = "#A0C8A8"}>
+                    {page}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "20px" }} className="gold jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" }}>Services</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {["Meal Prep", "Catering", "Private Dinners", "Cooking Lessons", "Combo Deals"].map((s) => (
+                  <div key={s} className="jost" style={{ color: "#A0C8A8", fontSize: "14px", fontWeight: 300 }}>{s}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ borderTop: "1px solid rgba(74,107,74,0.3)", paddingTop: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+            <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8" }}>© 2026 Flavor Fuzion by Heather Janey. All rights reserved.</div>
+            <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8" }}>Food is Life, Life is Good 🍽️</div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
+}
+
+// ── Contact Form Component ─────────────────────────────────────────────────────
+function ContactForm() {
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+
+  const handleSubmit = () => {
+    if (!form.name || !form.email || !form.message) return;
+    const mailto = `mailto:FlavorFuzionbyHJ@gmail.com?subject=${encodeURIComponent(form.subject || "Website Inquiry from " + form.name)}&body=${encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`)}`;
+    window.location.href = mailto;
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <div style={{ textAlign: "center", padding: "60px 20px" }}>
+        <div style={{ fontSize: "56px", marginBottom: "20px" }}>🎉</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "28px", fontWeight: 600, marginBottom: "12px" }}>Thank you!</div>
+        <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.7 }}>
+          Your email client should have opened. If not, email Heather directly at<br />
+          <strong>FlavorFuzionbyHJ@gmail.com</strong>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      {/* Hero Banner */}
-      <div style={{ background: "linear-gradient(135deg, #1A1208 0%, #3D2B1A 100%)", borderRadius: "20px", padding: "36px 40px", marginBottom: "36px", color: "#FEFAF4", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "20px" }}>
-        <div>
-          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", opacity: 0.6, marginBottom: "8px" }}>Save more, eat better</div>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "36px", fontWeight: 300, lineHeight: 1.1, marginBottom: "10px" }}>Build your <em>perfect combo</em></div>
-          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", opacity: 0.75, lineHeight: 1.6 }}>Pick a combo size, choose your entrées and sides, and save up to 7% automatically.</div>
-        </div>
-        <div style={{ fontSize: "64px" }}>🍱</div>
-      </div>
-
-      {/* Step 1 — Choose Tier */}
-      <div style={{ marginBottom: "36px" }}>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600, marginBottom: "4px" }}>Step 1 — Choose your combo size</div>
-        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", marginBottom: "20px" }}>Bigger combos save more!</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "16px" }}>
-          {COMBO_TIERS.map((t) => (
-            <div key={t.id} onClick={() => { setSelectedTier(t.id); setSelectedEntrees([]); setSelectedSides([]); }}
-              style={{
-                borderRadius: "16px", padding: "20px", cursor: "pointer",
-                border: `2px solid ${selectedTier === t.id ? "#1A1208" : "#EEE8DF"}`,
-                background: selectedTier === t.id ? "#1A120808" : "#fff",
-                transition: "all 0.2s", position: "relative", overflow: "hidden",
-              }}>
-              <div style={{ position: "absolute", top: "12px", right: "12px", background: t.color, color: "#fff", borderRadius: "100px", padding: "2px 10px", fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 700 }}>{t.badge}</div>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600, marginBottom: "4px", marginTop: "8px" }}>{t.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Steps 2 & 3 — only show after tier selected */}
-      {tier && (
-        <>
-          {/* Step 2 — Choose Entrées */}
-          <div style={{ marginBottom: "36px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600 }}>Step 2 — Choose {tier.entrees} entrée{tier.entrees > 1 ? "s" : ""}</div>
-              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: selectedEntrees.length === tier.entrees ? "#52B788" : "#B5A48C", fontWeight: 500 }}>
-                {selectedEntrees.length} / {tier.entrees} selected
-              </div>
-            </div>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", marginBottom: "16px" }}>Pick from Heather's meal prep menu</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {entrees.length === 0
-                ? <div style={{ fontFamily: "'DM Sans', sans-serif", color: "#B5A48C", fontSize: "14px" }}>No entrées available right now.</div>
-                : entrees.map((item) => (
-                  <SelectableCard key={item.id} item={item}
-                    selected={!!selectedEntrees.find((i) => i.id === item.id)}
-                    onToggle={(i) => toggleItem(i, selectedEntrees, setSelectedEntrees, tier.entrees)}
-                    disabled={selectedEntrees.length >= tier.entrees && !selectedEntrees.find((i) => i.id === item.id)} />
-                ))}
-            </div>
-          </div>
-
-          {/* Step 3 — Choose Sides */}
-          <div style={{ marginBottom: "36px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600 }}>Step 3 — Choose {tier.sides} side{tier.sides > 1 ? "s" : ""}</div>
-              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: selectedSides.length === tier.sides ? "#52B788" : "#B5A48C", fontWeight: 500 }}>
-                {selectedSides.length} / {tier.sides} selected
-              </div>
-            </div>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", marginBottom: "16px" }}>Complete your combo with sides</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {sides.length === 0
-                ? <div style={{ fontFamily: "'DM Sans', sans-serif", color: "#B5A48C", fontSize: "14px" }}>No sides available right now.</div>
-                : sides.map((item) => (
-                  <SelectableCard key={item.id} item={item}
-                    selected={!!selectedSides.find((i) => i.id === item.id)}
-                    onToggle={(i) => toggleItem(i, selectedSides, setSelectedSides, tier.sides)}
-                    disabled={selectedSides.length >= tier.sides && !selectedSides.find((i) => i.id === item.id)} />
-                ))}
-            </div>
-          </div>
-
-          {/* Summary + Add to Order */}
-          <div style={{ background: isComplete ? "#1A1208" : "#F5F0E8", borderRadius: "16px", padding: "24px", marginBottom: "12px", transition: "background 0.3s" }}>
-            {isComplete ? (
-              <>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                  <div>
-                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "20px", fontWeight: 600, color: "#FEFAF4" }}>{tier.label}</div>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C", marginTop: "2px" }}>
-                      {tier.entrees} entrées + {tier.sides} sides
-                    </div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C", textDecoration: "line-through" }}>${rawTotal.toFixed(2)}</div>
-                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "28px", fontWeight: 600, color: "#FEFAF4" }}>${discountedTotal.toFixed(2)}</div>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#52B788", fontWeight: 600 }}>You save ${savings.toFixed(2)}!</div>
-                  </div>
-                </div>
-                <button onClick={handleAdd} style={{ width: "100%", background: "#E76F51", color: "#fff", border: "none", borderRadius: "10px", padding: "14px", fontFamily: "'DM Sans', sans-serif", fontSize: "15px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.03em", transition: "background 0.2s" }}>
-                  {added ? "✓ Added to Order!" : "Add Combo to Order →"}
-                </button>
-              </>
-            ) : (
-              <div style={{ textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", padding: "8px 0" }}>
-                {selectedEntrees.length < tier.entrees
-                  ? `Choose ${tier.entrees - selectedEntrees.length} more entrée${tier.entrees - selectedEntrees.length !== 1 ? "s" : ""} to continue`
-                  : `Choose ${tier.sides - selectedSides.length} more side${tier.sides - selectedSides.length !== 1 ? "s" : ""} to complete your combo`}
-              </div>
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-// ── Order Form ────────────────────────────────────────────────────────────────
-function OrderForm({ cartItems, comboItems, onSuccess, onCancel }) {
-  // Detect what's in the cart
-  const hasMealPrep = cartItems.some((i) => i.category === "Meal Prep" || i.category === "Sides") || comboItems.length > 0;
-  const hasCatering = cartItems.some((i) => i.category === "Catering" || i.category === "Private Dinners");
-  const isMixed = hasMealPrep && hasCatering;
-
-  const [form, setForm] = useState({
-    customer_name: "", customer_email: "", customer_phone: "",
-    // Meal prep fields
-    delivery_date: "", delivery_time: "", diner_count: "",
-    // Catering fields
-    event_date: "", event_time: "", guest_count: "",
-    // Shared
-    entree_count: "", appetizer_count: "", side_count: "",
-    dietary_notes: "",
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
-  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
-
-  const validate = () => {
-    const e = {};
-    if (!form.customer_name.trim()) e.customer_name = "Name is required";
-    if (!form.customer_email.trim()) e.customer_email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(form.customer_email)) e.customer_email = "Enter a valid email";
-    if (hasMealPrep && !form.delivery_date) e.delivery_date = "Please choose a delivery date";
-    if (hasMealPrep && (!form.diner_count || Number(form.diner_count) < 1)) e.diner_count = "Enter number of diners";
-    if (hasCatering && !form.event_date) e.event_date = "Please choose an event date";
-    if (hasCatering && (!form.guest_count || Number(form.guest_count) < 1)) e.guest_count = "Enter number of guests";
-    return e;
-  };
-
-  const submit = async () => {
-    const e = validate();
-    if (Object.keys(e).length) { setErrors(e); return; }
-    setSubmitting(true);
-    try {
-      const regularItems = cartItems.map((i) => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, category: i.category }));
-      const combosSummary = comboItems.map((c) => ({
-        type: "combo", label: c.label, badge: c.badge,
-        entrees: c.entrees.map((i) => i.name),
-        sides: c.sides.map((i) => i.name),
-        rawTotal: c.rawTotal, discountedTotal: c.discountedTotal, savings: c.savings,
-      }));
-      // Use event_date for catering, delivery_date for meal prep; prefer catering date if mixed
-      const primaryDate = hasCatering ? form.event_date : form.delivery_date;
-      const primaryTime = hasCatering ? form.event_time : form.delivery_time;
-      const primaryCount = hasCatering ? Number(form.guest_count) : Number(form.diner_count);
-
-      const payload = {
-        customer_name: form.customer_name.trim(),
-        customer_email: form.customer_email.trim(),
-        customer_phone: form.customer_phone.trim() || null,
-        event_date: primaryDate,
-        event_time: primaryTime || null,
-        guest_count: primaryCount || null,
-        entree_count: Number(form.entree_count) || null,
-        appetizer_count: Number(form.appetizer_count) || null,
-        side_count: Number(form.side_count) || null,
-        dietary_notes: form.dietary_notes.trim() || null,
-        items: [...regularItems, ...combosSummary],
-        status: "new",
-      };
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
-        method: "POST",
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error("Supabase error:", errText);
-        throw new Error();
-      }
-      onSuccess(form.customer_name);
-    } catch { setErrors({ submit: "Something went wrong. Please try again or contact us directly." }); }
-    finally { setSubmitting(false); }
-  };
-
-  const err = (k) => errors[k] ? <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#E76F51", marginTop: "4px" }}>{errors[k]}</div> : null;
-
-  const sectionHeader = (title) => (
-    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600, margin: "24px 0 16px", paddingBottom: "8px", borderBottom: "1px solid #EEE8DF" }}>{title}</div>
-  );
-
-  const allItems = [
-    ...cartItems.map((i) => ({ key: i.id, thumb: getImage(i), name: i.name, sub: `$${i.price} × ${i.qty}` })),
-    ...comboItems.map((c) => ({ key: c.id, thumb: null, name: c.label, sub: `${c.entrees.map(i=>i.name).join(", ")} + ${c.sides.map(i=>i.name).join(", ")} — $${c.discountedTotal.toFixed(2)} (${c.badge})` })),
-  ];
-
-  return (
-    <div style={{ padding: "32px 24px", background: "#fff" }}>
-      <div style={{ marginBottom: "28px" }}>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "26px", fontWeight: 600, marginBottom: "6px" }}>Request a Quote</div>
-        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", lineHeight: 1.6 }}>Fill in your details and Heather will be in touch to confirm pricing.</div>
-      </div>
-
-      {/* Order Summary */}
-      {allItems.length > 0 && (
-        <div style={{ background: "#FEFAF4", borderRadius: "12px", border: "1px solid #EEE8DF", padding: "16px", marginBottom: "24px" }}>
-          <div style={{ ...labelStyle, marginBottom: "12px" }}>Your Order</div>
-          {allItems.map((item) => (
-            <div key={item.key} style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
-              {item.thumb
-                ? <img src={item.thumb} alt={item.name} onError={(e) => { e.target.src = FALLBACK; }} style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 }} />
-                : <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "#1A1208", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>🍱</div>
-              }
-              <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 500 }}>{item.name}</div>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#B5A48C", lineHeight: 1.5 }}>{item.sub}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Contact Info */}
-      {sectionHeader("Contact Information")}
-      <Field label="Full Name *"><input style={inputStyle} placeholder="Jane Smith" value={form.customer_name} onChange={(e) => set("customer_name", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("customer_name")}</Field>
-      <Field label="Email Address *"><input style={inputStyle} type="email" placeholder="jane@email.com" value={form.customer_email} onChange={(e) => set("customer_email", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("customer_email")}</Field>
-      <Field label="Phone Number"><input style={inputStyle} type="tel" placeholder="(555) 123-4567" value={form.customer_phone} onChange={(e) => set("customer_phone", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
-
-      {/* Meal Prep Section */}
-      {hasMealPrep && (
-        <>
-          {sectionHeader(isMixed ? "🥡 Meal Prep Delivery" : "Delivery Details")}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <Field label="Delivery Date *"><input style={inputStyle} type="date" value={form.delivery_date} min={new Date().toISOString().split("T")[0]} onChange={(e) => set("delivery_date", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("delivery_date")}</Field>
-            <Field label="Delivery Time"><input style={inputStyle} type="time" value={form.delivery_time} onChange={(e) => set("delivery_time", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
-          </div>
-          <Field label="Number of Diners *"><input style={inputStyle} type="number" min="1" placeholder="e.g. 4" value={form.diner_count} onChange={(e) => set("diner_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("diner_count")}</Field>
-        </>
-      )}
-
-      {/* Catering Section */}
-      {hasCatering && (
-        <>
-          {sectionHeader(isMixed ? "🍽️ Catering Event" : "Event Details")}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <Field label="Event Date *"><input style={inputStyle} type="date" value={form.event_date} min={new Date().toISOString().split("T")[0]} onChange={(e) => set("event_date", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("event_date")}</Field>
-            <Field label="Preferred Time"><input style={inputStyle} type="time" value={form.event_time} onChange={(e) => set("event_time", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
-          </div>
-          <Field label="Number of Guests *"><input style={inputStyle} type="number" min="1" placeholder="e.g. 25" value={form.guest_count} onChange={(e) => set("guest_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("guest_count")}</Field>
-        </>
-      )}
-
-      {/* Courses */}
-      {sectionHeader("Courses Needed")}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
-        <Field label="Entrées"><input style={inputStyle} type="number" min="0" placeholder="0" value={form.entree_count} onChange={(e) => set("entree_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
-        <Field label="Appetizers"><input style={inputStyle} type="number" min="0" placeholder="0" value={form.appetizer_count} onChange={(e) => set("appetizer_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
-        <Field label="Sides"><input style={inputStyle} type="number" min="0" placeholder="0" value={form.side_count} onChange={(e) => set("side_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
-      </div>
-
-      {/* Dietary Notes */}
-      {sectionHeader("Dietary Notes & Allergies")}
-      <Field label="Any allergies or dietary restrictions?"><textarea style={{ ...inputStyle, height: "100px", resize: "vertical" }} placeholder="e.g. 3 guests are gluten-free, 1 is allergic to shellfish…" value={form.dietary_notes} onChange={(e) => set("dietary_notes", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
-
-      {errors.submit && <div style={{ background: "#FEF0ED", border: "1px solid #E76F51", borderRadius: "10px", padding: "12px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#E76F51", marginBottom: "16px" }}>{errors.submit}</div>}
-
-      <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
-        <button onClick={onCancel} style={{ flex: 1, padding: "14px", border: "1.5px solid #D4C9B8", borderRadius: "12px", background: "transparent", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, color: "#6B5E4E", cursor: "pointer" }}>← Back</button>
-        <button onClick={submit} disabled={submitting} style={{ flex: 2, padding: "14px", border: "none", borderRadius: "12px", background: submitting ? "#B5A48C" : "#1A1208", color: "#FEFAF4", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, cursor: submitting ? "not-allowed" : "pointer", letterSpacing: "0.03em", transition: "background 0.2s" }}>
-          {submitting ? "Sending…" : "Submit Order Request ✓"}
-        </button>
-      </div>
-      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#B5A48C", textAlign: "center", marginTop: "14px", lineHeight: 1.6 }}>No payment required now. Heather will contact you to confirm details.</div>
-    </div>
-  );
-}
-
-// ── Success Screen ────────────────────────────────────────────────────────────
-function SuccessScreen({ name, onReset }) {
-  return (
-    <div style={{ padding: "48px 24px", textAlign: "center" }}>
-      <div style={{ fontSize: "56px", marginBottom: "20px" }}>🎉</div>
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "28px", fontWeight: 600, marginBottom: "12px" }}>Thank you, {name}!</div>
-      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.7, marginBottom: "32px" }}>
-        Your order request has been sent to Heather.<br />She'll be in touch soon to confirm all the details.<br /><br />
-        <em style={{ color: "#B5A48C" }}>Food is Life, Life is Good 🍽️</em>
-      </div>
-      <button onClick={onReset} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "12px", padding: "14px 28px", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer" }}>Back to Menu</button>
-    </div>
-  );
-}
-
-// ── Main App ──────────────────────────────────────────────────────────────────
-export default function MenuApp() {
-  const [menuItems, setMenuItems]       = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState(null);
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [cartItems, setCartItems]       = useState([]);
-  const [comboItems, setComboItems]     = useState([]);
-  const [showCart, setShowCart]         = useState(false);
-  const [view, setView]                 = useState("cart");
-  const [successName, setSuccessName]   = useState("");
-
-  useEffect(() => { fetchMenu(); }, []);
-
-  const fetchMenu = async () => {
-    try {
-      setLoading(true); setError(null);
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/menu?active=eq.true&order=created_at.asc`,
-        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
-      );
-      if (!res.ok) throw new Error();
-      setMenuItems(await res.json());
-    } catch { setError("Couldn't load the menu right now. Please try again shortly."); }
-    finally { setLoading(false); }
-  };
-
-  const isCombosTab = activeCategory === "🍱 Combos";
-  const filtered = isCombosTab ? [] : (activeCategory === "All"
-    ? menuItems.filter((i) => i.category !== "Sides")
-    : menuItems.filter((i) => i.category === activeCategory));
-
-  const addToCart = (item) => {
-    setCartItems((prev) => {
-      const existing = prev.find((c) => c.id === item.id);
-      if (existing) return prev.map((c) => c.id === item.id ? { ...c, qty: c.qty + 1 } : c);
-      return [...prev, { ...item, qty: 1 }];
-    });
-  };
-
-  const addCombo = (combo) => {
-    setComboItems((prev) => [...prev, combo]);
-  };
-
-  const removeFromCart   = (id) => setCartItems((prev) => prev.filter((c) => c.id !== id));
-  const removeCombo      = (id) => setComboItems((prev) => prev.filter((c) => c.id !== id));
-  const totalItems       = cartItems.reduce((s, c) => s + c.qty, 0) + comboItems.length;
-
-  const handleSuccess = (name) => { setSuccessName(name); setView("success"); };
-  const handleReset   = () => { setCartItems([]); setComboItems([]); setView("cart"); setShowCart(false); };
-
-  return (
-    <div style={{ fontFamily: "'Georgia', serif", background: "#FEFAF4", minHeight: "100vh", color: "#1A1208" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        .menu-card { background: #fff; border-radius: 20px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid #EEE8DF; }
-        .menu-card:hover { transform: translateY(-6px); box-shadow: 0 24px 64px rgba(26,18,8,0.13); }
-        .food-img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.5s ease; }
-        .menu-card:hover .food-img { transform: scale(1.04); }
-        .img-wrap { overflow: hidden; position: relative; height: 200px; }
-        .cat-badge { position: absolute; top: 12px; right: 12px; background: rgba(254,250,244,0.92); backdrop-filter: blur(8px); border-radius: 8px; padding: 4px 10px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: #1A1208; }
-        .cat-btn { border: 1.5px solid #D4C9B8; background: transparent; padding: 8px 20px; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; transition: all 0.2s ease; color: #6B5E4E; }
-        .cat-btn:hover { border-color: #1A1208; color: #1A1208; }
-        .cat-btn.active { background: #1A1208; border-color: #1A1208; color: #FEFAF4; }
-        .cat-btn.combo-btn { border-color: #E76F51; color: #C4400A; }
-        .cat-btn.combo-btn.active { background: #E76F51; border-color: #E76F51; color: #fff; }
-        .add-btn { background: #1A1208; color: #FEFAF4; border: none; padding: 10px 18px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; letter-spacing: 0.03em; white-space: nowrap; }
-        .add-btn:hover { background: #3D2B1A; }
-        .tag { display: inline-block; padding: 3px 9px; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; }
-        .section-label { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: #B5A48C; }
-        .spinner { width: 36px; height: 36px; border: 3px solid #EEE8DF; border-top-color: #1A1208; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 640px) { .hero-title { font-size: 48px !important; } }
-      `}</style>
-
-      {/* Nav */}
-      <nav style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(254,250,244,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid #EEE8DF", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600, letterSpacing: "0.04em" }}>Flavor Fuzion</div>
-          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#B5A48C", letterSpacing: "0.1em", marginTop: "1px" }}>BY HEATHER JANEY</div>
-        </div>
-        <button onClick={() => { setShowCart(true); setView("cart"); }} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "10px 20px", fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 500, cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
-          <span>🛒</span><span>Order</span>
-          {totalItems > 0 && <span style={{ background: "#E76F51", color: "#fff", borderRadius: "100px", padding: "2px 8px", fontSize: "11px" }}>{totalItems}</span>}
-        </button>
-      </nav>
-
-      {/* Hero */}
-      <div style={{ padding: "72px 32px 56px", maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
-        <div className="section-label" style={{ marginBottom: "16px" }}>Food is Life, Life is Good</div>
-        <h1 className="hero-title" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "72px", fontWeight: 300, lineHeight: 1.05, letterSpacing: "-0.01em", marginBottom: "20px" }}>
-          Bold flavors,<br /><em>made with love</em>
-        </h1>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "16px", color: "#6B5E4E", lineHeight: 1.7, maxWidth: "520px", margin: "0 auto" }}>
-          Welcome to Flavor Fuzion by Heather Janey — fresh weekly meal prep, bespoke catering, and exclusive private dinner experiences, all made to order.
-        </p>
-      </div>
-
-      {/* Category Filter */}
-      <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", padding: "0 32px 48px" }}>
-        {CATEGORIES.map((cat) => (
-          <button key={cat}
-            className={`cat-btn${cat === "🍱 Combos" ? " combo-btn" : ""}${activeCategory === cat ? " active" : ""}`}
-            onClick={() => setActiveCategory(cat)}>
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 32px 80px" }}>
-
-        {/* Combos Tab */}
-        {isCombosTab && (
-          <ComboBuilder menuItems={menuItems} onAddCombo={(combo) => { addCombo(combo); setShowCart(true); setView("cart"); }} />
-        )}
-
-        {/* Regular Menu */}
-        {!isCombosTab && (
-          <>
-            {loading && <div style={{ textAlign: "center", paddingTop: "60px" }}><div className="spinner" /><div style={{ fontFamily: "'DM Sans', sans-serif", color: "#B5A48C", fontSize: "14px" }}>Loading the menu…</div></div>}
-            {error && <div style={{ textAlign: "center", paddingTop: "60px" }}><div style={{ fontSize: "48px", marginBottom: "16px" }}>😔</div><div style={{ fontFamily: "'DM Sans', sans-serif", color: "#E76F51", fontSize: "15px", marginBottom: "16px" }}>{error}</div><button className="add-btn" onClick={fetchMenu}>Try Again</button></div>}
-            {!loading && !error && filtered.length === 0 && <div style={{ textAlign: "center", paddingTop: "60px" }}><div style={{ fontSize: "48px", marginBottom: "16px" }}>🍽️</div><div style={{ fontFamily: "'DM Sans', sans-serif", color: "#B5A48C", fontSize: "15px" }}>No items in this category right now.<br />Check back soon!</div></div>}
-            {!loading && !error && filtered.length > 0 && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "28px" }}>
-                {filtered.map((item) => (
-                  <div key={item.id} className="menu-card">
-                    <div className="img-wrap">
-                      <img src={getImage(item)} alt={item.name} className="food-img" onError={(e) => { e.target.src = FALLBACK; }} />
-                      <div className="cat-badge">{item.category?.toUpperCase()}</div>
-                    </div>
-                    <div style={{ padding: "20px 20px 18px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
-                        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600, lineHeight: 1.2, flex: 1, paddingRight: "12px" }}>{item.name}</h2>
-                        <div style={{ textAlign: "right", flexShrink: 0 }}>
-                          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "26px", fontWeight: 600 }}>${item.price}</div>
-                          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#B5A48C" }}>{item.unit}</div>
-                        </div>
-                      </div>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", lineHeight: 1.65, color: "#6B5E4E", marginBottom: "14px" }}>{item.description}</p>
-                      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "16px" }}>
-                        {(item.tags || []).map((tag) => (
-                          <span key={tag} className="tag" style={{ background: (tagColors[tag] || "#D4C9B8") + "30", color: tagColors[tag] || "#6B5E4E", border: `1px solid ${(tagColors[tag] || "#D4C9B8")}60` }}>{tag}</span>
-                        ))}
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid #EEE8DF", paddingTop: "14px" }}>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C" }}>📦 {item.servings}</div>
-                        <button className="add-btn" onClick={() => addToCart(item)}>+ Add to Order</button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div style={{ borderTop: "1px solid #EEE8DF", padding: "40px 32px", textAlign: "center", background: "#1A1208", color: "#FEFAF4" }}>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "28px", fontWeight: 300, marginBottom: "8px" }}>Planning a large event?</div>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", color: "#B5A48C", marginBottom: "20px" }}>Get in touch for custom menus, tastings, and deposit-based bookings.</p>
-        <button onClick={() => { setShowCart(true); setView("form"); }} style={{ background: "#E76F51", color: "#fff", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.04em" }}>Contact Us →</button>
-      </div>
-
-      {/* Cart Overlay */}
-      {showCart && <div onClick={() => setShowCart(false)} style={{ position: "fixed", inset: 0, background: "rgba(26,18,8,0.4)", zIndex: 99 }} />}
-
-      {/* Side Drawer */}
-      <div style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: "420px", maxWidth: "100vw", background: "#fff", boxShadow: "-8px 0 40px rgba(26,18,8,0.12)", zIndex: 100, overflowY: "auto", transform: showCart ? "translateX(0)" : "translateX(100%)", transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-        <button onClick={() => setShowCart(false)} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#6B5E4E", zIndex: 1 }}>✕</button>
-
-        {/* Cart View */}
-        {view === "cart" && (
-          <div style={{ padding: "32px 24px" }}>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "26px", fontWeight: 600, marginBottom: "28px" }}>Your Order</h2>
-
-            {cartItems.length === 0 && comboItems.length === 0 ? (
-              <div style={{ textAlign: "center", paddingTop: "60px", fontFamily: "'DM Sans', sans-serif", color: "#B5A48C" }}>
-                <div style={{ fontSize: "48px", marginBottom: "16px" }}>🍽️</div>
-                <div style={{ fontSize: "15px" }}>Your order is empty.</div>
-                <div style={{ fontSize: "13px", marginTop: "8px" }}>Browse the menu and add items!</div>
-              </div>
-            ) : (
-              <>
-                <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "28px" }}>
-                  {/* Regular items */}
-                  {cartItems.map((item) => (
-                    <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px", background: "#FEFAF4", borderRadius: "12px", border: "1px solid #EEE8DF" }}>
-                      <img src={getImage(item)} alt={item.name} onError={(e) => { e.target.src = FALLBACK; }} style={{ width: "52px", height: "52px", objectFit: "cover", borderRadius: "10px", flexShrink: 0 }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "16px", fontWeight: 600 }}>{item.name}</div>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C" }}>${item.price} × {item.qty}</div>
-                      </div>
-                      <button onClick={() => removeFromCart(item.id)} style={{ background: "none", border: "none", color: "#B5A48C", cursor: "pointer", fontSize: "16px" }}>✕</button>
-                    </div>
-                  ))}
-
-                  {/* Combo items */}
-                  {comboItems.map((combo) => (
-                    <div key={combo.id} style={{ padding: "14px", background: "#1A120808", borderRadius: "12px", border: "2px solid #1A1208" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
-                        <div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
-                            <span style={{ fontSize: "18px" }}>🍱</span>
-                            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "16px", fontWeight: 600 }}>{combo.label}</div>
-                          </div>
-                          <div style={{ background: "#E76F51", color: "#fff", display: "inline-block", borderRadius: "100px", padding: "1px 8px", fontFamily: "'DM Sans', sans-serif", fontSize: "10px", fontWeight: 700, marginBottom: "8px" }}>{combo.badge}</div>
-                        </div>
-                        <button onClick={() => removeCombo(combo.id)} style={{ background: "none", border: "none", color: "#B5A48C", cursor: "pointer", fontSize: "16px" }}>✕</button>
-                      </div>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#6B5E4E", lineHeight: 1.6 }}>
-                        <div>🍽️ {combo.entrees.map(i => i.name).join(", ")}</div>
-                        <div>🥗 {combo.sides.map(i => i.name).join(", ")}</div>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #EEE8DF" }}>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#52B788", fontWeight: 600 }}>You save ${combo.savings.toFixed(2)}</div>
-                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600 }}>${combo.discountedTotal.toFixed(2)}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{ borderTop: "1px solid #EEE8DF", paddingTop: "20px" }}>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", lineHeight: 1.6, marginBottom: "20px" }}>
-                    Final pricing confirmed by Heather before any payment is needed.
-                  </div>
-                  <button onClick={() => setView("form")} style={{ width: "100%", background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: "15px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.03em" }}>
-                    Request a Quote →
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {view === "form" && <OrderForm cartItems={cartItems} comboItems={comboItems} onSuccess={handleSuccess} onCancel={() => setView("cart")} />}
-        {view === "success" && <SuccessScreen name={successName} onReset={handleReset} />}
-      </div>
+      <input className="form-input" placeholder="Your Name *" value={form.name} onChange={(e) => set("name", e.target.value)} />
+      <input className="form-input" type="email" placeholder="Your Email *" value={form.email} onChange={(e) => set("email", e.target.value)} />
+      <input className="form-input" placeholder="Subject (e.g. Catering inquiry for 50 guests)" value={form.subject} onChange={(e) => set("subject", e.target.value)} />
+      <textarea className="form-input" placeholder="Your message *" rows={5} value={form.message} onChange={(e) => set("message", e.target.value)} style={{ resize: "vertical" }} />
+      <button className="btn-primary" style={{ width: "100%", fontSize: "14px", padding: "16px" }} onClick={handleSubmit}>
+        Send Message →
+      </button>
+      <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "12px", color: "#B5A48C", textAlign: "center", marginTop: "12px" }}>
+        This will open your email client. Heather responds within 24 hours.
+      </p>
     </div>
   );
 }

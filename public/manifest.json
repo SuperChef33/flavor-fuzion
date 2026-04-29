@@ -1,0 +1,35 @@
+{
+  "name": "Flavor Fuzion by Heather Janey",
+  "short_name": "Flavor Fuzion",
+  "description": "Fresh meal prep, catering, private dinners and cooking lessons by Chef Heather Janey. Food is Life, Life is Good.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F1A0F",
+  "theme_color": "#0F1A0F",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["food", "lifestyle", "shopping"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Browse Menu",
+      "short_name": "Menu",
+      "description": "Browse Heather's weekly menu",
+      "url": "https://flavor-fuzion.vercel.app",
+      "icons": [{ "src": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png", "sizes": "192x192" }]
+    }
+  ]
+}
