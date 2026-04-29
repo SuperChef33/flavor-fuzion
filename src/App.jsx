@@ -38,6 +38,11 @@ const testimonials = [
   { name: "Alex S.", text: "If I could give 6 stars, I would. Heather is the best! Her food is absolutely delicious and she is a dream to work with. She always gets what I'm looking for and delivers it perfectly!", stars: 5 },
   { name: "Ms. Lindor", text: "The food is absolutely amazing and delicious. Heather is also professional and a life saver! Heather was able to prepare meals for me for the entire week. I can't wait to receive my next order!", stars: 5 },
   { name: "Robinson R.", text: "Chef Heather Janey is a master of the culinary arts world! Everything I've ordered comes out EXACTLY how I WANTED! I recommend this chef to anyone who's a foodie! Will be ordering soon again!", stars: 5 },
+  { name: "Elizabeth", text: "Chef Heather Janey's first impression was punctual. Her presentation skills, personality, culinary art, spices and food selection was on point. Being Pescatarian was not a challenge for her — she made any adjustments to the menu requested and still made it delectable. She made my special day stress free and special. Thank You Chef Janey!", stars: 5 },
+  { name: "Harriet", text: "Heather was amazing, the meal was delicious and the presentation was truly a work of art. She was punctual even though it was raining. My family thoroughly enjoyed celebrating my daughter's birthday and having Heather as our Chef enhanced the celebration in a great way. I definitely will use Heather again and will recommend her to friends and family.", stars: 5 },
+  { name: "Kylie", text: "Heather was incredible for my boyfriend and me! She showed up on time and got cooking immediately. We had a Southern food menu, which Heather presented beautifully. We finished every course completely because we just could not get enough of the delicious flavors. I'm eager to hire her again for a larger party so I can show her off to my friends!", stars: 5 },
+  { name: "Amod", text: "We had an outstanding dinner experience with Chef Heather. I hired her to celebrate my wife's birthday with a private dinner. She worked within our dietary restrictions to craft a professionally presented and exceptionally tasty meal — dishes on par with some of the best fine dining restaurants in New York. I wholeheartedly recommend working with Chef Heather.", stars: 5 },
+  { name: "Webster", text: "Heather came in and helped us out when we needed it most! She created a tailored dairy-free menu for a week's worth of meals when we just welcomed our second son. Every single dish was incredible. Not only did she make all of these incredible dishes, but she also answered every single one of my thousand questions and left our very unorganized kitchen spotless. The best gift and chef that we could have asked for!", stars: 5 },
 ];
 
 export default function FlavorFuzionWebsite() {
@@ -481,7 +486,7 @@ export default function FlavorFuzionWebsite() {
                 "Food is Life, Life is Good"
               </div>
               <div className="jost" style={{ fontSize: "14px", color: "rgba(254,250,240,0.7)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-               , Heather Janey
+               — Heather Janey
               </div>
               </div>
             </div>
@@ -505,14 +510,18 @@ export default function FlavorFuzionWebsite() {
                 </h2>
                 <div className="divider" style={{ margin: "16px auto 0" }} />
               </div>
-              <div className="testimonials-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
-                {testimonials.map((t) => (
-                  <div key={t.name} className="testimonial-card">
-                    <div className="gold-stars" style={{ fontSize: "20px", marginBottom: "16px" }}>{"★".repeat(t.stars)}</div>
-                    <p className="jost" style={{ fontSize: "15px", color: "#3D3020", lineHeight: 1.7, fontStyle: "italic", marginBottom: "20px", fontWeight: 300 }}>"{t.text}"</p>
-                    <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#50C878", letterSpacing: "0.06em" }}>, {t.name}</div>
-                  </div>
-                ))}
+              <div style={{ position: "relative" }}>
+                <div style={{ display: "flex", overflowX: "auto", gap: "24px", paddingBottom: "16px", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}
+                  className="reviews-carousel">
+                  {testimonials.map((t) => (
+                    <div key={t.name} className="testimonial-card" style={{ minWidth: "320px", maxWidth: "340px", scrollSnapAlign: "start", flexShrink: 0 }}>
+                      <div className="gold-stars" style={{ fontSize: "20px", marginBottom: "16px" }}>{"★".repeat(t.stars)}</div>
+                      <p className="jost" style={{ fontSize: "15px", color: "#3D3020", lineHeight: 1.7, fontStyle: "italic", marginBottom: "20px", fontWeight: 300 }}>"{t.text}"</p>
+                      <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#50C878", letterSpacing: "0.06em" }}>— {t.name}</div>
+                    </div>
+                  ))}
+                </div>
+                <style>{`.reviews-carousel::-webkit-scrollbar { display: none; }`}</style>
               </div>
               </div>
             </div>
