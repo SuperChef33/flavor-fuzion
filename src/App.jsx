@@ -511,6 +511,8 @@ export default function FlavorFuzionWebsite() {
                 <div className="divider" style={{ margin: "16px auto 0" }} />
               </div>
               <div style={{ position: "relative" }}>
+                <button onClick={() => document.querySelector('.reviews-carousel').scrollBy({ left: -360, behavior: 'smooth' })}
+                  style={{ position: "absolute", left: "-20px", top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "#50C878", border: "none", borderRadius: "50%", width: "44px", height: "44px", fontSize: "20px", cursor: "pointer", color: "#0F1A0F", boxShadow: "0 4px 16px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
                 <div style={{ display: "flex", overflowX: "auto", gap: "24px", paddingBottom: "16px", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}
                   className="reviews-carousel">
                   {testimonials.map((t) => (
@@ -521,6 +523,8 @@ export default function FlavorFuzionWebsite() {
                     </div>
                   ))}
                 </div>
+                <button onClick={() => document.querySelector('.reviews-carousel').scrollBy({ left: 360, behavior: 'smooth' })}
+                  style={{ position: "absolute", right: "-20px", top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "#50C878", border: "none", borderRadius: "50%", width: "44px", height: "44px", fontSize: "20px", cursor: "pointer", color: "#0F1A0F", boxShadow: "0 4px 16px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
                 <style>{`.reviews-carousel::-webkit-scrollbar { display: none; }`}</style>
               </div>
               </div>
