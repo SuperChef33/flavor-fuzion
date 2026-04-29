@@ -697,7 +697,7 @@ export default function FlavorFuzionWebsite() {
             {/* Parallax Image - Cooking */}
             <div style={{
               height: "400px",
-              backgroundImage: "url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1800&q=80')",
+              backgroundImage: "url('https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=1800&q=80')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
@@ -970,3 +970,4 @@ function ContactForm() {
     </div>
   );
 }
+
