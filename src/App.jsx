@@ -1135,7 +1135,7 @@ export default function FlavorFuzionWebsite() {
                 </div>
                 <button onClick={async () => {
                   try {
-                    const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/rest/v1/lessons", {
+                    const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/rest/v1/lesson_requests", {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",
