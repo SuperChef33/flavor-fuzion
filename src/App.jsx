@@ -340,6 +340,7 @@ export default function FlavorFuzionWebsite() {
           .hero-title { font-size: 42px !important; }
           .services-grid { grid-template-columns: 1fr !important; }
           .services-grid > * { min-width: unset; }
+          .merch-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .testimonials-grid { grid-template-columns: 1fr !important; }
           .about-grid { grid-template-columns: 1fr !important; }
           .contact-grid { grid-template-columns: 1fr !important; }
@@ -704,6 +705,76 @@ export default function FlavorFuzionWebsite() {
                 <style>{`.reviews-carousel::-webkit-scrollbar { display: none; }`}</style>
               </div>
               </div>
+            </div>
+
+            {/* Merch Section */}
+            <div style={{ padding: "100px 80px", background: "#FEFAF0" }}>
+              <div style={{ textAlign: "center", marginBottom: "60px" }}>
+                <span className="section-tag">Flavor Fuzion Merch</span>
+                <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, color: "#0F1A0F", lineHeight: 1.2 }}>
+                  Love the food?<br /><em className="gold">Let everyone know.</em>
+                </h2>
+                <div className="divider" style={{ margin: "16px auto" }} />
+                <p className="jost" style={{ fontSize: "16px", color: "#6B5E4E", marginTop: "24px", maxWidth: "480px", margin: "24px auto 0", fontWeight: 300, lineHeight: 1.7 }}>
+                  Get some Flavor Fuzion merch and wear the vibe. Pre-order now and we'll ship right to you!
+                </p>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
+                {[
+                  { emoji: "🧥", name: "Hoodie", price: 35, sizes: true, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo." },
+                  { emoji: "👕", name: "T-Shirt", price: 20, sizes: true, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Soft cotton tee with bold Flavor Fuzion print." },
+                  { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Structured snapback with embroidered logo." },
+                  { emoji: "🎿", name: "Beanie", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Cozy knit beanie with Flavor Fuzion patch." },
+                ].map((item) => (
+                  <div key={item.name} style={{ background: "#fff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #EEE8DF", display: "flex", flexDirection: "column" }}>
+                    {/* Image placeholder */}
+                    <div style={{ background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", height: "200px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                      <span style={{ fontSize: "80px" }}>{item.emoji}</span>
+                      <div style={{ position: "absolute", top: "12px", right: "12px", background: "#DAA520", color: "#0F1A0F", padding: "4px 10px", borderRadius: "100px", fontSize: "12px", fontWeight: 700 }}>PRE-ORDER</div>
+                    </div>
+                    <div style={{ padding: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
+                      <h3 className="playfair" style={{ fontSize: "22px", fontWeight: 600, color: "#0F1A0F", marginBottom: "8px" }}>{item.name}</h3>
+                      <p className="jost" style={{ fontSize: "13px", color: "#6B5E4E", lineHeight: 1.6, marginBottom: "16px", fontWeight: 300 }}>{item.description}</p>
+                      
+                      {/* Colors */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Colors</div>
+                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                          {[{ name: "Forest Green", hex: "#1A5C2A" }, { name: "Royal Purple", hex: "#4A1B6B" }, { name: "Midnight Black", hex: "#0F1A0F" }, { name: "Gold", hex: "#DAA520" }].map((color) => (
+                            <div key={color.name} title={color.name} style={{ width: "20px", height: "20px", borderRadius: "50%", background: color.hex, border: "2px solid #EEE8DF", cursor: "pointer" }} />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Sizes */}
+                      {item.sizes && (
+                        <div style={{ marginBottom: "16px" }}>
+                          <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Sizes</div>
+                          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                            {["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"].map((size) => (
+                              <span key={size} className="jost" style={{ fontSize: "10px", padding: "3px 7px", border: "1px solid #D4C9B8", borderRadius: "4px", color: "#6B5E4E" }}>{size}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div className="playfair" style={{ fontSize: "24px", fontWeight: 600, color: "#0F1A0F" }}>${item.price}</div>
+                        <button
+                          onClick={() => { setActivePage("Contact"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                          style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", padding: "10px 20px", borderRadius: "100px", fontFamily: "'Jost', sans-serif", fontSize: "12px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
+                          Pre-Order →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="jost" style={{ textAlign: "center", fontSize: "13px", color: "#B5A48C", marginTop: "32px", fontStyle: "italic" }}>
+                * Please allow 7-10 days for shipping. Colors and designs subject to availability.
+              </p>
             </div>
 
             {/* CTA Section */}
