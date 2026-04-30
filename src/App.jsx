@@ -241,12 +241,18 @@ export default function FlavorFuzionWebsite() {
         .fade-up-4 { animation: fadeUp 0.8s ease 0.6s both; }
 
         @media (max-width: 768px) {
-          .hero-title { font-size: 52px !important; }
+          .hero-title { font-size: 42px !important; }
           .services-grid { grid-template-columns: 1fr !important; }
           .testimonials-grid { grid-template-columns: 1fr !important; }
           .about-grid { grid-template-columns: 1fr !important; }
           .contact-grid { grid-template-columns: 1fr !important; }
           .footer-grid { grid-template-columns: 1fr !important; }
+          .hero-watermark { display: none !important; }
+          .hero-content { padding: 80px 24px !important; }
+          .section-padding { padding: 60px 24px !important; }
+          .parallax-section { background-attachment: scroll !important; }
+          nav { padding: 0 24px !important; }
+          footer { padding: 40px 24px 24px !important; }
         }
       `}</style>
 
@@ -340,6 +346,7 @@ export default function FlavorFuzionWebsite() {
               <img
                 src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/symbol.svg"
                 alt=""
+                className="hero-watermark"
                 style={{
                   position: "absolute",
                   left: "120px", top: "50%",
@@ -355,6 +362,7 @@ export default function FlavorFuzionWebsite() {
               <img
                 src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/symbol.svg"
                 alt=""
+                className="hero-watermark"
                 style={{
                   position: "absolute",
                   right: "120px", top: "50%",
@@ -367,7 +375,7 @@ export default function FlavorFuzionWebsite() {
                 }}
               />
 
-              <div style={{ position: "relative", zIndex: 2, padding: "80px 80px", width: "100%", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <div className="hero-content" style={{ position: "relative", zIndex: 2, padding: "80px 80px", width: "100%", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <span className="section-tag fade-up">Food is Life, Life is Good</span>
                 <h1 className="playfair hero-title fade-up-2" style={{
                   fontSize: "80px", fontWeight: 700,
