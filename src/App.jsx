@@ -729,7 +729,7 @@ export default function FlavorFuzionWebsite() {
                   { emoji: "🧥", name: "Hoodie", price: 35, sizes: true, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo.", link: "https://buy.stripe.com/28E14mgSd7Eqa1Cdlqasg00" },
                   { emoji: "👕", name: "T-Shirt", price: 20, sizes: true, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Soft cotton tee with bold Flavor Fuzion print.", link: "https://buy.stripe.com/aFa4gybxTe2Oa1Cbdiasg01" },
                   { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Structured snapback with embroidered logo.", link: "https://buy.stripe.com/eVq4gy59v7EqehS2GMasg02" },
-                  { emoji: "🎿", name: "Beanie", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Cozy knit beanie with Flavor Fuzion patch.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
+                  { emoji: "🥶", name: "Beanie", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Cozy knit beanie with Flavor Fuzion patch.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
                 ].map((item) => (
                   <div key={item.name} style={{ background: "#fff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #EEE8DF", display: "flex", flexDirection: "column" }}>
                     {/* Image placeholder */}
