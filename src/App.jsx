@@ -242,8 +242,8 @@ export default function FlavorFuzionWebsite() {
 
         @media (max-width: 768px) {
           .hero-title { font-size: 42px !important; }
-          .services-grid { grid-template-columns: 1fr !important; overflow-x: auto; display: flex !important; flex-wrap: nowrap !important; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 12px; }
-          .services-grid > * { min-width: 80vw; scroll-snap-align: start; flex-shrink: 0; }
+          .services-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 4px !important; }
+          .services-grid > * { min-width: unset; font-size: 12px; }
           .testimonials-grid { grid-template-columns: 1fr !important; }
           .about-grid { grid-template-columns: 1fr !important; }
           .contact-grid { grid-template-columns: 1fr !important; }
