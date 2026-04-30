@@ -242,7 +242,8 @@ export default function FlavorFuzionWebsite() {
 
         @media (max-width: 768px) {
           .hero-title { font-size: 42px !important; }
-          .services-grid { grid-template-columns: 1fr !important; }
+          .services-grid { grid-template-columns: 1fr !important; overflow-x: auto; display: flex !important; flex-wrap: nowrap !important; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 12px; }
+          .services-grid > * { min-width: 80vw; scroll-snap-align: start; flex-shrink: 0; }
           .testimonials-grid { grid-template-columns: 1fr !important; }
           .about-grid { grid-template-columns: 1fr !important; }
           .contact-grid { grid-template-columns: 1fr !important; }
@@ -251,6 +252,7 @@ export default function FlavorFuzionWebsite() {
           .hero-content { padding: 80px 24px !important; }
           .section-padding { padding: 60px 24px !important; }
           .parallax-section { background-attachment: scroll !important; }
+          .testimonials-section { padding: 60px 40px !important; }
           nav { padding: 0 24px !important; }
           footer { padding: 40px 24px 24px !important; }
         }
@@ -509,7 +511,7 @@ export default function FlavorFuzionWebsite() {
               backgroundAttachment: "fixed",
             }} />
             {/* Testimonials */}
-            <div style={{ padding: "100px 80px", background: "#0F1A0F" }}>
+            <div className="testimonials-section" style={{ padding: "100px 80px", background: "#0F1A0F" }}>
               <div>
               <div style={{ textAlign: "center", marginBottom: "60px" }}>
                 <span className="section-tag">What People Say</span>
@@ -524,7 +526,7 @@ export default function FlavorFuzionWebsite() {
                 <div style={{ display: "flex", overflowX: "auto", gap: "24px", paddingBottom: "16px", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}
                   className="reviews-carousel">
                   {testimonials.map((t) => (
-                    <div key={t.name} className="testimonial-card" style={{ minWidth: "320px", maxWidth: "340px", scrollSnapAlign: "start", flexShrink: 0 }}>
+                    <div key={t.name} className="testimonial-card" style={{ minWidth: "min(320px, 80vw)", maxWidth: "min(340px, 85vw)", scrollSnapAlign: "start", flexShrink: 0 }}>
                       <div className="gold-stars" style={{ fontSize: "20px", marginBottom: "16px" }}>{"★".repeat(t.stars)}</div>
                       <p className="jost" style={{ fontSize: "15px", color: "#3D3020", lineHeight: 1.7, fontStyle: "italic", marginBottom: "20px", fontWeight: 300 }}>"{t.text}"</p>
                       <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#50C878", letterSpacing: "0.06em" }}>— {t.name}</div>
