@@ -530,7 +530,7 @@ export default function FlavorFuzionWebsite() {
                       <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, color: "#fff", marginBottom: "14px" }}>{lesson.title}</h3>
                       <p className="jost" style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, fontWeight: 300 }}>{lesson.description}</p>
                       <button
-                        onClick={() => { setSelectedLesson(lesson.title); setLessonForm(f => ({ ...f, lessonType: lesson.title })); setShowLessonsForm(true); }}
+                        onClick={(e) => { e.preventDefault(); setSelectedLesson(lesson.title); setLessonForm(f => ({ ...f, lessonType: lesson.title })); setShowLessonsForm(true); }}
                         style={{
                           marginTop: "28px",
                           background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)",
@@ -551,8 +551,7 @@ export default function FlavorFuzionWebsite() {
               </div>
             </div>
 
-            {/* Cooking Lessons Form Overlay - moved outside home condition */}
-
+            
             <div style={{
               height: "400px",
               backgroundImage: "url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=80')",
