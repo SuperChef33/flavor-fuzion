@@ -578,7 +578,7 @@ export default function FlavorFuzionWebsite() {
               <div style={{ textAlign: "center", marginBottom: "60px" }}>
                 <span className="section-tag">Learn From a Pro</span>
                 <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, color: "#FEFAF0", lineHeight: 1.2 }}>
-                  Cooking Lessons<br /><em className="gold">with Heather Janey</em>
+                  Cooking Lessons<br /><em className="gold">with Chef Heather Janey</em>
                 </h2>
                 <div className="divider" style={{ margin: "16px auto 0" }} />
                 <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.75)", marginTop: "24px", maxWidth: "560px", margin: "24px auto 0", fontWeight: 300, lineHeight: 1.7 }}>
@@ -662,7 +662,7 @@ export default function FlavorFuzionWebsite() {
                 "Food is Life, Life is Good"
               </div>
               <div className="jost" style={{ fontSize: "14px", color: "rgba(254,250,240,0.7)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-               — Heather Janey
+               — Chef Heather
               </div>
               </div>
             </div>
