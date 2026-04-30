@@ -81,6 +81,98 @@ export default function FlavorFuzionWebsite() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [activePage]);
 
+  // SEO - Update meta tags per page
+  useEffect(() => {
+    const seoData = {
+      Home: {
+        title: "Flavor Fuzion by Heather Janey | Personal Chef & Catering | Boston & South Shore MA",
+        description: "Chef Heather Janey offers fresh weekly meal prep, bespoke catering, private dinners, and cooking lessons in the Boston and South Shore Massachusetts area. Bold flavors made with love.",
+        keywords: "personal chef Boston, meal prep South Shore MA, catering Massachusetts, private chef dinner, cooking lessons Boston, Heather Janey chef",
+      },
+      Menu: {
+        title: "Menu | Flavor Fuzion by Heather Janey",
+        description: "Browse Flavor Fuzion's full menu — fresh meal prep, catering packages, private dinner experiences, and cookies. All made to order by Chef Heather Janey.",
+        keywords: "meal prep menu Boston, catering menu Massachusetts, personal chef menu, private dinner menu, gluten free meal prep",
+      },
+      About: {
+        title: "About Chef Heather Janey | Flavor Fuzion",
+        description: "Meet Chef Heather Janey — a passionate culinary artist bringing bold, worldly flavors to your table in the Boston and South Shore Massachusetts areas.",
+        keywords: "Chef Heather Janey, personal chef biography, Boston chef, South Shore chef, culinary artist Massachusetts",
+      },
+      Lessons: {
+        title: "Cooking Lessons | Flavor Fuzion by Heather Janey",
+        description: "Learn to cook with Chef Heather Janey! Virtual, in-home, and group cooking lessons available in the Boston and South Shore MA area. Book your lesson today.",
+        keywords: "cooking lessons Boston, virtual cooking class, in-home cooking lesson, group cooking class Massachusetts, personal chef cooking lesson",
+      },
+      Contact: {
+        title: "Contact | Flavor Fuzion by Heather Janey",
+        description: "Get in touch with Chef Heather Janey to book meal prep, catering, private dinners, or cooking lessons in the Boston and South Shore Massachusetts area.",
+        keywords: "contact personal chef Boston, book catering Massachusetts, hire personal chef South Shore",
+      },
+    };
+
+    const page = seoData[activePage] || seoData.Home;
+
+    // Title
+    document.title = page.title;
+
+    // Meta description
+    let desc = document.querySelector('meta[name="description"]');
+    if (!desc) { desc = document.createElement('meta'); desc.name = "description"; document.head.appendChild(desc); }
+    desc.content = page.description;
+
+    // Meta keywords
+    let keywords = document.querySelector('meta[name="keywords"]');
+    if (!keywords) { keywords = document.createElement('meta'); keywords.name = "keywords"; document.head.appendChild(keywords); }
+    keywords.content = page.keywords;
+
+    // Open Graph
+    const ogTags = {
+      "og:title": page.title,
+      "og:description": page.description,
+      "og:type": "website",
+      "og:url": "https://byheatherjaney.com",
+      "og:image": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png",
+      "og:site_name": "Flavor Fuzion by Heather Janey",
+    };
+    Object.entries(ogTags).forEach(([property, content]) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+      if (!tag) { tag = document.createElement('meta'); tag.setAttribute('property', property); document.head.appendChild(tag); }
+      tag.content = content;
+    });
+
+    // Twitter Card
+    const twitterTags = {
+      "twitter:card": "summary_large_image",
+      "twitter:title": page.title,
+      "twitter:description": page.description,
+      "twitter:image": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png",
+    };
+    Object.entries(twitterTags).forEach(([name, content]) => {
+      let tag = document.querySelector(`meta[name="${name}"]`);
+      if (!tag) { tag = document.createElement('meta'); tag.name = name; document.head.appendChild(tag); }
+      tag.content = content;
+    });
+
+    // Structured Data (JSON-LD)
+    let schema = document.querySelector('#schema-org');
+    if (!schema) { schema = document.createElement('script'); schema.id = "schema-org"; schema.type = "application/ld+json"; document.head.appendChild(schema); }
+    schema.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FoodEstablishment",
+      "name": "Flavor Fuzion by Heather Janey",
+      "description": "Personal chef, meal prep, catering, private dinners and cooking lessons in Boston and South Shore Massachusetts.",
+      "url": "https://byheatherjaney.com",
+      "telephone": "774-205-3071",
+      "email": "FlavorFuzionbyHJ@gmail.com",
+      "address": { "@type": "PostalAddress", "addressRegion": "MA", "addressCountry": "US" },
+      "areaServed": ["Boston, MA", "South Shore, MA", "Massachusetts"],
+      "sameAs": ["https://instagram.com/flavorfuzionbyhj"],
+      "priceRange": "$$",
+      "servesCuisine": ["American", "International", "Fusion"],
+    });
+  }, [activePage]);
+
   const handleInstall = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();
