@@ -712,11 +712,11 @@ export default function FlavorFuzionWebsite() {
               <div style={{ textAlign: "center", marginBottom: "60px" }}>
                 <span className="section-tag">Flavor Fuzion Merch</span>
                 <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, color: "#0F1A0F", lineHeight: 1.2 }}>
-                  Love the food?<br /><em className="gold">Let everyone know.</em>
+                  Love the Food?<br /><em className="gold">Wear the Vibe.</em>
                 </h2>
                 <div className="divider" style={{ margin: "16px auto" }} />
                 <p className="jost" style={{ fontSize: "16px", color: "#6B5E4E", marginTop: "24px", maxWidth: "480px", margin: "24px auto 0", fontWeight: 300, lineHeight: 1.7 }}>
-                  Get some Flavor Fuzion merch and wear the vibe. Pre-order now and we'll ship right to you!
+                  Get your Flavor Fuzion merch and let everyone know you've got taste.
                 </p>
               </div>
 
