@@ -530,7 +530,7 @@ export default function FlavorFuzionWebsite() {
                       <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, color: "#fff", marginBottom: "14px" }}>{lesson.title}</h3>
                       <p className="jost" style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, fontWeight: 300 }}>{lesson.description}</p>
                       <button
-                        onClick={() => { setSelectedLesson(lesson.title); setLessonForm(f => ({ ...f, lessonType: lesson.title })); setShowLessonsForm(true); window.scrollTo({ top: 0, behavior: "smooth" }); setActivePage("Contact"); }}
+                        onClick={() => { setSelectedLesson(lesson.title); setLessonForm(f => ({ ...f, lessonType: lesson.title })); setShowLessonsForm(true); }}
                         style={{
                           marginTop: "28px",
                           background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)",
