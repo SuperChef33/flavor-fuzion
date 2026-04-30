@@ -344,6 +344,7 @@ export default function FlavorFuzionWebsite() {
           .merch-grid > div { min-height: unset !important; }
           .merch-grid .merch-image { height: 140px !important; }
           .merch-grid .merch-body { padding: 16px !important; }
+          .lessons-title { font-size: 36px !important; }
           .testimonials-grid { grid-template-columns: 1fr !important; }
           .about-grid { grid-template-columns: 1fr !important; }
           .contact-grid { grid-template-columns: 1fr !important; }
@@ -581,7 +582,7 @@ export default function FlavorFuzionWebsite() {
             <div style={{ padding: "100px 80px", background: "#0F1A0F" }}>
               <div style={{ textAlign: "center", marginBottom: "60px" }}>
                 <span className="section-tag">Learn From a Pro</span>
-                <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, color: "#FEFAF0", lineHeight: 1.2 }}>
+                <h2 className="playfair lessons-title" style={{ fontSize: "48px", fontWeight: 600, color: "#FEFAF0", lineHeight: 1.2 }}>
                   Cooking Lessons<br /><em className="gold">with Chef Heather</em>
                 </h2>
                 <div className="divider" style={{ margin: "16px auto 0" }} />
