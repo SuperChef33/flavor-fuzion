@@ -340,7 +340,10 @@ export default function FlavorFuzionWebsite() {
           .hero-title { font-size: 42px !important; }
           .services-grid { grid-template-columns: 1fr !important; }
           .services-grid > * { min-width: unset; }
-          .merch-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .merch-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+          .merch-grid > div { min-height: unset !important; }
+          .merch-grid .merch-image { height: 140px !important; }
+          .merch-grid .merch-body { padding: 16px !important; }
           .testimonials-grid { grid-template-columns: 1fr !important; }
           .about-grid { grid-template-columns: 1fr !important; }
           .contact-grid { grid-template-columns: 1fr !important; }
@@ -579,7 +582,7 @@ export default function FlavorFuzionWebsite() {
               <div style={{ textAlign: "center", marginBottom: "60px" }}>
                 <span className="section-tag">Learn From a Pro</span>
                 <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, color: "#FEFAF0", lineHeight: 1.2 }}>
-                  Cooking Lessons<br /><em className="gold">with Chef Heather Janey</em>
+                  Cooking Lessons<br /><em className="gold">with Chef Heather</em>
                 </h2>
                 <div className="divider" style={{ margin: "16px auto 0" }} />
                 <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.75)", marginTop: "24px", maxWidth: "560px", margin: "24px auto 0", fontWeight: 300, lineHeight: 1.7 }}>
@@ -720,20 +723,20 @@ export default function FlavorFuzionWebsite() {
                 </p>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
+              <div className="merch-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
                 {[
-                  { emoji: "🧥", name: "Hoodie", price: 35, sizes: true, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo." },
-                  { emoji: "👕", name: "T-Shirt", price: 20, sizes: true, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Soft cotton tee with bold Flavor Fuzion print." },
-                  { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Structured snapback with embroidered logo." },
-                  { emoji: "🎿", name: "Beanie", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Cozy knit beanie with Flavor Fuzion patch." },
+                  { emoji: "🧥", name: "Hoodie", price: 35, sizes: true, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo.", link: "https://buy.stripe.com/28E14mgSd7Eqa1Cdlqasg00" },
+                  { emoji: "👕", name: "T-Shirt", price: 20, sizes: true, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Soft cotton tee with bold Flavor Fuzion print.", link: "https://buy.stripe.com/aFa4gybxTe2Oa1Cbdiasg01" },
+                  { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Structured snapback with embroidered logo.", link: "https://buy.stripe.com/eVq4gy59v7EqehS2GMasg02" },
+                  { emoji: "🎿", name: "Beanie", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Cozy knit beanie with Flavor Fuzion patch.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
                 ].map((item) => (
                   <div key={item.name} style={{ background: "#fff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #EEE8DF", display: "flex", flexDirection: "column" }}>
                     {/* Image placeholder */}
-                    <div style={{ background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", height: "200px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                    <div className="merch-image" style={{ background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", height: "200px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
                       <span style={{ fontSize: "80px" }}>{item.emoji}</span>
                       <div style={{ position: "absolute", top: "12px", right: "12px", background: "#DAA520", color: "#0F1A0F", padding: "4px 10px", borderRadius: "100px", fontSize: "12px", fontWeight: 700 }}>PRE-ORDER</div>
                     </div>
-                    <div style={{ padding: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
+                    <div className="merch-body" style={{ padding: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
                       <h3 className="playfair" style={{ fontSize: "22px", fontWeight: 600, color: "#0F1A0F", marginBottom: "8px" }}>{item.name}</h3>
                       <p className="jost" style={{ fontSize: "13px", color: "#6B5E4E", lineHeight: 1.6, marginBottom: "16px", fontWeight: 300 }}>{item.description}</p>
                       
@@ -761,11 +764,10 @@ export default function FlavorFuzionWebsite() {
 
                       <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <div className="playfair" style={{ fontSize: "24px", fontWeight: 600, color: "#0F1A0F" }}>${item.price}</div>
-                        <button
-                          onClick={() => { setActivePage("Contact"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                          style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", padding: "10px 20px", borderRadius: "100px", fontFamily: "'Jost', sans-serif", fontSize: "12px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
+                        <a href={item.link} target="_blank" rel="noopener noreferrer"
+                          style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", padding: "6px 14px", borderRadius: "100px", fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none" }}>
                           Pre-Order →
-                        </button>
+                        </a>
                       </div>
                     </div>
                   </div>
