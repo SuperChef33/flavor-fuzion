@@ -1133,7 +1133,39 @@ export default function FlavorFuzionWebsite() {
                   <textarea placeholder="e.g. nut allergy, gluten free, vegan..." value={lessonForm.dietary} onChange={(e) => setLessonForm(p => ({ ...p, dietary: e.target.value }))}
                     style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none", minHeight: "80px", resize: "vertical" }} />
                 </div>
-                <button onClick={() => setLessonSubmitted(true)}
+                <button onClick={async () => {
+                  try {
+                    const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/rest/v1/lessons", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxaGh3dWt2aGVlenVuY2NlaHptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzNTI0NTgsImV4cCI6MjA2MDkyODQ1OH0.UdfVhYJGaqKHFdkDH5LqEAGfhZbFBXHBpJQaorMqDmI",
+                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxaGh3dWt2aGVlenVuY2NlaHptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzNTI0NTgsImV4cCI6MjA2MDkyODQ1OH0.UdfVhYJGaqKHFdkDH5LqEAGfhZbFBXHBpJQaorMqDmI",
+                        "Prefer": "return=minimal",
+                      },
+                      body: JSON.stringify({
+                        name: lessonForm.name,
+                        email: lessonForm.email,
+                        phone: lessonForm.phone,
+                        lesson_type: selectedLesson,
+                        food_types: lessonForm.foodTypes,
+                        guests: lessonForm.guests,
+                        groceries: lessonForm.groceries,
+                        location: lessonForm.location,
+                        date1: lessonForm.date1,
+                        date2: lessonForm.date2,
+                        dietary: lessonForm.dietary,
+                      }),
+                    });
+                    if (res.ok) {
+                      setLessonSubmitted(true);
+                    } else {
+                      alert("Something went wrong. Please try again.");
+                    }
+                  } catch (err) {
+                    alert("Something went wrong. Please try again.");
+                  }
+                }}
                   style={{ width: "100%", background: "#0F1A0F", color: "#FEFAF0", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'Jost', sans-serif", fontSize: "15px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.03em" }}>
                   Submit Lesson Request →
                 </button>
