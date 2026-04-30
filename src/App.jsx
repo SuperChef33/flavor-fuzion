@@ -51,6 +51,10 @@ export default function FlavorFuzionWebsite() {
   const [scrolled, setScrolled] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [showLessonsForm, setShowLessonsForm] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState("");
+  const [lessonForm, setLessonForm] = useState({ name: "", email: "", phone: "", lessonType: "", foodTypes: "", guests: "", groceries: "", date1: "", date2: "", location: "", dietary: "" });
+  const [lessonSubmitted, setLessonSubmitted] = useState(false);
 
   useEffect(() => {
     // Register service worker
@@ -477,7 +481,146 @@ export default function FlavorFuzionWebsite() {
             </div>
 
 
-            {/* Parallax Image 2 - Fine Dining */}
+            {/* Cooking Lessons Section */}
+            <div style={{ padding: "100px 80px", background: "#0F1A0F" }}>
+              <div style={{ textAlign: "center", marginBottom: "60px" }}>
+                <span className="section-tag">Learn From a Pro</span>
+                <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, color: "#FEFAF0", lineHeight: 1.2 }}>
+                  Cooking Lessons<br /><em className="gold">with Heather Janey</em>
+                </h2>
+                <div className="divider" style={{ margin: "16px auto 0" }} />
+                <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.75)", marginTop: "24px", maxWidth: "560px", margin: "24px auto 0", fontWeight: 300, lineHeight: 1.7 }}>
+                  Whether you're a beginner or looking to sharpen your skills, Heather offers personalized cooking lessons tailored to your goals, dietary needs, and favorite flavors.
+                </p>
+              </div>
+
+              <div className="services-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px" }}>
+                {[
+                  {
+                    emoji: "💻",
+                    title: "Virtual",
+                    tag: "1-on-1 Online",
+                    description: "Learn from the comfort of your own kitchen! Heather guides you through recipes and techniques live via video call, tailored to your skill level and culinary interests.",
+                    color: "linear-gradient(160deg, #4A1B6B 0%, #6B2E8A 100%)",
+                  },
+                  {
+                    emoji: "🏠",
+                    title: "In-Home",
+                    tag: "Private Lesson",
+                    description: "Heather comes to your kitchen for a hands-on, personalized cooking experience. Perfect for individuals or couples looking for an intimate, immersive lesson.",
+                    color: "linear-gradient(160deg, #5A2280 0%, #1A7A5E 100%)",
+                  },
+                  {
+                    emoji: "👨‍🍳",
+                    title: "Group",
+                    tag: "Virtual or In-Person",
+                    description: "Fun, interactive group lessons for friends, family, or colleagues. Available virtually or at your home or venue. A unique experience for parties and team building!",
+                    color: "linear-gradient(160deg, #1A7A5E 0%, #50C878 100%)",
+                  },
+                ].map((lesson) => (
+                  <div key={lesson.title} className="service-card" style={{ background: lesson.color }}>
+                    <div style={{ padding: "48px 36px" }}>
+                      <div style={{ fontSize: "48px", marginBottom: "20px" }}>{lesson.emoji}</div>
+                      <div className="jost" style={{
+                        display: "inline-block", background: "rgba(255,255,255,0.15)",
+                        color: "#fff", padding: "4px 12px", borderRadius: "100px",
+                        fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
+                        textTransform: "uppercase", marginBottom: "16px",
+                      }}>{lesson.tag}</div>
+                      <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, color: "#fff", marginBottom: "14px" }}>{lesson.title}</h3>
+                      <p className="jost" style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, fontWeight: 300 }}>{lesson.description}</p>
+                      <button
+                        onClick={() => { setSelectedLesson(lesson.title); setLessonForm(f => ({ ...f, lessonType: lesson.title })); setShowLessonsForm(true); window.scrollTo({ top: 0, behavior: "smooth" }); setActivePage("Contact"); }}
+                        style={{
+                          marginTop: "28px",
+                          background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)",
+                          color: "#0F1A0F", border: "none",
+                          padding: "10px 20px", borderRadius: "100px",
+                          fontFamily: "'Jost', sans-serif", fontSize: "12px",
+                          fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                          cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s",
+                          boxShadow: "0 4px 16px rgba(218,165,32,0.4)",
+                        }}
+                        onMouseOver={(e) => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 8px 24px rgba(218,165,32,0.6)"; }}
+                        onMouseOut={(e) => { e.target.style.transform = "none"; e.target.style.boxShadow = "0 4px 16px rgba(218,165,32,0.4)"; }}>
+                        Book a Lesson →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Cooking Lessons Form Overlay */}
+            {showLessonsForm && (
+              <div style={{ position: "fixed", inset: 0, background: "rgba(15,26,15,0.85)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}
+                onClick={(e) => { if (e.target === e.currentTarget) setShowLessonsForm(false); }}>
+                <div style={{ background: "#FEFAF0", borderRadius: "24px", padding: "48px", maxWidth: "600px", width: "100%", maxHeight: "90vh", overflowY: "auto", position: "relative" }}>
+                  <button onClick={() => setShowLessonsForm(false)} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "24px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
+                  {lessonSubmitted ? (
+                    <div style={{ textAlign: "center", padding: "40px 0" }}>
+                      <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎉</div>
+                      <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, marginBottom: "12px" }}>Request Received!</h3>
+                      <p className="jost" style={{ fontSize: "15px", color: "#6B5E4E", lineHeight: 1.7 }}>Thanks! Heather will be in touch within 24 hours to confirm your lesson details.</p>
+                      <button onClick={() => { setShowLessonsForm(false); setLessonSubmitted(false); }} style={{ marginTop: "24px", background: "#0F1A0F", color: "#FEFAF0", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'Jost', sans-serif", fontSize: "14px", cursor: "pointer" }}>Close</button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="section-tag">Cooking Lessons</span>
+                      <h3 className="playfair" style={{ fontSize: "32px", fontWeight: 600, marginBottom: "8px", marginTop: "8px" }}>{selectedLesson} Lesson Request</h3>
+                      <div className="divider" style={{ marginBottom: "32px" }} />
+                      {[
+                        { label: "Your Name", key: "name", type: "text", placeholder: "Full name" },
+                        { label: "Email Address", key: "email", type: "email", placeholder: "your@email.com" },
+                        { label: "Phone Number", key: "phone", type: "tel", placeholder: "774-555-1234" },
+                        { label: "Location / Address", key: "location", type: "text", placeholder: "City, State or Zoom for virtual" },
+                        { label: "Number of People", key: "guests", type: "number", placeholder: "e.g. 2" },
+                      ].map((f) => (
+                        <div key={f.key} style={{ marginBottom: "18px" }}>
+                          <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>{f.label}</label>
+                          <input type={f.type} placeholder={f.placeholder} value={lessonForm[f.key]} onChange={(e) => setLessonForm(p => ({ ...p, [f.key]: e.target.value }))}
+                            style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }} />
+                        </div>
+                      ))}
+                      <div style={{ marginBottom: "18px" }}>
+                        <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>What Would You Like to Cook?</label>
+                        <input type="text" placeholder="e.g. steak, pasta, sauces, vegan dishes..." value={lessonForm.foodTypes} onChange={(e) => setLessonForm(p => ({ ...p, foodTypes: e.target.value }))}
+                          style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }} />
+                      </div>
+                      <div style={{ marginBottom: "18px" }}>
+                        <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>Who Provides Groceries?</label>
+                        <select value={lessonForm.groceries} onChange={(e) => setLessonForm(p => ({ ...p, groceries: e.target.value }))}
+                          style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }}>
+                          <option value="">Select an option</option>
+                          <option value="I will provide groceries">I will provide groceries</option>
+                          <option value="Heather provides groceries">Heather provides groceries</option>
+                          <option value="We can discuss">We can discuss</option>
+                        </select>
+                      </div>
+                      <div style={{ marginBottom: "18px" }}>
+                        <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>Preferred Date & Time #1</label>
+                        <input type="datetime-local" value={lessonForm.date1} onChange={(e) => setLessonForm(p => ({ ...p, date1: e.target.value }))}
+                          style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }} />
+                      </div>
+                      <div style={{ marginBottom: "18px" }}>
+                        <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>Preferred Date & Time #2</label>
+                        <input type="datetime-local" value={lessonForm.date2} onChange={(e) => setLessonForm(p => ({ ...p, date2: e.target.value }))}
+                          style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }} />
+                      </div>
+                      <div style={{ marginBottom: "28px" }}>
+                        <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>Dietary Restrictions & Allergies</label>
+                        <textarea placeholder="e.g. nut allergy, gluten free, vegan..." value={lessonForm.dietary} onChange={(e) => setLessonForm(p => ({ ...p, dietary: e.target.value }))}
+                          style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none", minHeight: "80px", resize: "vertical" }} />
+                      </div>
+                      <button onClick={() => setLessonSubmitted(true)}
+                        style={{ width: "100%", background: "#0F1A0F", color: "#FEFAF0", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'Jost', sans-serif", fontSize: "15px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.03em" }}>
+                        Submit Lesson Request →
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
             <div style={{
               height: "400px",
               backgroundImage: "url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=80')",
