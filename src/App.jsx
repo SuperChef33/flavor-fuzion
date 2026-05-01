@@ -720,16 +720,16 @@ export default function FlavorFuzionWebsite() {
                 </h2>
                 <div className="divider" style={{ margin: "16px auto" }} />
                 <p className="jost" style={{ fontSize: "16px", color: "#6B5E4E", marginTop: "24px", maxWidth: "480px", margin: "24px auto 0", fontWeight: 300, lineHeight: 1.7 }}>
-                  Get your Flavor Fuzion merch and let everyone know you've got taste.
+                  Get your Flavor Fuzion merch and let everyone know you've got <span style={{ background: "linear-gradient(135deg, #8B6914, #DAA520, #F5D060, #DAA520, #8B6914)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontWeight: 700 }}>taste!</span>
                 </p>
               </div>
 
               <div className="merch-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
                 {[
-                  { emoji: "🧥", name: "Hoodie", price: 35, sizes: true, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo.", link: "https://buy.stripe.com/28E14mgSd7Eqa1Cdlqasg00" },
-                  { emoji: "👕", name: "T-Shirt", price: 20, sizes: true, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Soft cotton tee with bold Flavor Fuzion print.", link: "https://buy.stripe.com/aFa4gybxTe2Oa1Cbdiasg01" },
-                  { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Structured snapback with embroidered logo.", link: "https://buy.stripe.com/eVq4gy59v7EqehS2GMasg02" },
-                  { emoji: "🥶", name: "Beanie", price: 15, sizes: false, colors: ["Forest Green", "Royal Purple", "Midnight Black", "Gold"], description: "Cozy knit beanie with Flavor Fuzion patch.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
+                  { emoji: "🧥", name: "Hoodie", price: 35, sizes: true, colors: ["Midnight Black"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo.", link: "https://buy.stripe.com/28E14mgSd7Eqa1Cdlqasg00" },
+                  { emoji: "👕", name: "T-Shirt", price: 20, sizes: true, colors: ["Midnight Black"], description: "Soft cotton tee with bold Flavor Fuzion print.", link: "https://buy.stripe.com/aFa4gybxTe2Oa1Cbdiasg01" },
+                  { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Midnight Black"], description: "Structured snapback with embroidered logo.", link: "https://buy.stripe.com/eVq4gy59v7EqehS2GMasg02" },
+                  { emoji: "🥶", name: "Beanie", price: 15, sizes: false, colors: ["Midnight Black", "Royal Purple"], description: "Cozy knit beanie with Flavor Fuzion patch.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
                 ].map((item) => (
                   <div key={item.name} style={{ background: "#fff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #EEE8DF", display: "flex", flexDirection: "column" }}>
                     {/* Image placeholder */}
@@ -745,9 +745,10 @@ export default function FlavorFuzionWebsite() {
                       <div style={{ marginBottom: "16px" }}>
                         <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Colors</div>
                         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                          {[{ name: "Forest Green", hex: "#1A5C2A" }, { name: "Royal Purple", hex: "#4A1B6B" }, { name: "Midnight Black", hex: "#0F1A0F" }, { name: "Gold", hex: "#DAA520" }].map((color) => (
-                            <div key={color.name} title={color.name} style={{ width: "20px", height: "20px", borderRadius: "50%", background: color.hex, border: "2px solid #EEE8DF", cursor: "pointer" }} />
-                          ))}
+                          {item.colors.map((colorName) => {
+                            const colorMap = { "Midnight Black": "#0F1A0F", "Royal Purple": "#4A1B6B", "Forest Green": "#1A5C2A", "Gold": "#DAA520" };
+                            return <div key={colorName} title={colorName} style={{ width: "20px", height: "20px", borderRadius: "50%", background: colorMap[colorName], border: "2px solid #EEE8DF", cursor: "pointer" }} />;
+                          })}
                         </div>
                       </div>
 
