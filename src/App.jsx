@@ -955,7 +955,7 @@ export default function FlavorFuzionWebsite() {
                         <div style={{ marginBottom: "16px" }}>
                           <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Sizes</div>
                           <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-                            {["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"].map((size) => (
+                            {[...(["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"]), ...(item.name === "Hoodie" ? ["5XL"] : [])].map((size) => (
                               <span key={size} className="jost" style={{ fontSize: "10px", padding: "3px 7px", border: "1px solid #D4C9B8", borderRadius: "4px", color: "#6B5E4E" }}>{size}</span>
                             ))}
                           </div>
