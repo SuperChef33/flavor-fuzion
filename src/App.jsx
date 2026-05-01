@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 // Cream:   #FEFAF0
 // Dark:    #0F1A0F
 
-const PAGES = ["Home", "Menu", "About", "Contact"];
+const PAGES = ["Home", "Menu", "About", "Cookies", "Contact"];
 
 const services = [
   {
@@ -44,6 +44,123 @@ const testimonials = [
   { name: "Amod", text: "We had an outstanding dinner experience with Chef Heather. I hired her to celebrate my wife's birthday with a private dinner. She worked within our dietary restrictions to craft a professionally presented and exceptionally tasty meal — dishes on par with some of the best fine dining restaurants in New York. I wholeheartedly recommend working with Chef Heather.", stars: 5 },
   { name: "Webster", text: "Heather came in and helped us out when we needed it most! She created a tailored dairy-free menu for a week's worth of meals when we just welcomed our second son. Every single dish was incredible. Not only did she make all of these incredible dishes, but she also answered every single one of my thousand questions and left our very unorganized kitchen spotless. The best gift and chef that we could have asked for!", stars: 5 },
 ];
+
+const COOKIE_TIERS = [
+  { pack: 6, price: 5.75 },
+  { pack: 12, price: 11.25 },
+  { pack: 18, price: 17.00 },
+  { pack: 24, price: 23.00 },
+  { pack: 30, price: 28.00 },
+  { pack: 36, price: 33.00 },
+  { pack: 42, price: 37.50 },
+  { pack: 48, price: 42.00 },
+  { pack: 54, price: 46.50 },
+  { pack: 60, price: 54.50 },
+];
+
+function CookiesPage() {
+  const [selectedTier, setSelectedTier] = useState(COOKIE_TIERS[0]);
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleOrder = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/functions/v1/cookie-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packSize: selectedTier.pack, price: selectedTier.price, customerEmail: email }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    } catch (err) {
+      alert("Something went wrong. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div>
+      {/* Hero */}
+      <div style={{ background: "linear-gradient(135deg, #CDB4DB 0%, #0F1A0F 100%)", padding: "120px 80px 80px", textAlign: "center" }}>
+        <span className="section-tag">Freshly Baked</span>
+        <h1 className="playfair" style={{ fontSize: "64px", fontWeight: 600, color: "#FEFAF0", lineHeight: 1.1, marginBottom: "20px" }}>
+          Almond Lavender<br /><em className="gold">Cookies</em>
+        </h1>
+        <div className="divider" style={{ margin: "16px auto" }} />
+        <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.75)", maxWidth: "560px", margin: "0 auto", fontWeight: 300, lineHeight: 1.7 }}>
+          Organic, Gluten-Free cookies made with love by Chef Heather Janey. Delicate almond flour base with a hint of lavender — perfectly balanced and irresistible.
+        </p>
+      </div>
+
+      {/* Ingredients */}
+      <div style={{ background: "#0F1A0F", padding: "48px 80px", textAlign: "center" }}>
+        <div className="jost" style={{ fontSize: "13px", color: "#B5A48C", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "12px" }}>Ingredients</div>
+        <p className="jost" style={{ fontSize: "14px", color: "rgba(254,250,240,0.7)", maxWidth: "700px", margin: "0 auto", lineHeight: 1.8, fontWeight: 300 }}>
+          Organic Almond Flour · Organic GF Flour · Organic Cane Sugar · Organic Brown Sugar · Organic Butter · Organic Eggs · Organic Vanilla Extract · Non-GMO Lavender Extract · Baking Powder · Baking Soda · Sea Salt
+        </p>
+        <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "20px", flexWrap: "wrap" }}>
+          {["🌿 Organic", "🌾 Gluten-Free", "❤️ Made with Love"].map((tag) => (
+            <span key={tag} className="jost" style={{ background: "rgba(205,180,219,0.15)", color: "#CDB4DB", padding: "6px 16px", borderRadius: "100px", fontSize: "12px", fontWeight: 600 }}>{tag}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Order Section */}
+      <div style={{ padding: "80px", background: "#FEFAF0", maxWidth: "800px", margin: "0 auto" }}>
+        <span className="section-tag">Order Now</span>
+        <h2 className="playfair" style={{ fontSize: "36px", fontWeight: 600, marginBottom: "8px", marginTop: "8px" }}>Choose Your Pack</h2>
+        <div className="divider" style={{ marginBottom: "32px" }} />
+
+        {/* Tier Selector */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px", marginBottom: "32px" }}>
+          {COOKIE_TIERS.map((tier) => (
+            <button key={tier.pack} onClick={() => setSelectedTier(tier)}
+              style={{ padding: "12px 8px", borderRadius: "12px", border: `2px solid ${selectedTier.pack === tier.pack ? "#4A1B6B" : "#D4C9B8"}`, background: selectedTier.pack === tier.pack ? "#4A1B6B" : "transparent", color: selectedTier.pack === tier.pack ? "#FEFAF0" : "#6B5E4E", fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s", textAlign: "center" }}>
+              <div>{tier.pack} pack</div>
+              <div style={{ fontSize: "15px", fontWeight: 700, marginTop: "4px" }}>${tier.price}</div>
+              {tier.pack >= 24 && <div style={{ fontSize: "10px", marginTop: "2px", color: selectedTier.pack === tier.pack ? "#CDB4DB" : "#B5A48C" }}>
+                {tier.pack <= 36 ? "3% off" : tier.pack <= 54 ? "4% off" : "5% off"} per cookie
+              </div>}
+            </button>
+          ))}
+        </div>
+
+        {/* Selected Summary */}
+        <div style={{ background: "#fff", borderRadius: "16px", padding: "24px", marginBottom: "24px", border: "1px solid #EEE8DF", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C" }}>Your Selection</div>
+            <div className="playfair" style={{ fontSize: "24px", fontWeight: 600, color: "#0F1A0F", marginTop: "4px" }}>{selectedTier.pack} Cookies</div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C" }}>Total</div>
+            <div className="playfair" style={{ fontSize: "32px", fontWeight: 700, color: "#4A1B6B" }}>${selectedTier.price}</div>
+          </div>
+        </div>
+
+        {/* Email */}
+        <div style={{ marginBottom: "20px" }}>
+          <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>Email Address (for order confirmation)</label>
+          <input type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)}
+            style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }} />
+        </div>
+
+        <button onClick={handleOrder} disabled={loading}
+          style={{ width: "100%", background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "18px", fontFamily: "'Jost', sans-serif", fontSize: "16px", fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", letterSpacing: "0.05em" }}>
+          {loading ? "Redirecting to checkout..." : `Order ${selectedTier.pack} Cookies — $${selectedTier.price} →`}
+        </button>
+
+        <p className="jost" style={{ textAlign: "center", fontSize: "12px", color: "#B5A48C", marginTop: "16px" }}>
+          🔒 Secure checkout powered by Stripe. Orders fulfilled within 3-5 business days.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function FlavorFuzionWebsite() {
   const [activePage, setActivePage] = useState("Home");
@@ -1057,6 +1174,13 @@ export default function FlavorFuzionWebsite() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ════════════════════════════════════════════════════
+            COOKIES PAGE
+        ════════════════════════════════════════════════════ */}
+        {activePage === "Cookies" && (
+          <CookiesPage />
         )}
 
         {/* ════════════════════════════════════════════════════
