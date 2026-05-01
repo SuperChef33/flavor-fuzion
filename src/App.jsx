@@ -88,7 +88,7 @@ function CookiesPage() {
       {/* Hero */}
       <div style={{ background: "linear-gradient(135deg, #CDB4DB 0%, #0F1A0F 100%)", padding: "120px 80px 80px", textAlign: "center" }}>
         <div style={{ maxWidth: "500px", margin: "0 auto 32px", borderRadius: "20px", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
-          <img src="https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=800&q=80" alt="Almond Lavender Cookies" style={{ width: "100%", height: "300px", objectFit: "cover", display: "block" }} />
+          <img src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=80" alt="Almond Lavender Cookies" style={{ width: "100%", height: "300px", objectFit: "cover", display: "block" }} />
         </div>
         <span className="section-tag">Freshly Baked</span>
         <h1 className="playfair" style={{ fontSize: "64px", fontWeight: 600, color: "#FEFAF0", lineHeight: 1.1, marginBottom: "20px" }}>
