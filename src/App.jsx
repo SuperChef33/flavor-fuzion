@@ -58,7 +58,7 @@ const COOKIE_TIERS = [
   { pack: 60, price: 54.50 },
 ];
 
-function CookiesPage() {
+function CookiesPage({ onAddToCart }) {
   const [selectedTier, setSelectedTier] = useState(COOKIE_TIERS[0]);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -154,7 +154,12 @@ function CookiesPage() {
 
         <button onClick={handleOrder} disabled={loading}
           style={{ width: "100%", background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "18px", fontFamily: "'Jost', sans-serif", fontSize: "16px", fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", letterSpacing: "0.05em" }}>
-          {loading ? "Redirecting to checkout..." : `Order ${selectedTier.pack} Cookies — $${selectedTier.price} →`}
+          {loading ? "Redirecting to checkout..." : `Buy Now — $${selectedTier.price} →`}
+        </button>
+
+        <button onClick={() => { onAddToCart({ id: `cookie-${selectedTier.pack}`, name: `Almond Lavender Cookies - ${selectedTier.pack} Pack`, price: selectedTier.price, cartKey: `cookie-${selectedTier.pack}` }); }}
+          style={{ width: "100%", background: "#0F1A0F", color: "#FEFAF0", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'Jost', sans-serif", fontSize: "15px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.03em", marginTop: "12px" }}>
+          🛒 Add to Cart
         </button>
 
         <p className="jost" style={{ textAlign: "center", fontSize: "12px", color: "#B5A48C", marginTop: "16px" }}>
@@ -175,6 +180,43 @@ export default function FlavorFuzionWebsite() {
   const [selectedLesson, setSelectedLesson] = useState("");
   const [lessonForm, setLessonForm] = useState({ name: "", email: "", phone: "", lessonType: "", foodTypes: "", guests: "", groceries: "", date1: "", date2: "", location: "", dietary: "" });
   const [lessonSubmitted, setLessonSubmitted] = useState(false);
+  const [cart, setCart] = useState([]);
+  const [showCart, setShowCart] = useState(false);
+  const [showMerchPopup, setShowMerchPopup] = useState(false);
+  const [selectedMerch, setSelectedMerch] = useState(null);
+  const [merchColor, setMerchColor] = useState("");
+  const [merchSize, setMerchSize] = useState("");
+  const [cartCheckingOut, setCartCheckingOut] = useState(false);
+
+  const addToCart = (item) => {
+    setCart(prev => {
+      const key = item.id + (item.color || "") + (item.size || "");
+      const existing = prev.find(i => i.cartKey === key);
+      if (existing) return prev.map(i => i.cartKey === key ? { ...i, qty: i.qty + 1 } : i);
+      return [...prev, { ...item, qty: 1, cartKey: key }];
+    });
+  };
+
+  const removeFromCart = (cartKey) => setCart(prev => prev.filter(i => i.cartKey !== cartKey));
+  const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
+
+  const handleCartCheckout = async () => {
+    setCartCheckingOut(true);
+    try {
+      const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/functions/v1/website-cart-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cart }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert("Something went wrong. Please try again.");
+    } catch {
+      alert("Something went wrong. Please try again.");
+    }
+    setCartCheckingOut(false);
+  };
 
   useEffect(() => {
     // Register service worker
@@ -516,6 +558,10 @@ export default function FlavorFuzionWebsite() {
           <button className="btn-primary" style={{ padding: "10px 24px", fontSize: "12px" }}
             onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
             Order Now
+          </button>
+          <button onClick={() => setShowCart(true)} style={{ position: "relative", background: "none", border: "none", cursor: "pointer", fontSize: "22px", padding: "4px 8px" }}>
+            🛒
+            {cartCount > 0 && <span style={{ position: "absolute", top: "-4px", right: "-4px", background: "#DAA520", color: "#0F1A0F", borderRadius: "50%", width: "18px", height: "18px", fontSize: "10px", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Jost', sans-serif" }}>{cartCount}</span>}
           </button>
         </div>
       </nav>
@@ -887,6 +933,7 @@ export default function FlavorFuzionWebsite() {
                       <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <div className="playfair" style={{ fontSize: "24px", fontWeight: 600, color: "#0F1A0F" }}>${item.price}</div>
                         <a href={item.link} target="_blank" rel="noopener noreferrer"
+                          onClick={(e) => { e.preventDefault(); setSelectedMerch(item); setMerchColor(item.colors[0]); setMerchSize(""); setShowMerchPopup(true); }}
                           style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", padding: "6px 14px", borderRadius: "100px", fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none" }}>
                           Pre-Order →
                         </a>
@@ -1183,7 +1230,7 @@ export default function FlavorFuzionWebsite() {
             COOKIES PAGE
         ════════════════════════════════════════════════════ */}
         {activePage === "Cookies" && (
-          <CookiesPage />
+          <CookiesPage onAddToCart={addToCart} />
         )}
 
         {/* ════════════════════════════════════════════════════
@@ -1270,6 +1317,113 @@ export default function FlavorFuzionWebsite() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Merch Popup ── */}
+      {showMerchPopup && selectedMerch && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(15,26,15,0.85)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowMerchPopup(false); }}>
+          <div style={{ background: "#FEFAF0", borderRadius: "24px", padding: "40px", maxWidth: "480px", width: "100%", position: "relative" }}>
+            <button onClick={() => setShowMerchPopup(false)} style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", fontSize: "24px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
+            <div style={{ fontSize: "48px", textAlign: "center", marginBottom: "12px" }}>{selectedMerch.emoji}</div>
+            <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, textAlign: "center", marginBottom: "24px" }}>{selectedMerch.name}</h3>
+
+            {/* Color Selector */}
+            <div style={{ marginBottom: "20px" }}>
+              <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "10px" }}>Color</label>
+              <div style={{ display: "flex", gap: "10px" }}>
+                {selectedMerch.colors.map((color) => {
+                  const colorMap = { "Midnight Black": "#0F1A0F", "Royal Purple": "#4A1B6B", "Forest Green": "#1A5C2A", "Gold": "#DAA520" };
+                  return (
+                    <button key={color} onClick={() => setMerchColor(color)} title={color}
+                      style={{ width: "32px", height: "32px", borderRadius: "50%", background: colorMap[color], border: `3px solid ${merchColor === color ? "#DAA520" : "#EEE8DF"}`, cursor: "pointer", transition: "border 0.2s" }} />
+                  );
+                })}
+              </div>
+              {merchColor && <div className="jost" style={{ fontSize: "12px", color: "#6B5E4E", marginTop: "6px" }}>{merchColor}</div>}
+            </div>
+
+            {/* Size Selector */}
+            {selectedMerch.sizes && (
+              <div style={{ marginBottom: "24px" }}>
+                <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "10px" }}>Size</label>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  {["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"].map((size) => (
+                    <button key={size} onClick={() => setMerchSize(size)}
+                      style={{ padding: "8px 12px", borderRadius: "8px", border: `2px solid ${merchSize === size ? "#4A1B6B" : "#D4C9B8"}`, background: merchSize === size ? "#4A1B6B" : "transparent", color: merchSize === size ? "#FEFAF0" : "#6B5E4E", fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <div className="playfair" style={{ fontSize: "28px", fontWeight: 700 }}>${selectedMerch.price}</div>
+            </div>
+
+            <button
+              disabled={!merchColor || (selectedMerch.sizes && !merchSize)}
+              onClick={() => {
+                const cartKey = `${selectedMerch.name}-${merchColor}-${merchSize}`;
+                addToCart({ ...selectedMerch, id: cartKey, color: merchColor, size: merchSize, cartKey });
+                setShowMerchPopup(false);
+                setShowCart(true);
+              }}
+              style={{ width: "100%", background: (!merchColor || (selectedMerch.sizes && !merchSize)) ? "#D4C9B8" : "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'Jost', sans-serif", fontSize: "15px", fontWeight: 700, cursor: (!merchColor || (selectedMerch.sizes && !merchSize)) ? "not-allowed" : "pointer" }}>
+              🛒 Add to Cart
+            </button>
+            {(!merchColor || (selectedMerch.sizes && !merchSize)) && (
+              <p className="jost" style={{ textAlign: "center", fontSize: "12px", color: "#B5A48C", marginTop: "8px" }}>
+                {!merchColor ? "Please select a color" : "Please select a size"}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Cart Drawer ── */}
+      {showCart && <div onClick={() => setShowCart(false)} style={{ position: "fixed", inset: 0, background: "rgba(15,26,15,0.5)", zIndex: 199 }} />}
+      <div style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: "420px", maxWidth: "100vw", background: "#FEFAF0", boxShadow: "-8px 0 40px rgba(0,0,0,0.15)", zIndex: 200, overflowY: "auto", transform: showCart ? "translateX(0)" : "translateX(100%)", transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+        <div style={{ padding: "28px 24px", borderBottom: "1px solid #EEE8DF", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h2 className="playfair" style={{ fontSize: "24px", fontWeight: 600 }}>Your Cart 🛒</h2>
+          <button onClick={() => setShowCart(false)} style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
+        </div>
+
+        {cart.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 24px" }}>
+            <div style={{ fontSize: "48px", marginBottom: "16px" }}>🛒</div>
+            <p className="jost" style={{ color: "#B5A48C", fontSize: "15px" }}>Your cart is empty!</p>
+            <p className="jost" style={{ color: "#B5A48C", fontSize: "13px", marginTop: "8px" }}>Add some merch or cookies to get started.</p>
+          </div>
+        ) : (
+          <div style={{ padding: "24px" }}>
+            {cart.map((item) => (
+              <div key={item.cartKey} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0", borderBottom: "1px solid #EEE8DF" }}>
+                <div style={{ flex: 1 }}>
+                  <div className="jost" style={{ fontSize: "14px", fontWeight: 600, color: "#0F1A0F" }}>{item.name}</div>
+                  {item.color && <div className="jost" style={{ fontSize: "12px", color: "#B5A48C" }}>{item.color}{item.size ? ` · ${item.size}` : ""}</div>}
+                  <div className="jost" style={{ fontSize: "13px", color: "#6B5E4E", marginTop: "4px" }}>${item.price} × {item.qty}</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div className="playfair" style={{ fontSize: "18px", fontWeight: 600 }}>${(item.price * item.qty).toFixed(2)}</div>
+                  <button onClick={() => removeFromCart(item.cartKey)} style={{ background: "none", border: "none", cursor: "pointer", color: "#B5A48C", fontSize: "16px" }}>✕</button>
+                </div>
+              </div>
+            ))}
+
+            <div style={{ padding: "20px 0", borderTop: "2px solid #0F1A0F", marginTop: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div className="jost" style={{ fontSize: "16px", fontWeight: 600 }}>Total</div>
+              <div className="playfair" style={{ fontSize: "24px", fontWeight: 700 }}>${cartTotal.toFixed(2)}</div>
+            </div>
+
+            <button onClick={handleCartCheckout} disabled={cartCheckingOut}
+              style={{ width: "100%", background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'Jost', sans-serif", fontSize: "15px", fontWeight: 700, cursor: cartCheckingOut ? "not-allowed" : "pointer", marginTop: "8px" }}>
+              {cartCheckingOut ? "Redirecting..." : `Checkout — $${cartTotal.toFixed(2)} →`}
+            </button>
+            <p className="jost" style={{ textAlign: "center", fontSize: "11px", color: "#B5A48C", marginTop: "12px" }}>🔒 Secure checkout powered by Stripe</p>
           </div>
         )}
       </div>
