@@ -88,7 +88,7 @@ function CookiesPage({ onAddToCart }) {
       {/* Hero */}
       <div style={{ background: "linear-gradient(135deg, #CDB4DB 0%, #0F1A0F 100%)", padding: "120px 80px 80px", textAlign: "center" }}>
         <div style={{ maxWidth: "500px", margin: "0 auto 32px", borderRadius: "20px", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
-          <img src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=80" alt="Almond Lavender Cookies" style={{ width: "100%", height: "300px", objectFit: "cover", display: "block" }} />
+          <img src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg" alt="Almond Lavender Cookies" style={{ width: "100%", height: "300px", objectFit: "cover", display: "block" }} />
         </div>
         <span className="section-tag">Freshly Baked</span>
         <h1 className="playfair" style={{ fontSize: "64px", fontWeight: 600, color: "#FEFAF0", lineHeight: 1.1, marginBottom: "20px" }}>
@@ -126,9 +126,7 @@ function CookiesPage({ onAddToCart }) {
               style={{ padding: "12px 8px", borderRadius: "12px", border: `2px solid ${selectedTier.pack === tier.pack ? "#4A1B6B" : "#D4C9B8"}`, background: selectedTier.pack === tier.pack ? "#4A1B6B" : "transparent", color: selectedTier.pack === tier.pack ? "#FEFAF0" : "#6B5E4E", fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s", textAlign: "center" }}>
               <div>{tier.pack} pack</div>
               <div style={{ fontSize: "15px", fontWeight: 700, marginTop: "4px" }}>${tier.price}</div>
-              {tier.pack >= 24 && <div style={{ fontSize: "10px", marginTop: "2px", color: selectedTier.pack === tier.pack ? "#CDB4DB" : "#B5A48C" }}>
-                {tier.pack <= 36 ? "3% off" : tier.pack <= 54 ? "4% off" : "5% off"} per cookie
-              </div>}
+              {tier.pack >= 24 && null}
             </button>
           ))}
         </div>
@@ -1658,7 +1656,7 @@ function ContactForm() {
         Send Message →
       </button>
       <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "12px", color: "#B5A48C", textAlign: "center", marginTop: "12px" }}>
-        This will open your email client. Heather responds within 24 hours.
+        We will respond within 24 hours.
       </p>
     </div>
   );
