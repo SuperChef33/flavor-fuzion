@@ -713,7 +713,7 @@ export default function FlavorFuzionWebsite() {
                   ))}
                   <div style={{ textAlign: "center" }}>
                     <div className="playfair gold" style={{ fontSize: "36px", fontWeight: 700 }}>5.0 ★★★★★</div>
-                    <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "4px" }}>Happy Tummies 🍽️</div>
+                    <div className="jost" onClick={() => document.getElementById('reviews').scrollIntoView({ behavior: 'smooth' })} style={{ fontSize: "12px", color: "#A0C8A8", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "4px", cursor: "pointer", textDecoration: "underline", textDecorationColor: "rgba(160,200,168,0.4)" }}>Happy Tummies! 🍽️</div>
                   </div>
                 </div>
               </div>
@@ -880,7 +880,7 @@ export default function FlavorFuzionWebsite() {
               backgroundAttachment: "fixed",
             }} />
             {/* Testimonials */}
-            <div className="testimonials-section" style={{ padding: "100px 80px", background: "#0F1A0F" }}>
+            <div id="reviews" className="testimonials-section" style={{ padding: "100px 80px", background: "#0F1A0F" }}>
               <div>
               <div style={{ textAlign: "center", marginBottom: "60px" }}>
                 <span className="section-tag">What People Say</span>
