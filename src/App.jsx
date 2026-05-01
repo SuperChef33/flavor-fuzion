@@ -713,7 +713,7 @@ export default function FlavorFuzionWebsite() {
                   ))}
                   <div style={{ textAlign: "center" }}>
                     <div className="playfair gold" style={{ fontSize: "36px", fontWeight: 700 }}>5.0 ★★★★★</div>
-                    <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "4px" }}>on Google</div>
+                    <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "4px" }}>Happy Tummies 🍽️</div>
                   </div>
                 </div>
               </div>
