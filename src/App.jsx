@@ -961,7 +961,11 @@ export default function FlavorFuzionWebsite() {
                       )}
 
                       <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div className="playfair" style={{ fontSize: "24px", fontWeight: 600, color: "#0F1A0F" }}>${item.price}</div>
+                        <div className="playfair" style={{ fontSize: "24px", fontWeight: 600, color: "#0F1A0F" }}>
+                          {item.sizePricing
+                            ? `$${Math.min(...Object.values(item.sizePricing))} – $${Math.max(...Object.values(item.sizePricing))}`
+                            : `$${item.price}`}
+                        </div>
                         <a href={item.link} target="_blank" rel="noopener noreferrer"
                           onClick={(e) => { e.preventDefault(); setSelectedMerch(item); setMerchColor(item.colors[0]); setMerchSize(""); setShowMerchPopup(true); }}
                           style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", padding: "6px 14px", borderRadius: "100px", fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none" }}>
