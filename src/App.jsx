@@ -516,6 +516,8 @@ export default function FlavorFuzionWebsite() {
           .section-padding { padding: 60px 24px !important; }
           .parallax-section { background-attachment: scroll !important; }
           .testimonials-section { padding: 60px 40px !important; }
+          .desktop-nav { display: none !important; }
+          .mobile-nav { display: flex !important; }
           nav { padding: 0 24px !important; }
           footer { padding: 40px 24px 24px !important; }
         }
@@ -541,7 +543,7 @@ export default function FlavorFuzionWebsite() {
         </div>
 
         {/* Desktop Nav */}
-        <div style={{ display: "flex", gap: "36px", alignItems: "center" }}>
+        <div className="desktop-nav" style={{ display: "flex", gap: "36px", alignItems: "center" }}>
           {PAGES.map((page) => (
             page === "Menu" ? (
               <button key={page} className="nav-link"
@@ -564,7 +566,37 @@ export default function FlavorFuzionWebsite() {
             {cartCount > 0 && <span style={{ position: "absolute", top: "-4px", right: "-4px", background: "#DAA520", color: "#0F1A0F", borderRadius: "50%", width: "18px", height: "18px", fontSize: "10px", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Jost', sans-serif" }}>{cartCount}</span>}
           </button>
         </div>
+
+        {/* Mobile Nav */}
+        <div className="mobile-nav" style={{ display: "none", alignItems: "center", gap: "16px" }}>
+          <button onClick={() => setShowCart(true)} style={{ position: "relative", background: "none", border: "none", cursor: "pointer", fontSize: "22px", padding: "4px" }}>
+            🛒
+            {cartCount > 0 && <span style={{ position: "absolute", top: "-4px", right: "-4px", background: "#DAA520", color: "#0F1A0F", borderRadius: "50%", width: "18px", height: "18px", fontSize: "10px", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Jost', sans-serif" }}>{cartCount}</span>}
+          </button>
+          <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", display: "flex", flexDirection: "column", gap: "5px" }}>
+            <span style={{ display: "block", width: "24px", height: "2px", background: "#DAA520", transition: "all 0.3s" }} />
+            <span style={{ display: "block", width: "24px", height: "2px", background: "#DAA520", transition: "all 0.3s" }} />
+            <span style={{ display: "block", width: "24px", height: "2px", background: "#DAA520", transition: "all 0.3s" }} />
+          </button>
+        </div>
       </nav>
+
+      {/* Mobile Menu Dropdown */}
+      {menuOpen && (
+        <div style={{ position: "fixed", top: "72px", left: 0, right: 0, background: "#0F1A0F", zIndex: 99, padding: "24px", borderBottom: "1px solid rgba(201,168,76,0.2)", display: "flex", flexDirection: "column", gap: "4px" }}>
+          {PAGES.map((page) => (
+            <button key={page}
+              onClick={() => { page === "Menu" ? window.open("https://flavor-fuzion-app.vercel.app", "_blank") : setActivePage(page); setMenuOpen(false); }}
+              style={{ background: "none", border: "none", color: activePage === page ? "#DAA520" : "#FEFAF0", fontFamily: "'Jost', sans-serif", fontSize: "16px", fontWeight: 500, padding: "12px 0", textAlign: "left", cursor: "pointer", borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
+              {page}
+            </button>
+          ))}
+          <button onClick={() => { window.open("https://flavor-fuzion-app.vercel.app", "_blank"); setMenuOpen(false); }}
+            className="btn-primary" style={{ marginTop: "16px", width: "100%", textAlign: "center" }}>
+            Order Now
+          </button>
+        </div>
+      )}
 
       {/* ── Install Banner ── */}
       {showInstallBanner && (
@@ -774,7 +806,7 @@ export default function FlavorFuzionWebsite() {
                     color: "linear-gradient(160deg, #5A2280 0%, #1A7A5E 100%)",
                   },
                   {
-                    emoji: "👨‍🍳",
+                    emoji: "👩‍🍳",
                     title: "Group",
                     tag: "Virtual or In-Person",
                     description: "Fun, interactive group lessons for friends, family, or colleagues. Available virtually or at your home or venue. A unique experience for parties and team building!",
@@ -892,10 +924,10 @@ export default function FlavorFuzionWebsite() {
 
               <div className="merch-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
                 {[
-                  { emoji: "🧥", name: "Hoodie", price: 35, sizes: true, colors: ["Midnight Black"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo.", link: "https://buy.stripe.com/28E14mgSd7Eqa1Cdlqasg00" },
-                  { emoji: "👕", name: "T-Shirt", price: 20, sizes: true, colors: ["Midnight Black"], description: "Soft cotton tee with bold Flavor Fuzion print.", link: "https://buy.stripe.com/aFa4gybxTe2Oa1Cbdiasg01" },
-                  { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Midnight Black"], description: "Structured snapback with embroidered logo.", link: "https://buy.stripe.com/eVq4gy59v7EqehS2GMasg02" },
-                  { emoji: "🥶", name: "Beanie", price: 15, sizes: false, colors: ["Midnight Black", "Royal Purple"], description: "Cozy knit beanie with Flavor Fuzion patch.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
+                  { emoji: "🧥", name: "Hoodie", price: 30, sizePricing: { "XS": 25, "S": 25, "M": 30, "L": 30, "XL": 30, "2XL": 30, "3XL": 35, "4XL": 35, "5XL": 40 }, sizes: true, colors: ["Black"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo.", link: "https://buy.stripe.com/28E14mgSd7Eqa1Cdlqasg00" },
+                  { emoji: "👕", name: "T-Shirt", price: 20, sizePricing: { "XS": 15, "S": 15, "M": 20, "L": 20, "XL": 20, "2XL": 20, "3XL": 25, "4XL": 25 }, sizes: true, colors: ["Black"], description: "Soft cotton tee with bold Flavor Fuzion print.", link: "https://buy.stripe.com/aFa4gybxTe2Oa1Cbdiasg01" },
+                  { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Black"], description: "Structured snapback with embroidered logo.", link: "https://buy.stripe.com/eVq4gy59v7EqehS2GMasg02" },
+                  { emoji: "🥶", name: "Beanie", price: 15, sizes: false, colors: ["Black", "Royal Purple"], description: "Cozy knit beanie with Flavor Fuzion patch.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
                 ].map((item) => (
                   <div key={item.name} style={{ background: "#fff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #EEE8DF", display: "flex", flexDirection: "column" }}>
                     {/* Image placeholder */}
@@ -912,7 +944,7 @@ export default function FlavorFuzionWebsite() {
                         <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Colors</div>
                         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                           {item.colors.map((colorName) => {
-                            const colorMap = { "Midnight Black": "#0F1A0F", "Royal Purple": "#4A1B6B", "Forest Green": "#1A5C2A", "Gold": "#DAA520" };
+                            const colorMap = { "Black": "#0F1A0F", "Royal Purple": "#4A1B6B", "Forest Green": "#1A5C2A", "Gold": "#DAA520" };
                             return <div key={colorName} title={colorName} style={{ width: "20px", height: "20px", borderRadius: "50%", background: colorMap[colorName], border: "2px solid #EEE8DF", cursor: "pointer" }} />;
                           })}
                         </div>
@@ -1335,7 +1367,7 @@ export default function FlavorFuzionWebsite() {
               <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "10px" }}>Color</label>
               <div style={{ display: "flex", gap: "10px" }}>
                 {selectedMerch.colors.map((color) => {
-                  const colorMap = { "Midnight Black": "#0F1A0F", "Royal Purple": "#4A1B6B", "Forest Green": "#1A5C2A", "Gold": "#DAA520" };
+                  const colorMap = { "Black": "#0F1A0F", "Royal Purple": "#4A1B6B", "Forest Green": "#1A5C2A", "Gold": "#DAA520" };
                   return (
                     <button key={color} onClick={() => setMerchColor(color)} title={color}
                       style={{ width: "32px", height: "32px", borderRadius: "50%", background: colorMap[color], border: `3px solid ${merchColor === color ? "#DAA520" : "#EEE8DF"}`, cursor: "pointer", transition: "border 0.2s" }} />
@@ -1350,7 +1382,7 @@ export default function FlavorFuzionWebsite() {
               <div style={{ marginBottom: "24px" }}>
                 <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "10px" }}>Size</label>
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  {["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"].map((size) => (
+                  {["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", ...(selectedMerch.name === "Hoodie" ? ["5XL"] : [])].map((size) => (
                     <button key={size} onClick={() => setMerchSize(size)}
                       style={{ padding: "8px 12px", borderRadius: "8px", border: `2px solid ${merchSize === size ? "#4A1B6B" : "#D4C9B8"}`, background: merchSize === size ? "#4A1B6B" : "transparent", color: merchSize === size ? "#FEFAF0" : "#6B5E4E", fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>
                       {size}
@@ -1361,14 +1393,21 @@ export default function FlavorFuzionWebsite() {
             )}
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-              <div className="playfair" style={{ fontSize: "28px", fontWeight: 700 }}>${selectedMerch.price}</div>
+              <div>
+                <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "4px" }}>Price</div>
+                <div className="playfair" style={{ fontSize: "28px", fontWeight: 700 }}>
+                  ${selectedMerch.sizePricing && merchSize ? selectedMerch.sizePricing[merchSize] : selectedMerch.price}
+                </div>
+                {selectedMerch.sizePricing && !merchSize && <div className="jost" style={{ fontSize: "11px", color: "#B5A48C" }}>Select a size to see price</div>}
+              </div>
             </div>
 
             <button
               disabled={!merchColor || (selectedMerch.sizes && !merchSize)}
               onClick={() => {
+                const itemPrice = selectedMerch.sizePricing && merchSize ? selectedMerch.sizePricing[merchSize] : selectedMerch.price;
                 const cartKey = `${selectedMerch.name}-${merchColor}-${merchSize}`;
-                addToCart({ ...selectedMerch, id: cartKey, color: merchColor, size: merchSize, cartKey });
+                addToCart({ ...selectedMerch, price: itemPrice, id: cartKey, color: merchColor, size: merchSize, cartKey });
                 setShowMerchPopup(false);
                 setShowCart(true);
               }}
