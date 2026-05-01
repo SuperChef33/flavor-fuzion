@@ -1324,6 +1324,17 @@ export default function FlavorFuzionWebsite() {
                     ))}
                   </div>
 
+                  {/* Pricing Transparency */}
+                  <div style={{ background: "#FEFAF0", borderRadius: "16px", padding: "24px", marginBottom: "28px", border: "1px solid #EEE8DF" }}>
+                    <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "12px" }}>💡 Pricing Info</div>
+                    <p className="jost" style={{ fontSize: "13px", color: "#6B5E4E", lineHeight: 1.8, marginBottom: "12px" }}>
+                      Prices shown are per person and cover all food and ingredients. <strong>In-home services</strong> (Private Dinners, Catering, and Dinner Parties) include a professional chef service fee of <strong>$65/hour</strong> (3-hour minimum) which will be included in your personalized quote. Meal prep orders do not include a service fee. Substitutions and custom requests may affect the final price. Heather will reach out within 24 hours to confirm your details and provide your full quote — no surprises!
+                    </p>
+                    <p className="jost" style={{ fontSize: "13px", color: "#6B5E4E", lineHeight: 1.8 }}>
+                      🚗 <strong>Delivery:</strong> Local (within 10 miles) $10 · Extended (10–35 miles) $18 · <strong>Free delivery on meal prep orders over $150!</strong>
+                    </p>
+                  </div>
+
                   {/* Order CTA */}
                   <div style={{ background: "linear-gradient(135deg, #50C878, #4A1B6B)", borderRadius: "20px", padding: "32px" }}>
                     <div className="playfair" style={{ fontSize: "22px", fontWeight: 600, color: "#FEFAF0", marginBottom: "8px" }}>
