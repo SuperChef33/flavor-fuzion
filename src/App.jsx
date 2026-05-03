@@ -675,7 +675,7 @@ export default function FlavorFuzionWebsite() {
               />
 
               <div className="hero-content" style={{ position: "relative", zIndex: 2, padding: "80px 80px", width: "100%", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <span className="section-tag fade-up">Food is Life, Life is Good</span>
+                <span className="section-tag fade-up">Food is Life. Life is Good.™</span>
                 <h1 className="playfair hero-title fade-up-2" style={{
                   fontSize: "80px", fontWeight: 700,
                   color: "#FEFAF0", lineHeight: 1.05,
@@ -721,7 +721,7 @@ export default function FlavorFuzionWebsite() {
             {/* Parallax Image 1 - Food Spread */}
             <div style={{
               height: "400px",
-              backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1800&q=80')",
+              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/1000070215.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
@@ -847,7 +847,7 @@ export default function FlavorFuzionWebsite() {
             
             <div style={{
               height: "400px",
-              backgroundImage: "url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=80')",
+              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_220046129.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
@@ -860,7 +860,7 @@ export default function FlavorFuzionWebsite() {
             }}>
               <div style={{ position: "relative", zIndex: 1 }}>
               <div className="playfair" style={{ fontSize: "48px", fontWeight: 400, color: "#FEFAF0", fontStyle: "italic", marginBottom: "16px" }}>
-                "Food is Life, Life is Good"
+                "Food is Life. Life is Good.™"
               </div>
               <div className="jost" style={{ fontSize: "14px", color: "rgba(254,250,240,0.7)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
                — Chef Heather
@@ -872,7 +872,7 @@ export default function FlavorFuzionWebsite() {
             {/* Parallax Image 3 - Meal Prep */}
             <div style={{
               height: "400px",
-              backgroundImage: "url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1800&q=80')",
+              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_114235232.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
@@ -1073,7 +1073,7 @@ export default function FlavorFuzionWebsite() {
             {/* Parallax Image 1 - Food Spread */}
             <div style={{
               height: "400px",
-              backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1800&q=80')",
+              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_133312861.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
@@ -1162,7 +1162,7 @@ export default function FlavorFuzionWebsite() {
             {/* Parallax Image - Dessert */}
             <div style={{
               height: "400px",
-              backgroundImage: "url('https://images.unsplash.com/photo-1488477181946-6428a0291777?w=1800&q=80')",
+              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_102739586.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
@@ -1212,7 +1212,7 @@ export default function FlavorFuzionWebsite() {
             {/* Parallax Image - Kitchen */}
             <div style={{
               height: "400px",
-              backgroundImage: "url('https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=1800&q=80')",
+              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_124530092.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
@@ -1627,7 +1627,7 @@ export default function FlavorFuzionWebsite() {
               <a href="https://instagram.com/flavorfuzionbyhj" target="_blank" rel="noopener noreferrer" className="jost" style={{ fontSize: "12px", color: "#A0C8A8", textDecoration: "none" }}>📸 @flavorfuzionbyhj</a>
               <a href="tel:7742053071" className="jost" style={{ fontSize: "12px", color: "#A0C8A8", textDecoration: "none" }}>📞 774-205-3071</a>
             </div>
-            <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8" }}>Food is Life, Life is Good 🍽️</div>
+            <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8" }}>Food is Life. Life is Good.™ 🍽️</div>
           </div>
         </div>
       </footer>
