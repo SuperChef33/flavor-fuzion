@@ -632,7 +632,7 @@ export default function FlavorFuzionWebsite() {
         {activePage === "Home" && (
           <div>
             {/* Hero */}
-            <div style={{
+            <div className="parallax-section" style={{
               background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)",
               minHeight: "92vh",
               position: "relative",
@@ -719,9 +719,9 @@ export default function FlavorFuzionWebsite() {
 
 
             {/* Parallax Image 1 - Food Spread */}
-            <div style={{
+            <div className="parallax-section" style={{
               height: "400px",
-              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_220046129.png')",
+              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_124530092.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
@@ -845,7 +845,7 @@ export default function FlavorFuzionWebsite() {
             </div>
 
             
-            <div style={{
+            <div className="parallax-section" style={{
               height: "400px",
               backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_220046129.png')",
               backgroundSize: "cover",
@@ -853,7 +853,7 @@ export default function FlavorFuzionWebsite() {
               backgroundAttachment: "fixed",
             }} />
             {/* Tagline Banner */}
-            <div style={{
+            <div className="parallax-section" style={{
               background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)",
               padding: "80px 40px", textAlign: "center",
               position: "relative", overflow: "hidden",
@@ -870,7 +870,7 @@ export default function FlavorFuzionWebsite() {
 
 
             {/* Parallax Image 3 - Meal Prep */}
-            <div style={{
+            <div className="parallax-section" style={{
               height: "400px",
               backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_114235232.png')",
               backgroundSize: "cover",
@@ -1051,7 +1051,7 @@ export default function FlavorFuzionWebsite() {
         {activePage === "Menu" && (
           <div>
             {/* Hero */}
-            <div style={{
+            <div className="parallax-section" style={{
               background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)",
               padding: "100px 40px 80px",
               textAlign: "center",
@@ -1071,7 +1071,7 @@ export default function FlavorFuzionWebsite() {
 
 
             {/* Parallax Image 1 - Food Spread */}
-            <div style={{
+            <div className="parallax-section" style={{
               height: "400px",
               backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_133312861.png')",
               backgroundSize: "cover",
@@ -1146,7 +1146,7 @@ export default function FlavorFuzionWebsite() {
         {activePage === "About" && (
           <div>
             {/* Hero */}
-            <div style={{
+            <div className="parallax-section" style={{
               background: "linear-gradient(135deg, #4A1B6B 0%, #0F1A0F 100%)",
               padding: "100px 40px 80px",
             }}>
@@ -1160,7 +1160,7 @@ export default function FlavorFuzionWebsite() {
 
 
             {/* Parallax Image - Dessert */}
-            <div style={{
+            <div className="parallax-section" style={{
               height: "400px",
               backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_102739586.png')",
               backgroundSize: "cover",
@@ -1210,7 +1210,7 @@ export default function FlavorFuzionWebsite() {
 
 
             {/* Parallax Image - Kitchen */}
-            <div style={{
+            <div className="parallax-section" style={{
               height: "400px",
               backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_124530092.png')",
               backgroundSize: "cover",
@@ -1273,7 +1273,7 @@ export default function FlavorFuzionWebsite() {
         {activePage === "Contact" && (
           <div>
             {/* Hero */}
-            <div style={{
+            <div className="parallax-section" style={{
               background: "linear-gradient(135deg, #7A5C0A 0%, #0F1A0F 100%)",
               padding: "100px 40px 80px",
             }}>
