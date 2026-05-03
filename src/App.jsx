@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 // Cream:   #FEFAF0
 // Dark:    #0F1A0F
 
-const PAGES = ["Home", "Menu", "About", "Cookies", "Contact"];
+const PAGES = ["Home", "Menu", "About", "Get Cookies 🍪", "Contact"];
 
 const services = [
   {
@@ -1212,7 +1212,7 @@ export default function FlavorFuzionWebsite() {
             {/* Parallax Image - Kitchen */}
             <div className="parallax-section" style={{
               height: "400px",
-              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_123129050.png')",
+              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_130220682.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
@@ -1263,7 +1263,7 @@ export default function FlavorFuzionWebsite() {
         {/* ════════════════════════════════════════════════════
             COOKIES PAGE
         ════════════════════════════════════════════════════ */}
-        {activePage === "Cookies" && (
+        {activePage === "Get Cookies 🍪" && (
           <CookiesPage onAddToCart={addToCart} />
         )}
 
