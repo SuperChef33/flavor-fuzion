@@ -1212,7 +1212,7 @@ export default function FlavorFuzionWebsite() {
             {/* Parallax Image - Kitchen */}
             <div className="parallax-section" style={{
               height: "400px",
-              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_124530092.png')",
+              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_120333754.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
