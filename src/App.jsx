@@ -512,7 +512,7 @@ export default function FlavorFuzionWebsite() {
           .hero-watermark { display: none !important; }
           .hero-content { padding: 80px 24px !important; }
           .section-padding { padding: 60px 24px !important; }
-          .parallax-section { background-attachment: scroll !important; }
+          /* .parallax-section { background-attachment: scroll !important; } */
           .testimonials-section { padding: 60px 40px !important; }
           .desktop-nav { display: none !important; }
           .mobile-nav { display: flex !important; }
