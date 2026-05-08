@@ -1158,11 +1158,10 @@ export default function FlavorFuzionWebsite() {
               </div>
             </div>
 
-
-            {/* Parallax Image - Dessert */}
+            {/* Parallax Image - Lobster Ravioli */}
             <div className="parallax-section" style={{
               height: "400px",
-              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_102739586.png')",
+              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/lobster%20ravioli.jpg')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundAttachment: "fixed",
