@@ -509,7 +509,7 @@ export default function FlavorFuzionWebsite() {
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 101, background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
           <span style={{ fontSize: "16px" }}>🍪</span>
           <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, color: "#1A1208", margin: 0, textAlign: "center" }}>
-            🍪 Mix & Match cookie packages! Use code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px", letterSpacing: "0.08em" }}>SUMRCOOKIE</span> for FREE shipping on orders over $50 ✨
+            🍪 Mix & Match cookie packages! Use code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px", letterSpacing: "0.08em" }}>SUMRCOOKIE</span> for <strong>20% OFF</strong> orders over $50 ✨
           </p>
           <button onClick={() => setShowPromoBanner(false)} style={{ background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "#1A1208", marginLeft: "8px", lineHeight: 1, flexShrink: 0 }}>✕</button>
         </div>
@@ -522,9 +522,9 @@ export default function FlavorFuzionWebsite() {
             <button onClick={() => setShowPromoPopup(false)} style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
             <div style={{ fontSize: "52px", marginBottom: "16px" }}>🍪</div>
             <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Limited Time Offer</div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "32px", fontWeight: 600, color: "#1A1208", marginBottom: "12px", lineHeight: 1.2 }}>Free Shipping on Cookies! 🎉</h2>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "32px", fontWeight: 600, color: "#1A1208", marginBottom: "12px", lineHeight: 1.2 }}>20% Off Your Cookie Order! 🎉</h2>
             <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.7, marginBottom: "24px" }}>
-              <strong>Order over $50 and get FREE shipping on us!</strong> Mix & Match cookie packages to place your delicious cookie order. Keep some for yourself, give some as tasty gifts. Let's see how the cookie crumbles! 🍪 Use the code below at checkout:
+              <strong>Order over $50 and get 20% OFF!</strong> Mix & Match cookie packages to place your delicious cookie order. Keep some for yourself, give some as tasty gifts. Let's see how the cookie crumbles! 🍪 Enter the code below at checkout:
             </p>
             <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", borderRadius: "12px", padding: "16px 24px", marginBottom: "28px" }}>
               <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1A1208", marginBottom: "4px" }}>Your Promo Code</div>
