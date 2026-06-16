@@ -46,16 +46,16 @@ const testimonials = [
 ];
 
 const COOKIE_TIERS = [
-  { pack: 6,  price: 5.75,  link: "https://buy.stripe.com/9B6cN4cBX8Iuc9K2GMasg04" },
-  { pack: 12, price: 11.25, link: "https://buy.stripe.com/aFa14m9pL4se4HigxCasg05" },
-  { pack: 18, price: 17.00, link: "https://buy.stripe.com/6oUbJ059v0bYflWdlqasg06" },
-  { pack: 24, price: 23.00, link: "https://buy.stripe.com/4gMfZgatP2k6a1Cepuasg07" },
-  { pack: 30, price: 28.00, link: "https://buy.stripe.com/dRm14matP7Eq6Pq1CIasg08" },
-  { pack: 36, price: 33.00, link: "https://buy.stripe.com/cNi9AS6dz6AmddO3KQasg09" },
-  { pack: 42, price: 37.50, link: "https://buy.stripe.com/00wfZgdG11g21v6gxCasg0a" },
-  { pack: 48, price: 42.00, link: "https://buy.stripe.com/6oU14m7hD9My2za5SYasg0b" },
-  { pack: 54, price: 46.50, link: "https://buy.stripe.com/6oU00iatP6Am0r26X2asg0c" },
-  { pack: 60, price: 54.50, link: "https://buy.stripe.com/9B68wO6dzgaWb5Gbdiasg0d" },
+  { pack: 6,  price: 5.75,  link: "https://buy.stripe.com/9B6cN4cBX8Iuc9K2GMasg04?prefilled_promo_code=SUMRCOOKIE" },
+  { pack: 12, price: 11.25, link: "https://buy.stripe.com/aFa14m9pL4se4HigxCasg05?prefilled_promo_code=SUMRCOOKIE" },
+  { pack: 18, price: 17.00, link: "https://buy.stripe.com/6oUbJ059v0bYflWdlqasg06?prefilled_promo_code=SUMRCOOKIE" },
+  { pack: 24, price: 23.00, link: "https://buy.stripe.com/4gMfZgatP2k6a1Cepuasg07?prefilled_promo_code=SUMRCOOKIE" },
+  { pack: 30, price: 28.00, link: "https://buy.stripe.com/dRm14matP7Eq6Pq1CIasg08?prefilled_promo_code=SUMRCOOKIE" },
+  { pack: 36, price: 33.00, link: "https://buy.stripe.com/cNi9AS6dz6AmddO3KQasg09?prefilled_promo_code=SUMRCOOKIE" },
+  { pack: 42, price: 37.50, link: "https://buy.stripe.com/00wfZgdG11g21v6gxCasg0a?prefilled_promo_code=SUMRCOOKIE" },
+  { pack: 48, price: 42.00, link: "https://buy.stripe.com/6oU14m7hD9My2za5SYasg0b?prefilled_promo_code=SUMRCOOKIE" },
+  { pack: 54, price: 46.50, link: "https://buy.stripe.com/6oU00iatP6Am0r26X2asg0c?prefilled_promo_code=SUMRCOOKIE" },
+  { pack: 60, price: 54.50, link: "https://buy.stripe.com/9B68wO6dzgaWb5Gbdiasg0d?prefilled_promo_code=SUMRCOOKIE" },
 ];
 
 function CookiesPage({ onAddToCart }) {
