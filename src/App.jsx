@@ -78,7 +78,7 @@ function CookiesPage({ onAddToCart }) {
   const maxShipping = cartCount > 0
     ? Math.max(...Object.keys(cart).map(p => SHIPPING_RATES[Number(p)] || 10))
     : 0;
-  const shippingCost = qualifiesForPromo ? 0 : maxShipping;
+  const shippingCost = maxShipping;
 
   const updateCart = (pack, delta) => {
     setCart(prev => {
@@ -160,7 +160,7 @@ function CookiesPage({ onAddToCart }) {
       {/* Promo Banner */}
       <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "16px 80px", textAlign: "center" }}>
         <p className="jost" style={{ fontSize: "14px", fontWeight: 700, color: "#1A1208", margin: 0 }}>
-          🍪 Mix & Match any packages! <strong>Order over $20 and get 20% OFF</strong> with code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px" }}>SUMRCOOKIE</span> — plus free shipping automatically applied at checkout!
+          🍪 Mix & Match any packages! <strong>Order over $20 and get 20% OFF</strong> with code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px" }}>SUMRCOOKIE</span> — automatically applied at checkout!
         </p>
       </div>
 
@@ -209,7 +209,7 @@ function CookiesPage({ onAddToCart }) {
               <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #EEE8DF" }}>
                 <span className="jost" style={{ fontSize: "14px", color: "#6B5E4E" }}>Shipping</span>
                 <span className="jost" style={{ fontSize: "14px", fontWeight: 600, color: qualifiesForPromo ? "#3A6B3A" : "#1A1208" }}>
-                  {qualifiesForPromo ? "FREE 🎉" : `$${shippingCost.toFixed(2)}`}
+                  {qualifiesForPromo ? `$${shippingCost.toFixed(2)}` : `$${shippingCost.toFixed(2)}`}
                 </span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px" }}>
@@ -218,14 +218,14 @@ function CookiesPage({ onAddToCart }) {
                     Total: ${(cartTotal + shippingCost).toFixed(2)}
                   </div>
                   {qualifiesForPromo ? (
-                    <div className="jost" style={{ fontSize: "13px", color: "#3A6B3A", fontWeight: 600, marginTop: "4px" }}>✅ 20% off + free shipping will be applied at checkout!</div>
+                    <div className="jost" style={{ fontSize: "13px", color: "#3A6B3A", fontWeight: 600, marginTop: "4px" }}>✅ 20% off (SUMRCOOKIE) will be applied at checkout!</div>
                   ) : (
                     <div className="jost" style={{ fontSize: "13px", color: "#B5A48C", marginTop: "4px" }}>Add ${(20 - cartTotal).toFixed(2)} more to unlock 20% off + free shipping!</div>
                   )}
                 </div>
                 {qualifiesForPromo && (
                   <div style={{ background: "linear-gradient(135deg, #C9A227, #E8C547)", borderRadius: "100px", padding: "6px 16px" }}>
-                    <span className="jost" style={{ fontSize: "12px", fontWeight: 700, color: "#1A1208" }}>20% OFF + FREE Shipping 🎉</span>
+                    <span className="jost" style={{ fontSize: "12px", fontWeight: 700, color: "#1A1208" }}>20% OFF 🎉</span>
                   </div>
                 )}
               </div>
