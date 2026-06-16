@@ -68,7 +68,7 @@ function CookiesPage({ onAddToCart }) {
   }, 0);
 
   const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-  const qualifiesForPromo = cartTotal >= 50;
+  const qualifiesForPromo = cartTotal >= 20;
 
   const SHIPPING_RATES: Record<number, number> = {
     6: 3.50, 12: 5.00, 18: 6.50, 24: 6.50,
@@ -160,7 +160,7 @@ function CookiesPage({ onAddToCart }) {
       {/* Promo Banner */}
       <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "16px 80px", textAlign: "center" }}>
         <p className="jost" style={{ fontSize: "14px", fontWeight: 700, color: "#1A1208", margin: 0 }}>
-          🍪 Mix & Match any packages! <strong>Order over $50 and get 20% OFF</strong> with code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px" }}>SUMRCOOKIE</span> — plus free shipping automatically applied at checkout!
+          🍪 Mix & Match any packages! <strong>Order over $20 and get 20% OFF</strong> with code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px" }}>SUMRCOOKIE</span> — plus free shipping automatically applied at checkout!
         </p>
       </div>
 
@@ -220,7 +220,7 @@ function CookiesPage({ onAddToCart }) {
                   {qualifiesForPromo ? (
                     <div className="jost" style={{ fontSize: "13px", color: "#3A6B3A", fontWeight: 600, marginTop: "4px" }}>✅ 20% off + free shipping will be applied at checkout!</div>
                   ) : (
-                    <div className="jost" style={{ fontSize: "13px", color: "#B5A48C", marginTop: "4px" }}>Add ${(50 - cartTotal).toFixed(2)} more to unlock 20% off + free shipping!</div>
+                    <div className="jost" style={{ fontSize: "13px", color: "#B5A48C", marginTop: "4px" }}>Add ${(20 - cartTotal).toFixed(2)} more to unlock 20% off + free shipping!</div>
                   )}
                 </div>
                 {qualifiesForPromo && (
@@ -608,7 +608,7 @@ export default function FlavorFuzionWebsite() {
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 101, background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
           <span style={{ fontSize: "16px" }}>🍪</span>
           <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, color: "#1A1208", margin: 0, textAlign: "center" }}>
-            🍪 Mix & Match cookie packages! Use code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px", letterSpacing: "0.08em" }}>SUMRCOOKIE</span> for <strong>20% OFF</strong> orders over $50 ✨
+            🍪 Mix & Match cookie packages! Use code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px", letterSpacing: "0.08em" }}>SUMRCOOKIE</span> for <strong>20% OFF</strong> orders over $20 ✨
           </p>
           <button onClick={() => setShowPromoBanner(false)} style={{ background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "#1A1208", marginLeft: "8px", lineHeight: 1, flexShrink: 0 }}>✕</button>
         </div>
@@ -623,7 +623,7 @@ export default function FlavorFuzionWebsite() {
             <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Limited Time Offer</div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "32px", fontWeight: 600, color: "#1A1208", marginBottom: "12px", lineHeight: 1.2 }}>20% Off Your Cookie Order! 🎉</h2>
             <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.7, marginBottom: "24px" }}>
-              <strong>Order over $50 and get 20% OFF!</strong> Mix & Match cookie packages to place your delicious cookie order. Keep some for yourself, give some as tasty gifts. Let's see how the cookie crumbles! 🍪 Enter the code below at checkout:
+              <strong>Order over $20 and get 20% OFF!</strong> Mix & Match cookie packages to place your delicious cookie order. Keep some for yourself, give some as tasty gifts. Let's see how the cookie crumbles! 🍪 Enter the code below at checkout:
             </p>
             <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", borderRadius: "12px", padding: "16px 24px", marginBottom: "28px" }}>
               <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1A1208", marginBottom: "4px" }}>Your Promo Code</div>
