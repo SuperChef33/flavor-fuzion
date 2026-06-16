@@ -59,14 +59,72 @@ const COOKIE_TIERS = [
 ];
 
 function CookiesPage({ onAddToCart }) {
-  const [selectedTier, setSelectedTier] = useState(COOKIE_TIERS[0]);
+  const [cart, setCart]       = useState({});
+  const [loading, setLoading] = useState(false);
 
-  const handleOrder = () => {
-    if (selectedTier.link) {
-      window.open(selectedTier.link, "_blank");
-    } else {
-      alert("Something went wrong. Please try again.");
+  const cartTotal = Object.entries(cart).reduce((sum, [pack, qty]) => {
+    const tier = COOKIE_TIERS.find(t => t.pack === Number(pack));
+    return sum + (tier ? tier.price * qty : 0);
+  }, 0);
+
+  const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+  const qualifiesForPromo = cartTotal >= 50;
+
+  const SHIPPING_RATES: Record<number, number> = {
+    6: 3.50, 12: 5.00, 18: 6.50, 24: 6.50,
+    30: 8.50, 36: 8.50, 42: 8.50, 48: 10.00, 54: 10.00, 60: 10.00,
+  };
+
+  const maxShipping = cartCount > 0
+    ? Math.max(...Object.keys(cart).map(p => SHIPPING_RATES[Number(p)] || 10))
+    : 0;
+  const shippingCost = qualifiesForPromo ? 0 : maxShipping;
+
+  const updateCart = (pack, delta) => {
+    setCart(prev => {
+      const current = prev[pack] || 0;
+      const next = Math.max(0, current + delta);
+      if (next === 0) { const { [pack]: _, ...rest } = prev; return rest; }
+      return { ...prev, [pack]: next };
+    });
+  };
+
+  const handleCheckout = async () => {
+    if (cartCount === 0) return;
+    setLoading(true);
+    try {
+      const lineItems = Object.entries(cart).map(([pack, qty]) => {
+        const tier = COOKIE_TIERS.find(t => t.pack === Number(pack));
+        return { pack: Number(pack), qty, price: tier.price };
+      });
+      const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/functions/v1/cookie-cart-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lineItems }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        // Fallback for single item
+        const packs = Object.keys(cart);
+        if (packs.length === 1) {
+          const tier = COOKIE_TIERS.find(t => t.pack === Number(packs[0]));
+          if (tier) window.open(tier.link, "_blank");
+        } else {
+          alert("Something went wrong. Please try again or contact Heather directly.");
+        }
+      }
+    } catch (err) {
+      const packs = Object.keys(cart);
+      if (packs.length === 1) {
+        const tier = COOKIE_TIERS.find(t => t.pack === Number(packs[0]));
+        if (tier) window.open(tier.link, "_blank");
+      } else {
+        alert("Something went wrong. Please try again or contact Heather directly.");
+      }
     }
+    setLoading(false);
   };
 
   return (
@@ -99,49 +157,90 @@ function CookiesPage({ onAddToCart }) {
         </div>
       </div>
 
-      {/* Order Section */}
-      <div style={{ padding: "80px", background: "#FEFAF0", maxWidth: "800px", margin: "0 auto" }}>
-        <span className="section-tag">Order Now</span>
-        <h2 className="playfair" style={{ fontSize: "36px", fontWeight: 600, marginBottom: "8px", marginTop: "8px" }}>Choose Your Pack</h2>
-        <div className="divider" style={{ marginBottom: "32px" }} />
-
-        {/* Tier Selector */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px", marginBottom: "32px" }}>
-          {COOKIE_TIERS.map((tier) => (
-            <button key={tier.pack} onClick={() => setSelectedTier(tier)}
-              style={{ padding: "12px 8px", borderRadius: "12px", border: `2px solid ${selectedTier.pack === tier.pack ? "#4A1B6B" : "#D4C9B8"}`, background: selectedTier.pack === tier.pack ? "#4A1B6B" : "transparent", color: selectedTier.pack === tier.pack ? "#FEFAF0" : "#6B5E4E", fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s", textAlign: "center" }}>
-              <div>{tier.pack} pack</div>
-              <div style={{ fontSize: "15px", fontWeight: 700, marginTop: "4px" }}>${tier.price}</div>
-              {tier.pack >= 24 && null}
-            </button>
-          ))}
-        </div>
-
-        {/* Selected Summary */}
-        <div style={{ background: "#fff", borderRadius: "16px", padding: "24px", marginBottom: "24px", border: "1px solid #EEE8DF", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C" }}>Your Selection</div>
-            <div className="playfair" style={{ fontSize: "24px", fontWeight: 600, color: "#0F1A0F", marginTop: "4px" }}>{selectedTier.pack} Cookies</div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C" }}>Total</div>
-            <div className="playfair" style={{ fontSize: "32px", fontWeight: 700, color: "#4A1B6B" }}>${selectedTier.price}</div>
-          </div>
-        </div>
-
-        <button onClick={handleOrder}
-          style={{ width: "100%", background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "18px", fontFamily: "'Jost', sans-serif", fontSize: "16px", fontWeight: 700, cursor: "pointer", letterSpacing: "0.05em" }}>
-          Buy Now — ${selectedTier.price} →
-        </button>
-
-        <button onClick={() => { onAddToCart({ id: `cookie-${selectedTier.pack}`, name: `Almond Lavender Cookies - ${selectedTier.pack} Pack`, price: selectedTier.price, cartKey: `cookie-${selectedTier.pack}` }); }}
-          style={{ width: "100%", background: "#0F1A0F", color: "#FEFAF0", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'Jost', sans-serif", fontSize: "15px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.03em", marginTop: "12px" }}>
-          🛒 Add to Cart
-        </button>
-
-        <p className="jost" style={{ textAlign: "center", fontSize: "12px", color: "#B5A48C", marginTop: "16px" }}>
-          🔒 Secure checkout powered by Stripe. Orders fulfilled within 3-5 business days.
+      {/* Promo Banner */}
+      <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "16px 80px", textAlign: "center" }}>
+        <p className="jost" style={{ fontSize: "14px", fontWeight: 700, color: "#1A1208", margin: 0 }}>
+          🍪 Mix & Match any packages! <strong>Order over $50 and get 20% OFF</strong> with code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px" }}>SUMRCOOKIE</span> — plus free shipping automatically applied at checkout!
         </p>
+      </div>
+
+      {/* Order Section */}
+      <div style={{ padding: "60px 80px", background: "#FEFAF0" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+          <span className="section-tag">Build Your Order</span>
+          <h2 className="playfair" style={{ fontSize: "36px", fontWeight: 600, marginBottom: "8px", marginTop: "8px" }}>Mix & Match Cookie Packages</h2>
+          <div className="divider" style={{ marginBottom: "32px" }} />
+
+          {/* Package Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "16px", marginBottom: "40px" }}>
+            {COOKIE_TIERS.map((tier) => {
+              const qty = cart[tier.pack] || 0;
+              return (
+                <div key={tier.pack} style={{ background: "#fff", borderRadius: "16px", border: `2px solid ${qty > 0 ? "#4A1B6B" : "#EEE8DF"}`, padding: "20px 16px", textAlign: "center", transition: "all 0.2s" }}>
+                  <div className="playfair" style={{ fontSize: "22px", fontWeight: 700, color: "#1A1208" }}>{tier.pack}</div>
+                  <div className="jost" style={{ fontSize: "11px", color: "#B5A48C", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>cookies</div>
+                  <div className="playfair" style={{ fontSize: "20px", fontWeight: 600, color: "#4A1B6B", marginBottom: "4px" }}>${tier.price}</div>
+                  <div className="jost" style={{ fontSize: "11px", color: "#B5A48C", marginBottom: "12px" }}>+ ${SHIPPING_RATES[tier.pack].toFixed(2)} shipping</div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+                    <button onClick={() => updateCart(tier.pack, -1)} disabled={qty === 0}
+                      style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1.5px solid #D4C9B8", background: qty === 0 ? "#f5f5f5" : "#fff", cursor: qty === 0 ? "not-allowed" : "pointer", fontSize: "18px", color: "#6B5E4E", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+                    <span className="jost" style={{ fontSize: "16px", fontWeight: 700, minWidth: "20px", color: "#1A1208" }}>{qty}</span>
+                    <button onClick={() => updateCart(tier.pack, 1)}
+                      style={{ width: "32px", height: "32px", borderRadius: "50%", border: "none", background: "#4A1B6B", cursor: "pointer", fontSize: "18px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Cart Summary */}
+          {cartCount > 0 && (
+            <div style={{ background: "#fff", borderRadius: "20px", border: "1px solid #EEE8DF", padding: "28px 32px", marginBottom: "24px" }}>
+              <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "16px" }}>Your Order</div>
+              {Object.entries(cart).map(([pack, qty]) => {
+                const tier = COOKIE_TIERS.find(t => t.pack === Number(pack));
+                return (
+                  <div key={pack} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #EEE8DF" }}>
+                    <span className="jost" style={{ fontSize: "14px", color: "#1A1208" }}>{pack} Pack × {qty}</span>
+                    <span className="jost" style={{ fontSize: "14px", fontWeight: 600, color: "#1A1208" }}>${(tier.price * qty).toFixed(2)}</span>
+                  </div>
+                );
+              })}
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #EEE8DF" }}>
+                <span className="jost" style={{ fontSize: "14px", color: "#6B5E4E" }}>Shipping</span>
+                <span className="jost" style={{ fontSize: "14px", fontWeight: 600, color: qualifiesForPromo ? "#3A6B3A" : "#1A1208" }}>
+                  {qualifiesForPromo ? "FREE 🎉" : `$${shippingCost.toFixed(2)}`}
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px" }}>
+                <div>
+                  <div className="playfair" style={{ fontSize: "24px", fontWeight: 700, color: "#1A1208" }}>
+                    Total: ${(cartTotal + shippingCost).toFixed(2)}
+                  </div>
+                  {qualifiesForPromo ? (
+                    <div className="jost" style={{ fontSize: "13px", color: "#3A6B3A", fontWeight: 600, marginTop: "4px" }}>✅ 20% off + free shipping will be applied at checkout!</div>
+                  ) : (
+                    <div className="jost" style={{ fontSize: "13px", color: "#B5A48C", marginTop: "4px" }}>Add ${(50 - cartTotal).toFixed(2)} more to unlock 20% off + free shipping!</div>
+                  )}
+                </div>
+                {qualifiesForPromo && (
+                  <div style={{ background: "linear-gradient(135deg, #C9A227, #E8C547)", borderRadius: "100px", padding: "6px 16px" }}>
+                    <span className="jost" style={{ fontSize: "12px", fontWeight: 700, color: "#1A1208" }}>20% OFF + FREE Shipping 🎉</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <button onClick={handleCheckout} disabled={cartCount === 0 || loading}
+            style={{ width: "100%", background: cartCount === 0 ? "#D4C9B8" : "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "18px", fontFamily: "'Jost', sans-serif", fontSize: "16px", fontWeight: 700, cursor: cartCount === 0 ? "not-allowed" : "pointer", letterSpacing: "0.05em" }}>
+            {loading ? "Redirecting to checkout..." : cartCount === 0 ? "Add cookies to your order above" : `Checkout — $${(cartTotal + shippingCost).toFixed(2)} →`}
+          </button>
+
+          <p className="jost" style={{ textAlign: "center", fontSize: "12px", color: "#B5A48C", marginTop: "16px" }}>
+            🔒 Secure checkout powered by Stripe. Orders fulfilled within 3-5 business days.
+          </p>
+        </div>
       </div>
     </div>
   );
