@@ -46,41 +46,27 @@ const testimonials = [
 ];
 
 const COOKIE_TIERS = [
-  { pack: 6, price: 5.75 },
-  { pack: 12, price: 11.25 },
-  { pack: 18, price: 17.00 },
-  { pack: 24, price: 23.00 },
-  { pack: 30, price: 28.00 },
-  { pack: 36, price: 33.00 },
-  { pack: 42, price: 37.50 },
-  { pack: 48, price: 42.00 },
-  { pack: 54, price: 46.50 },
-  { pack: 60, price: 54.50 },
+  { pack: 6,  price: 5.75,  link: "https://buy.stripe.com/9B6cN4cBX8Iuc9K2GMasg04" },
+  { pack: 12, price: 11.25, link: "https://buy.stripe.com/aFa14m9pL4se4HigxCasg05" },
+  { pack: 18, price: 17.00, link: "https://buy.stripe.com/6oUbJ059v0bYflWdlqasg06" },
+  { pack: 24, price: 23.00, link: "https://buy.stripe.com/4gMfZgatP2k6a1Cepuasg07" },
+  { pack: 30, price: 28.00, link: "https://buy.stripe.com/dRm14matP7Eq6Pq1CIasg08" },
+  { pack: 36, price: 33.00, link: "https://buy.stripe.com/cNi9AS6dz6AmddO3KQasg09" },
+  { pack: 42, price: 37.50, link: "https://buy.stripe.com/00wfZgdG11g21v6gxCasg0a" },
+  { pack: 48, price: 42.00, link: "https://buy.stripe.com/6oU14m7hD9My2za5SYasg0b" },
+  { pack: 54, price: 46.50, link: "https://buy.stripe.com/6oU00iatP6Am0r26X2asg0c" },
+  { pack: 60, price: 54.50, link: "https://buy.stripe.com/9B68wO6dzgaWb5Gbdiasg0d" },
 ];
 
 function CookiesPage({ onAddToCart }) {
   const [selectedTier, setSelectedTier] = useState(COOKIE_TIERS[0]);
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleOrder = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/functions/v1/cookie-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packSize: selectedTier.pack, price: selectedTier.price, customerEmail: email }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Something went wrong. Please try again.");
-      }
-    } catch (err) {
+  const handleOrder = () => {
+    if (selectedTier.link) {
+      window.open(selectedTier.link, "_blank");
+    } else {
       alert("Something went wrong. Please try again.");
     }
-    setLoading(false);
   };
 
   return (
@@ -143,16 +129,9 @@ function CookiesPage({ onAddToCart }) {
           </div>
         </div>
 
-        {/* Email */}
-        <div style={{ marginBottom: "20px" }}>
-          <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>Email Address (for order confirmation)</label>
-          <input type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)}
-            style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }} />
-        </div>
-
-        <button onClick={handleOrder} disabled={loading}
-          style={{ width: "100%", background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "18px", fontFamily: "'Jost', sans-serif", fontSize: "16px", fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", letterSpacing: "0.05em" }}>
-          {loading ? "Redirecting to checkout..." : `Buy Now — $${selectedTier.price} →`}
+        <button onClick={handleOrder}
+          style={{ width: "100%", background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "18px", fontFamily: "'Jost', sans-serif", fontSize: "16px", fontWeight: 700, cursor: "pointer", letterSpacing: "0.05em" }}>
+          Buy Now — ${selectedTier.price} →
         </button>
 
         <button onClick={() => { onAddToCart({ id: `cookie-${selectedTier.pack}`, name: `Almond Lavender Cookies - ${selectedTier.pack} Pack`, price: selectedTier.price, cartKey: `cookie-${selectedTier.pack}` }); }}
