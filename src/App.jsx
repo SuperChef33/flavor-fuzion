@@ -164,66 +164,6 @@ function CookiesPage({ onAddToCart }) {
           🔒 Secure checkout powered by Stripe. Orders fulfilled within 3-5 business days.
         </p>
       </div>
-      {/* Privacy Policy Modal */}
-      {showPrivacy && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(10,18,10,0.7)", zIndex: 200, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px" }}>
-          <div style={{ background: "#FEFAF4", borderRadius: "20px", maxWidth: "720px", width: "100%", padding: "48px 40px", position: "relative", boxShadow: "0 24px 80px rgba(10,18,10,0.3)" }}>
-            <button onClick={() => setShowPrivacy(false)} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
-            <div className="jost" style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "12px" }}>Legal</div>
-            <h1 className="playfair" style={{ fontSize: "36px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>Privacy Policy</h1>
-            <p className="jost" style={{ fontSize: "12px", color: "#B5A48C", marginBottom: "32px" }}>Effective Date: May 1, 2025 · Last Updated: May 1, 2025</p>
-            {[
-              { title: "1. Who We Are", body: 'Flavor Fuzion by Heather Janey ("we," "us," or "our") is a sole proprietorship operating in Massachusetts, transitioning to an LLC. We operate the Flavor Fuzion ordering platform at byheatherjaney.com. Our business address is 131 Samoset Street #1027, Plymouth, MA 02360.' },
-              { title: "2. Information We Collect", body: "We collect information you provide directly when placing an order or inquiry, including: your name, email address, phone number, shipping address (for cookie orders), event date, guest count, dietary notes, and order details. We do not collect payment information directly — all payment processing is handled securely by Stripe." },
-              { title: "3. How We Use Your Information", body: "We use the information you provide to: respond to your order requests, communicate with you about your event or order, ship your products, and improve our services. We do not sell, rent, or share your personal information with third parties for marketing purposes." },
-              { title: "4. Third Party Services", body: "We use Stripe for payment processing and Supabase for order data storage. These services have their own privacy policies. Shipping addresses provided for cookie orders are used solely to fulfill your shipment via our shipping provider and are never shared for any other purpose." },
-              { title: "5. Data Storage", body: "Your order information is stored securely using Supabase, a third-party database service. Data is stored on servers located in the United States. We retain your information only as long as necessary to fulfill your order and comply with applicable law." },
-              { title: "6. Cookies", body: "Our website may use cookies or similar technologies to improve your browsing experience. You can disable cookies in your browser settings, though some features of the site may not function properly as a result." },
-              { title: "7. Your Rights (Massachusetts Residents)", body: "Under Massachusetts law, you have the right to request access to, correction of, or deletion of your personal information. To exercise these rights, please contact us at the email below." },
-              { title: "8. Children's Privacy", body: "Our services are not directed to children under the age of 13. We do not knowingly collect personal information from children." },
-              { title: "9. Changes to This Policy", body: "We may update this Privacy Policy from time to time. We will notify you of significant changes by updating the effective date at the top of this page." },
-              { title: "10. Contact Us", body: "If you have questions about this Privacy Policy, please contact us at: FlavorFuzionbHJ@Outlook.com | 131 Samoset Street #1027, Plymouth, MA 02360" },
-            ].map(({ title, body }) => (
-              <div key={title} style={{ marginBottom: "24px" }}>
-                <h2 className="playfair" style={{ fontSize: "20px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>{title}</h2>
-                <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E", lineHeight: 1.75 }}>{body}</p>
-              </div>
-            ))}
-            <button onClick={() => setShowPrivacy(false)} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'Jost', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}>Close</button>
-          </div>
-        </div>
-      )}
-
-      {/* Terms of Service Modal */}
-      {showTerms && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(10,18,10,0.7)", zIndex: 200, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px" }}>
-          <div style={{ background: "#FEFAF4", borderRadius: "20px", maxWidth: "720px", width: "100%", padding: "48px 40px", position: "relative", boxShadow: "0 24px 80px rgba(10,18,10,0.3)" }}>
-            <button onClick={() => setShowTerms(false)} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
-            <div className="jost" style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "12px" }}>Legal</div>
-            <h1 className="playfair" style={{ fontSize: "36px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>Terms of Service</h1>
-            <p className="jost" style={{ fontSize: "12px", color: "#B5A48C", marginBottom: "32px" }}>Effective Date: May 1, 2025 · Last Updated: May 1, 2025</p>
-            {[
-              { title: "1. Acceptance of Terms", body: "By accessing or using the Flavor Fuzion website and ordering platform, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services." },
-              { title: "2. Services Provided", body: "Flavor Fuzion by Heather Janey provides personal chef services including weekly meal preparation, catering, private dinners, and baked goods including our Almond Lavender Cookies." },
-              { title: "3. Order Requests & Confirmation", body: "Submitting an order through our platform constitutes a request only — not a confirmed booking. Orders become confirmed only after Heather Janey contacts you to review details, confirm pricing, and arrange payment. No payment is collected at the time of submission, except for cookie orders processed directly through Stripe." },
-              { title: "4. Cookie Orders & Shipping", body: "Cookie orders are processed through Stripe. Your shipping address is collected solely for fulfillment purposes and is never shared with third parties for marketing. Shipping rates are calculated at checkout. We are not responsible for delays caused by shipping carriers." },
-              { title: "5. Pricing", body: "Prices shown on the menu cover food and ingredient costs. Private dinners, catering, and in-home services include a chef service fee of $45/hr (3-hour minimum), which will be included in your confirmed quote. Delivery fees apply based on distance. Custom requests and substitutions may affect the final price." },
-              { title: "6. Cancellations & Deposits", body: "Cancellation and deposit policies will be communicated during booking confirmation. For large events or catering bookings, a deposit may be required to secure your date. Deposits are generally non-refundable within 48 hours of the event." },
-              { title: "7. Dietary & Allergen Responsibility", body: "While we make every effort to accommodate dietary needs and allergies disclosed at the time of ordering, Flavor Fuzion cannot guarantee a completely allergen-free environment. Customers must disclose all known allergies and dietary restrictions at the time of ordering." },
-              { title: "8. Intellectual Property", body: 'The phrase "Food is Life. Life is Good.™" is a trademark of Flavor Fuzion by Heather Janey. All content on this platform is the property of Flavor Fuzion by Heather Janey and may not be used without written permission.' },
-              { title: "9. Limitation of Liability", body: "To the fullest extent permitted by Massachusetts law, Flavor Fuzion by Heather Janey shall not be liable for any indirect, incidental, or consequential damages arising from use of our services." },
-              { title: "10. Governing Law", body: "These Terms of Service are governed by the laws of the Commonwealth of Massachusetts." },
-              { title: "11. Contact Us", body: "If you have questions about these Terms, please contact us at: FlavorFuzionbHJ@Outlook.com | 131 Samoset Street #1027, Plymouth, MA 02360" },
-            ].map(({ title, body }) => (
-              <div key={title} style={{ marginBottom: "24px" }}>
-                <h2 className="playfair" style={{ fontSize: "20px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>{title}</h2>
-                <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E", lineHeight: 1.75 }}>{body}</p>
-              </div>
-            ))}
-            <button onClick={() => setShowTerms(false)} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'Jost', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}>Close</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -1696,6 +1636,67 @@ export default function FlavorFuzionWebsite() {
           </div>
         </div>
       </footer>
+
+      {/* Privacy Policy Modal */}
+      {showPrivacy && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(10,18,10,0.7)", zIndex: 200, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px" }}>
+          <div style={{ background: "#FEFAF4", borderRadius: "20px", maxWidth: "720px", width: "100%", padding: "48px 40px", position: "relative", boxShadow: "0 24px 80px rgba(10,18,10,0.3)" }}>
+            <button onClick={() => setShowPrivacy(false)} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
+            <div className="jost" style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "12px" }}>Legal</div>
+            <h1 className="playfair" style={{ fontSize: "36px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>Privacy Policy</h1>
+            <p className="jost" style={{ fontSize: "12px", color: "#B5A48C", marginBottom: "32px" }}>Effective Date: May 1, 2025 · Last Updated: May 1, 2025</p>
+            {[
+              { title: "1. Who We Are", body: 'Flavor Fuzion by Heather Janey ("we," "us," or "our") is a sole proprietorship operating in Massachusetts, transitioning to an LLC. We operate the Flavor Fuzion ordering platform at byheatherjaney.com. Our business address is 131 Samoset Street #1027, Plymouth, MA 02360.' },
+              { title: "2. Information We Collect", body: "We collect information you provide directly when placing an order or inquiry, including: your name, email address, phone number, shipping address (for cookie orders), event date, guest count, dietary notes, and order details. We do not collect payment information directly — all payment processing is handled securely by Stripe." },
+              { title: "3. How We Use Your Information", body: "We use the information you provide to: respond to your order requests, communicate with you about your event or order, ship your products, and improve our services. We do not sell, rent, or share your personal information with third parties for marketing purposes." },
+              { title: "4. Third Party Services", body: "We use Stripe for payment processing and Supabase for order data storage. These services have their own privacy policies. Shipping addresses provided for cookie orders are used solely to fulfill your shipment and are never shared for any other purpose." },
+              { title: "5. Data Storage", body: "Your order information is stored securely using Supabase, a third-party database service. Data is stored on servers located in the United States. We retain your information only as long as necessary to fulfill your order and comply with applicable law." },
+              { title: "6. Cookies", body: "Our website may use cookies or similar technologies to improve your browsing experience. You can disable cookies in your browser settings, though some features of the site may not function properly as a result." },
+              { title: "7. Your Rights (Massachusetts Residents)", body: "Under Massachusetts law, you have the right to request access to, correction of, or deletion of your personal information. To exercise these rights, please contact us at the email below." },
+              { title: "8. Children's Privacy", body: "Our services are not directed to children under the age of 13. We do not knowingly collect personal information from children." },
+              { title: "9. Changes to This Policy", body: "We may update this Privacy Policy from time to time. We will notify you of significant changes by updating the effective date at the top of this page." },
+              { title: "10. Contact Us", body: "If you have questions about this Privacy Policy, please contact us at: FlavorFuzionbHJ@Outlook.com | 131 Samoset Street #1027, Plymouth, MA 02360" },
+            ].map(({ title, body }) => (
+              <div key={title} style={{ marginBottom: "24px" }}>
+                <h2 className="playfair" style={{ fontSize: "20px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>{title}</h2>
+                <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E", lineHeight: 1.75 }}>{body}</p>
+              </div>
+            ))}
+            <button onClick={() => setShowPrivacy(false)} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'Jost', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* Terms of Service Modal */}
+      {showTerms && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(10,18,10,0.7)", zIndex: 200, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px" }}>
+          <div style={{ background: "#FEFAF4", borderRadius: "20px", maxWidth: "720px", width: "100%", padding: "48px 40px", position: "relative", boxShadow: "0 24px 80px rgba(10,18,10,0.3)" }}>
+            <button onClick={() => setShowTerms(false)} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
+            <div className="jost" style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "12px" }}>Legal</div>
+            <h1 className="playfair" style={{ fontSize: "36px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>Terms of Service</h1>
+            <p className="jost" style={{ fontSize: "12px", color: "#B5A48C", marginBottom: "32px" }}>Effective Date: May 1, 2025 · Last Updated: May 1, 2025</p>
+            {[
+              { title: "1. Acceptance of Terms", body: "By accessing or using the Flavor Fuzion website and ordering platform, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services." },
+              { title: "2. Services Provided", body: "Flavor Fuzion by Heather Janey provides personal chef services including weekly meal preparation, catering, private dinners, and baked goods including our Almond Lavender Cookies." },
+              { title: "3. Order Requests & Confirmation", body: "Submitting an order through our platform constitutes a request only — not a confirmed booking. Orders become confirmed only after Heather Janey contacts you to review details, confirm pricing, and arrange payment. No payment is collected at the time of submission, except for cookie orders processed directly through Stripe." },
+              { title: "4. Cookie Orders & Shipping", body: "Cookie orders are processed through Stripe. Your shipping address is collected solely for fulfillment purposes and is never shared with third parties for marketing. Shipping rates are calculated at checkout. We are not responsible for delays caused by shipping carriers." },
+              { title: "5. Pricing", body: "Prices shown on the menu cover food and ingredient costs. Private dinners, catering, and in-home services include a chef service fee of $45/hr (3-hour minimum), which will be included in your confirmed quote. Delivery fees apply based on distance. Custom requests and substitutions may affect the final price." },
+              { title: "6. Cancellations & Deposits", body: "Cancellation and deposit policies will be communicated during booking confirmation. For large events or catering bookings, a deposit may be required to secure your date. Deposits are generally non-refundable within 48 hours of the event." },
+              { title: "7. Dietary & Allergen Responsibility", body: "While we make every effort to accommodate dietary needs and allergies disclosed at the time of ordering, Flavor Fuzion cannot guarantee a completely allergen-free environment. Customers must disclose all known allergies and dietary restrictions at the time of ordering." },
+              { title: "8. Intellectual Property", body: 'The phrase "Food is Life. Life is Good.™" is a trademark of Flavor Fuzion by Heather Janey. All content on this platform is the property of Flavor Fuzion by Heather Janey and may not be used without written permission.' },
+              { title: "9. Limitation of Liability", body: "To the fullest extent permitted by Massachusetts law, Flavor Fuzion by Heather Janey shall not be liable for any indirect, incidental, or consequential damages arising from use of our services." },
+              { title: "10. Governing Law", body: "These Terms of Service are governed by the laws of the Commonwealth of Massachusetts." },
+              { title: "11. Contact Us", body: "If you have questions about these Terms, please contact us at: FlavorFuzionbHJ@Outlook.com | 131 Samoset Street #1027, Plymouth, MA 02360" },
+            ].map(({ title, body }) => (
+              <div key={title} style={{ marginBottom: "24px" }}>
+                <h2 className="playfair" style={{ fontSize: "20px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>{title}</h2>
+                <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E", lineHeight: 1.75 }}>{body}</p>
+              </div>
+            ))}
+            <button onClick={() => setShowTerms(false)} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'Jost', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
