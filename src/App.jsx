@@ -99,7 +99,11 @@ function CookiesPage({ onAddToCart }) {
       });
       const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/functions/v1/cookie-cart-checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxaGh3dWt2aGVlenVuY2NlaHptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MzEzNjgsImV4cCI6MjA5MDEwNzM2OH0.7Dno6w4GyX5DXTcCMLnT0C1FvIBpqHrXASr-aDf8pzQ",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxaGh3dWt2aGVlenVuY2NlaHptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MzEzNjgsImV4cCI6MjA5MDEwNzM2OH0.7Dno6w4GyX5DXTcCMLnT0C1FvIBpqHrXASr-aDf8pzQ",
+        },
         body: JSON.stringify({ lineItems }),
       });
       const data = await res.json();
@@ -923,7 +927,7 @@ export default function FlavorFuzionWebsite() {
                     color: "linear-gradient(160deg, #5A2280 0%, #1A7A5E 100%)",
                   },
                   {
-                    emoji: "👩‍🍳",
+                    emoji: "👩🏽‍🍳",
                     title: "Group",
                     tag: "Virtual or In-Person",
                     description: "Fun, interactive group lessons for friends, family, or colleagues. Available virtually or at your home or venue. A unique experience for parties and team building!",
