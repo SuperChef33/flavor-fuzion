@@ -70,7 +70,7 @@ function CookiesPage({ onAddToCart }) {
   const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
   const qualifiesForPromo = cartTotal >= 20;
 
-  const SHIPPING_RATES: Record<number, number> = {
+  const SHIPPING_RATES = {
     6: 3.50, 12: 5.00, 18: 6.50, 24: 6.50,
     30: 8.50, 36: 8.50, 42: 8.50, 48: 10.00, 54: 10.00, 60: 10.00,
   };
