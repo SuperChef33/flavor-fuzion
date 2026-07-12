@@ -256,6 +256,14 @@ export default function FlavorFuzionWebsite() {
   const [showTerms, setShowTerms]           = useState(false);
   const [showPromoPopup, setShowPromoPopup] = useState(true);
   const [showPromoBanner, setShowPromoBanner] = useState(true);
+  const [activeBanner, setActiveBanner] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveBanner(prev => (prev + 1) % 2);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -609,11 +617,16 @@ export default function FlavorFuzionWebsite() {
 
       {/* ── Promo Banner ── */}
       {showPromoBanner && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 101, background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
-          <span style={{ fontSize: "16px" }}>🍪</span>
-          <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, color: "#1A1208", margin: 0, textAlign: "center" }}>
-            🍪 Mix & Match cookie packages! Use code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px", letterSpacing: "0.08em" }}>SUMRCOOKIE</span> for <strong>20% OFF</strong> orders over $20 ✨
-          </p>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 101, background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", transition: "all 0.5s ease" }}>
+          {activeBanner === 0 ? (
+            <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, color: "#1A1208", margin: 0, textAlign: "center" }}>
+              🍪 Mix & Match cookie packages! Use code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px", letterSpacing: "0.08em" }}>SUMRCOOKIE</span> for <strong>20% OFF</strong> orders over $20 ✨
+            </p>
+          ) : (
+            <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, color: "#1A1208", margin: 0, textAlign: "center" }}>
+              🚨 First Responders get <strong>15% off</strong> workplace lunch orders! Just mention it when ordering. Thank you for your service! ❤️
+            </p>
+          )}
           <button onClick={() => setShowPromoBanner(false)} style={{ background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "#1A1208", marginLeft: "8px", lineHeight: 1, flexShrink: 0 }}>✕</button>
         </div>
       )}
@@ -629,10 +642,19 @@ export default function FlavorFuzionWebsite() {
             <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.7, marginBottom: "24px" }}>
               <strong>Order over $20 and get 20% OFF!</strong> Mix & Match cookie packages to place your delicious cookie order. Keep some for yourself, give some as tasty gifts. Let's see how the cookie crumbles! 🍪 Enter the code below at checkout:
             </p>
-            <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", borderRadius: "12px", padding: "16px 24px", marginBottom: "28px" }}>
+            <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", borderRadius: "12px", padding: "16px 24px", marginBottom: "20px" }}>
               <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1A1208", marginBottom: "4px" }}>Your Promo Code</div>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "28px", fontWeight: 700, color: "#1A1208", letterSpacing: "0.08em" }}>SUMRCOOKIE</div>
             </div>
+
+            {/* First Responder Promo */}
+            <div style={{ background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", borderRadius: "12px", padding: "16px 24px", marginBottom: "24px" }}>
+              <div style={{ fontSize: "24px", marginBottom: "6px" }}>🚨</div>
+              <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "4px" }}>First Responders</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "20px", fontWeight: 700, color: "#F5E4A0" }}>15% Off Workplace Lunch Orders!</div>
+              <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "12px", color: "rgba(254,250,244,0.75)", marginTop: "6px" }}>Just mention it when ordering. Thank you for your service! ❤️</div>
+            </div>
+
             <button onClick={() => { setShowPromoPopup(false); setActivePage("Get Cookies 🍪"); }}
               style={{ background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "14px 32px", fontFamily: "'Jost', sans-serif", fontSize: "14px", fontWeight: 600, cursor: "pointer", width: "100%", marginBottom: "12px" }}>
               🍪 Get Cookies Now
