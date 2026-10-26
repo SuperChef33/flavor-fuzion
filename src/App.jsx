@@ -46,8 +46,7 @@ const testimonials = [
 ];
 
 const COOKIE_TIERS = [
-  { pack: 6,  price: 5.75,  link: "https://buy.stripe.com/9B6cN4cBX8Iuc9K2GMasg04?prefilled_promo_code=SUMRCOOK
-    IE" },
+  { pack: 6,  price: 5.75,  link: "https://buy.stripe.com/9B6cN4cBX8Iuc9K2GMasg04?prefilled_promo_code=FALLCOOKIE" },
   { pack: 12, price: 11.25, link: "https://buy.stripe.com/aFa14m9pL4se4HigxCasg05?prefilled_promo_code=FALLCOOKIE" },
   { pack: 18, price: 17.00, link: "https://buy.stripe.com/6oUbJ059v0bYflWdlqasg06?prefilled_promo_code=FALLCOOKIE" },
   { pack: 24, price: 23.00, link: "https://buy.stripe.com/4gMfZgatP2k6a1Cepuasg07?prefilled_promo_code=FALLCOOKIE" },
