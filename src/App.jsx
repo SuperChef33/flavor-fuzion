@@ -46,16 +46,17 @@ const testimonials = [
 ];
 
 const COOKIE_TIERS = [
-  { pack: 6,  price: 5.75,  link: "https://buy.stripe.com/9B6cN4cBX8Iuc9K2GMasg04?prefilled_promo_code=SUMRCOOKIE" },
-  { pack: 12, price: 11.25, link: "https://buy.stripe.com/aFa14m9pL4se4HigxCasg05?prefilled_promo_code=SUMRCOOKIE" },
-  { pack: 18, price: 17.00, link: "https://buy.stripe.com/6oUbJ059v0bYflWdlqasg06?prefilled_promo_code=SUMRCOOKIE" },
-  { pack: 24, price: 23.00, link: "https://buy.stripe.com/4gMfZgatP2k6a1Cepuasg07?prefilled_promo_code=SUMRCOOKIE" },
-  { pack: 30, price: 28.00, link: "https://buy.stripe.com/dRm14matP7Eq6Pq1CIasg08?prefilled_promo_code=SUMRCOOKIE" },
-  { pack: 36, price: 33.00, link: "https://buy.stripe.com/cNi9AS6dz6AmddO3KQasg09?prefilled_promo_code=SUMRCOOKIE" },
-  { pack: 42, price: 37.50, link: "https://buy.stripe.com/00wfZgdG11g21v6gxCasg0a?prefilled_promo_code=SUMRCOOKIE" },
-  { pack: 48, price: 42.00, link: "https://buy.stripe.com/6oU14m7hD9My2za5SYasg0b?prefilled_promo_code=SUMRCOOKIE" },
-  { pack: 54, price: 46.50, link: "https://buy.stripe.com/6oU00iatP6Am0r26X2asg0c?prefilled_promo_code=SUMRCOOKIE" },
-  { pack: 60, price: 54.50, link: "https://buy.stripe.com/9B68wO6dzgaWb5Gbdiasg0d?prefilled_promo_code=SUMRCOOKIE" },
+  { pack: 6,  price: 5.75,  link: "https://buy.stripe.com/9B6cN4cBX8Iuc9K2GMasg04?prefilled_promo_code=SUMRCOOK
+    IE" },
+  { pack: 12, price: 11.25, link: "https://buy.stripe.com/aFa14m9pL4se4HigxCasg05?prefilled_promo_code=FALLCOOKIE" },
+  { pack: 18, price: 17.00, link: "https://buy.stripe.com/6oUbJ059v0bYflWdlqasg06?prefilled_promo_code=FALLCOOKIE" },
+  { pack: 24, price: 23.00, link: "https://buy.stripe.com/4gMfZgatP2k6a1Cepuasg07?prefilled_promo_code=FALLCOOKIE" },
+  { pack: 30, price: 28.00, link: "https://buy.stripe.com/dRm14matP7Eq6Pq1CIasg08?prefilled_promo_code=FALLCOOKIE" },
+  { pack: 36, price: 33.00, link: "https://buy.stripe.com/cNi9AS6dz6AmddO3KQasg09?prefilled_promo_code=FALLCOOKIE" },
+  { pack: 42, price: 37.50, link: "https://buy.stripe.com/00wfZgdG11g21v6gxCasg0a?prefilled_promo_code=FALLCOOKIE" },
+  { pack: 48, price: 42.00, link: "https://buy.stripe.com/6oU14m7hD9My2za5SYasg0b?prefilled_promo_code=FALLCOOKIE" },
+  { pack: 54, price: 46.50, link: "https://buy.stripe.com/6oU00iatP6Am0r26X2asg0c?prefilled_promo_code=FALLCOOKIE" },
+  { pack: 60, price: 54.50, link: "https://buy.stripe.com/9B68wO6dzgaWb5Gbdiasg0d?prefilled_promo_code=FALLCOOKIE" },
 ];
 
 function CookiesPage({ onAddToCart }) {
@@ -164,7 +165,7 @@ function CookiesPage({ onAddToCart }) {
       {/* Promo Banner */}
       <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "16px 80px", textAlign: "center" }}>
         <p className="jost" style={{ fontSize: "14px", fontWeight: 700, color: "#1A1208", margin: 0 }}>
-          🍪 Mix & Match any packages! <strong>Order over $20 and get 20% OFF</strong> with code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px" }}>SUMRCOOKIE</span> — automatically applied at checkout!
+          🍪 Mix & Match any packages! <strong>Order over $20 and get 20% OFF</strong> with code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px" }}>FALLCOOKIE</span> — automatically applied at checkout!
         </p>
       </div>
 
@@ -222,7 +223,7 @@ function CookiesPage({ onAddToCart }) {
                     Total: ${(cartTotal + shippingCost).toFixed(2)}
                   </div>
                   {qualifiesForPromo ? (
-                    <div className="jost" style={{ fontSize: "13px", color: "#3A6B3A", fontWeight: 600, marginTop: "4px" }}>✅ 20% off (SUMRCOOKIE) will be applied at checkout!</div>
+                    <div className="jost" style={{ fontSize: "13px", color: "#3A6B3A", fontWeight: 600, marginTop: "4px" }}>✅ 20% off (FALLCOOKIE) will be applied at checkout!</div>
                   ) : (
                     <div className="jost" style={{ fontSize: "13px", color: "#B5A48C", marginTop: "4px" }}>Add ${(20 - cartTotal).toFixed(2)} more to unlock 20% off + free shipping!</div>
                   )}
@@ -620,7 +621,7 @@ export default function FlavorFuzionWebsite() {
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 101, background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", transition: "all 0.5s ease" }}>
           {activeBanner === 0 ? (
             <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, color: "#1A1208", margin: 0, textAlign: "center" }}>
-              🍪 Mix & Match cookie packages! Use code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px", letterSpacing: "0.08em" }}>SUMRCOOKIE</span> for <strong>20% OFF</strong> orders over $20 ✨
+              🍪 Mix & Match cookie packages! Use code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px", letterSpacing: "0.08em" }}>FALLCOOKIE</span> for <strong>20% OFF</strong> orders over $20 ✨
             </p>
           ) : (
             <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, color: "#1A1208", margin: 0, textAlign: "center" }}>
@@ -644,7 +645,7 @@ export default function FlavorFuzionWebsite() {
             </p>
             <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", borderRadius: "12px", padding: "16px 24px", marginBottom: "20px" }}>
               <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1A1208", marginBottom: "4px" }}>Your Promo Code</div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "28px", fontWeight: 700, color: "#1A1208", letterSpacing: "0.08em" }}>SUMRCOOKIE</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "28px", fontWeight: 700, color: "#1A1208", letterSpacing: "0.08em" }}>FALLCOOKIE</div>
             </div>
 
             {/* First Responder Promo */}
