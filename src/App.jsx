@@ -301,7 +301,7 @@ export default function FlavorFuzionWebsite() {
   };
 
   const removeFromCart = (cartKey) => setCart(prev => prev.filter(i => i.cartKey !== cartKey));
-  const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const cartSubtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0); const cartItemCount = cart.reduce((sum, i) => sum + i.qty, 0); const cartShipping = cartItemCount === 0 ? 0 : (cartItemCount <= 2 ? 5 : cartItemCount <= 5 ? 8 : 12) + (cart.some(i => i.name.startsWith("Hoodie")) ? 2 : 0); const cartTotal = cartSubtotal + cartShipping;
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
   const handleCartCheckout = async () => {
@@ -1703,7 +1703,7 @@ export default function FlavorFuzionWebsite() {
             ))}
 
             <div style={{ padding: "20px 0", borderTop: "2px solid #0F1A0F", marginTop: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div className="jost" style={{ fontSize: "16px", fontWeight: 600 }}>Total</div>
+              <div className="jost" style={{ fontSize: "16px", fontWeight: 600 }}>Total {cartShipping > 0 && <span style={{ fontSize: "12px", fontWeight: 400, color: "#6B5E4E" }}>(includes ${cartShipping.toFixed(2)} shipping)</span>}</div>
               <div className="playfair" style={{ fontSize: "24px", fontWeight: 700 }}>${cartTotal.toFixed(2)}</div>
             </div>
 
