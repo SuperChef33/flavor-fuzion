@@ -1,1888 +1,981 @@
 import { useState, useEffect } from "react";
 
-// ── Color Palette ─────────────────────────────────────────────────────────────
-// Emerald: #50C878 / #3DDC84
-// Gold:    #B8860B / #DAA520
-// Purple:  #4A1B6B / #7B3FA0
-// Cream:   #FEFAF0
-// Dark:    #0F1A0F
+const SUPABASE_URL = "https://vqhhwukvheezunccehzm.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_aMDffSz8hpfjHjsD7_jq3g_ux_IKJKV";
 
-const PAGES = ["Home", "Menu", "About", "Get Cookies 🍪", "Contact"];
-
-const services = [
-  {
-    emoji: "🥗",
-    title: "Meal Prep",
-    description: "Fresh, healthy meals prepared weekly and delivered to your door. Eat well without the stress of cooking every night.",
-    color: "linear-gradient(160deg, #4A1B6B 0%, #6B2E8A 100%)",
-    tag: "Weekly Plans Available",
-  },
-  {
-    emoji: "🍽️",
-    title: "Catering",
-    description: "From intimate gatherings to large corporate events, Heather crafts custom menus that leave lasting impressions.",
-    color: "linear-gradient(160deg, #5A2280 0%, #1A7A5E 100%)",
-    tag: "Custom Menus Available",
-  },
-  {
-    emoji: "🕯️",
-    title: "Private Dinners",
-    description: "An exclusive chef's table experience in the comfort of your own home. Custom menus, plated service, unforgettable evenings.",
-    color: "linear-gradient(160deg, #1A7A5E 0%, #50C878 100%)",
-    tag: "By Appointment",
-  },
+// ── Combo definitions ─────────────────────────────────────────────────────────
+const COMBO_TIERS = [
+  { id: "3x3", label: "3 Entrées + 3 Sides", entrees: 3, sides: 3, discount: 0.05, badge: "5% OFF", color: "#F4A261" },
+  { id: "4x4", label: "4 Entrées + 4 Sides", entrees: 4, sides: 4, discount: 0.06, badge: "6% OFF", color: "#52B788" },
+  { id: "5x5", label: "5 Entrées + 5 Sides", entrees: 5, sides: 5, discount: 0.07, badge: "7% OFF", color: "#CDB4DB" },
 ];
 
-const testimonials = [
-  { name: "Greg K.", text: "Chef Heather is exceptionally talented and client-focused. She's created many exceptional meals for our family, and also catered in-home events. She has a great attention to detail, and her food is delicious! Highly recommended!", stars: 5 },
-  { name: "Alex S.", text: "If I could give 6 stars, I would. Heather is the best! Her food is absolutely delicious and she is a dream to work with. She always gets what I'm looking for and delivers it perfectly!", stars: 5 },
-  { name: "Ms. Lindor", text: "The food is absolutely amazing and delicious. Heather is also professional and a life saver! Heather was able to prepare meals for me for the entire week. I can't wait to receive my next order!", stars: 5 },
-  { name: "Robinson R.", text: "Chef Heather Janey is a master of the culinary arts world! Everything I've ordered comes out EXACTLY how I WANTED! I recommend this chef to anyone who's a foodie! Will be ordering soon again!", stars: 5 },
-  { name: "Elizabeth", text: "Chef Heather Janey's first impression was punctual. Her presentation skills, personality, culinary art, spices and food selection was on point. Being Pescatarian was not a challenge for her — she made any adjustments to the menu requested and still made it delectable. She made my special day stress free and special. Thank You Chef Janey!", stars: 5 },
-  { name: "Harriet", text: "Heather was amazing, the meal was delicious and the presentation was truly a work of art. She was punctual even though it was raining. My family thoroughly enjoyed celebrating my daughter's birthday and having Heather as our Chef enhanced the celebration in a great way. I definitely will use Heather again and will recommend her to friends and family.", stars: 5 },
-  { name: "Kylie", text: "Heather was incredible for my boyfriend and me! She showed up on time and got cooking immediately. We had a Southern food menu, which Heather presented beautifully. We finished every course completely because we just could not get enough of the delicious flavors. I'm eager to hire her again for a larger party so I can show her off to my friends!", stars: 5 },
-  { name: "Amod", text: "We had an outstanding dinner experience with Chef Heather. I hired her to celebrate my wife's birthday with a private dinner. She worked within our dietary restrictions to craft a professionally presented and exceptionally tasty meal — dishes on par with some of the best fine dining restaurants in New York. I wholeheartedly recommend working with Chef Heather.", stars: 5 },
-  { name: "Webster", text: "Heather came in and helped us out when we needed it most! She created a tailored dairy-free menu for a week's worth of meals when we just welcomed our second son. Every single dish was incredible. Not only did she make all of these incredible dishes, but she also answered every single one of my thousand questions and left our very unorganized kitchen spotless. The best gift and chef that we could have asked for!", stars: 5 },
-];
+const PLACEHOLDERS = {
+  "Herb-Crusted Salmon Bowl": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&q=80",
+  "Mediterranean Chicken":   "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/IMG-20260501-WA0021.jpg",
+  "Teriyaki Salmon":         "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&q=80",
+  "Turkey Meatballs":                    "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_125551213.png",
+  "Not Your Mama\u2019s Turkey Meatballs": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_125551213.png",
+  "Not Your Mama's Turkey Meatballs":    "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_125551213.png",
+  "Deluxe Burgers":          "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80",
+  "Shrimp Stir Fry":         "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/IMG-20260501-WA0022.jpg",
+  "Chicken Tikka Masala":    "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&q=80",
+  "Beef & Broccoli":         "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/IMG-20260501-WA0018.jpg",
+  "Seafood Boil Experience": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/IMG-20260501-WA0019.jpg",
+  "Mediterranean Mezze":     "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/IMG-20260501-WA0020.jpg",
+  "Southern Comfort Spread": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=600&q=80",
+  "Asian Fusion Banquet":    "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=600&q=80",
+  "Holiday Feast Package":   "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/IMG-20260501-WA0017.jpg",
+  "Vegan Lentil Curry":      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&q=80",
+  "Silken Tofu Simple Stir Fry": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_114235232.png",
+  "BBQ Feast Package":       "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&q=80",
+  "Elegant Brunch Spread":   "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=600&q=80",
+  "Taco & Tequila Bar":      "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80",
+  "Date Night for Two":      "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/1000070275%20(1).jpg",
+  "Dinner Party Experience": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&q=80",
+  "Garlic Roasted Potatoes": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_102739586.png",
+  "Steamed Jasmine Rice":    "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=600&q=80",
+  "Sautéed Garlic Broccolini": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_102909005.png",
+  "Mac & Cheese":            "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_102344979.png",
+  "Roasted Sweet Potatoes":  "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_103112725.png",
+  "Garden Side Salad":       "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80",
+  "Almond Lavender Cookies - 6 Pack":  "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg",
+  "Almond Lavender Cookies - 12 Pack": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg",
+  "Almond Lavender Cookies - 18 Pack": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg",
+  "Almond Lavender Cookies - 24 Pack": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg",
+  "Almond Lavender Cookies - 30 Pack": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg",
+  "Almond Lavender Cookies - 36 Pack": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg",
+  "Almond Lavender Cookies - 42 Pack": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg",
+  "Almond Lavender Cookies - 48 Pack": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg",
+  "Almond Lavender Cookies - 54 Pack": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg",
+  "Almond Lavender Cookies - 60 Pack": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg",
+};
+const FALLBACK = "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=600&q=80";
 
-const COOKIE_TIERS = [
-  { pack: 6,  price: 5.75,  link: "https://buy.stripe.com/9B6cN4cBX8Iuc9K2GMasg04?prefilled_promo_code=FALLCOOKIE" },
-  { pack: 12, price: 11.25, link: "https://buy.stripe.com/aFa14m9pL4se4HigxCasg05?prefilled_promo_code=FALLCOOKIE" },
-  { pack: 18, price: 17.00, link: "https://buy.stripe.com/6oUbJ059v0bYflWdlqasg06?prefilled_promo_code=FALLCOOKIE" },
-  { pack: 24, price: 23.00, link: "https://buy.stripe.com/4gMfZgatP2k6a1Cepuasg07?prefilled_promo_code=FALLCOOKIE" },
-  { pack: 30, price: 28.00, link: "https://buy.stripe.com/dRm14matP7Eq6Pq1CIasg08?prefilled_promo_code=FALLCOOKIE" },
-  { pack: 36, price: 33.00, link: "https://buy.stripe.com/cNi9AS6dz6AmddO3KQasg09?prefilled_promo_code=FALLCOOKIE" },
-  { pack: 42, price: 37.50, link: "https://buy.stripe.com/00wfZgdG11g21v6gxCasg0a?prefilled_promo_code=FALLCOOKIE" },
-  { pack: 48, price: 42.00, link: "https://buy.stripe.com/6oU14m7hD9My2za5SYasg0b?prefilled_promo_code=FALLCOOKIE" },
-  { pack: 54, price: 46.50, link: "https://buy.stripe.com/6oU00iatP6Am0r26X2asg0c?prefilled_promo_code=FALLCOOKIE" },
-  { pack: 60, price: 54.50, link: "https://buy.stripe.com/9B68wO6dzgaWb5Gbdiasg0d?prefilled_promo_code=FALLCOOKIE" },
-];
+const tagColors = {
+  "GF": "#52B788", "Vegan": "#52B788", "High Protein": "#E76F51",
+  "Popular": "#E9C46A", "Crowd Fave": "#E9C46A", "Romantic": "#CDB4DB",
+  "Custom Menu": "#BDE0FE", "Premium": "#BDE0FE",
+  "Vegetarian Option": "#52B788", "GF Option": "#52B788",
+};
 
-function CookiesPage({ onAddToCart }) {
-  const [cart, setCart]       = useState({});
-  const [loading, setLoading] = useState(false);
+const CATEGORIES = ["All", "Meal Prep", "Catering", "Private Dinners", "🍪 Cookies", "🍱 Combos", "🏢 Workplace Lunch", "🍔 Build a Burger"];
 
-  const cartTotal = Object.entries(cart).reduce((sum, [pack, qty]) => {
-    const tier = COOKIE_TIERS.find(t => t.pack === Number(pack));
-    return sum + (tier ? tier.price * qty : 0);
-  }, 0);
+function getImage(item) { return item.image_url || PLACEHOLDERS[item.name] || FALLBACK; }
 
-  const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-  const qualifiesForPromo = cartTotal >= 20;
+const inputStyle = {
+  width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8",
+  borderRadius: "10px", fontFamily: "'DM Sans', sans-serif", fontSize: "14px",
+  color: "#1A1208", background: "#FEFAF4", outline: "none", transition: "border-color 0.2s",
+};
+const labelStyle = {
+  fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 500,
+  letterSpacing: "0.06em", textTransform: "uppercase", color: "#B5A48C",
+  marginBottom: "6px", display: "block",
+};
+function Field({ label, children }) {
+  return <div style={{ marginBottom: "18px" }}><label style={labelStyle}>{label}</label>{children}</div>;
+}
 
-  const SHIPPING_RATES = {
-    6: 3.50, 12: 5.00, 18: 6.50, 24: 6.50,
-    30: 8.50, 36: 8.50, 42: 8.50, 48: 10.00, 54: 10.00, 60: 10.00,
+// ── Combo Builder ─────────────────────────────────────────────────────────────
+function ComboBuilder({ menuItems, onAddCombo }) {
+  const [selectedTier, setSelectedTier] = useState(null);
+  const [selectedEntrees, setSelectedEntrees] = useState([]);
+  const [selectedSides, setSelectedSides]     = useState([]);
+  const [added, setAdded] = useState(false);
+
+  const entrees = menuItems.filter((i) => i.category === "Meal Prep");
+  const sides   = menuItems.filter((i) => i.category === "Sides");
+
+  const tier = COMBO_TIERS.find((t) => t.id === selectedTier);
+
+  const toggleItem = (item, list, setList, max) => {
+    const exists = list.find((i) => i.id === item.id);
+    if (exists) { setList(list.filter((i) => i.id !== item.id)); return; }
+    if (list.length >= max) return;
+    setList([...list, item]);
   };
 
-  const maxShipping = cartCount > 0
-    ? Math.max(...Object.keys(cart).map(p => SHIPPING_RATES[Number(p)] || 10))
-    : 0;
-  const shippingCost = maxShipping;
+  const rawTotal = [
+    ...selectedEntrees.map((i) => Number(i.price)),
+    ...selectedSides.map((i) => Number(i.price)),
+  ].reduce((s, p) => s + p, 0);
 
-  const updateCart = (pack, delta) => {
-    setCart(prev => {
-      const current = prev[pack] || 0;
-      const next = Math.max(0, current + delta);
-      if (next === 0) { const { [pack]: _, ...rest } = prev; return rest; }
-      return { ...prev, [pack]: next };
+  const discountedTotal = tier ? rawTotal * (1 - tier.discount) : rawTotal;
+  const savings = rawTotal - discountedTotal;
+
+  const isComplete = tier &&
+    selectedEntrees.length === tier.entrees &&
+    selectedSides.length === tier.sides;
+
+  const handleAdd = () => {
+    if (!isComplete) return;
+    onAddCombo({
+      id: `combo-${Date.now()}`,
+      type: "combo",
+      label: tier.label,
+      entrees: selectedEntrees,
+      sides: selectedSides,
+      rawTotal,
+      discountedTotal,
+      savings,
+      discount: tier.discount,
+      badge: tier.badge,
     });
+    setSelectedTier(null);
+    setSelectedEntrees([]);
+    setSelectedSides([]);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2500);
   };
 
-  const handleCheckout = async () => {
-    if (cartCount === 0) return;
-    setLoading(true);
-    try {
-      const lineItems = Object.entries(cart).map(([pack, qty]) => {
-        const tier = COOKIE_TIERS.find(t => t.pack === Number(pack));
-        return { pack: Number(pack), qty, price: tier.price };
-      });
-      const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/functions/v1/cookie-cart-checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxaGh3dWt2aGVlenVuY2NlaHptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MzEzNjgsImV4cCI6MjA5MDEwNzM2OH0.7Dno6w4GyX5DXTcCMLnT0C1FvIBpqHrXASr-aDf8pzQ",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxaGh3dWt2aGVlenVuY2NlaHptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MzEzNjgsImV4cCI6MjA5MDEwNzM2OH0.7Dno6w4GyX5DXTcCMLnT0C1FvIBpqHrXASr-aDf8pzQ",
-        },
-        body: JSON.stringify({ lineItems }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        // Fallback for single item
-        const packs = Object.keys(cart);
-        if (packs.length === 1) {
-          const tier = COOKIE_TIERS.find(t => t.pack === Number(packs[0]));
-          if (tier) window.open(tier.link, "_blank");
-        } else {
-          alert("Something went wrong. Please try again or contact Heather directly.");
-        }
-      }
-    } catch (err) {
-      const packs = Object.keys(cart);
-      if (packs.length === 1) {
-        const tier = COOKIE_TIERS.find(t => t.pack === Number(packs[0]));
-        if (tier) window.open(tier.link, "_blank");
-      } else {
-        alert("Something went wrong. Please try again or contact Heather directly.");
-      }
-    }
-    setLoading(false);
-  };
+  const SelectableCard = ({ item, selected, onToggle, disabled }) => (
+    <div onClick={() => !disabled && onToggle(item)}
+      style={{
+        display: "flex", alignItems: "center", gap: "12px",
+        padding: "12px", borderRadius: "12px", cursor: disabled && !selected ? "not-allowed" : "pointer",
+        border: `2px solid ${selected ? "#1A1208" : "#EEE8DF"}`,
+        background: selected ? "#1A120808" : "#fff",
+        opacity: disabled && !selected ? 0.45 : 1,
+        transition: "all 0.2s",
+      }}>
+      <img src={getImage(item)} alt={item.name} onError={(e) => { e.target.src = FALLBACK; }}
+        style={{ width: "48px", height: "48px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 }} />
+      <div style={{ flex: 1 }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "16px", fontWeight: 600, lineHeight: 1.2 }}>{item.name}</div>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C" }}>${item.price} / serving</div>
+      </div>
+      <div style={{
+        width: "22px", height: "22px", borderRadius: "50%", flexShrink: 0,
+        border: `2px solid ${selected ? "#1A1208" : "#D4C9B8"}`,
+        background: selected ? "#1A1208" : "transparent",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        color: "#fff", fontSize: "12px",
+      }}>{selected ? "✓" : ""}</div>
+    </div>
+  );
 
   return (
     <div>
-      {/* Hero */}
-      <div style={{ background: "linear-gradient(135deg, #CDB4DB 0%, #0F1A0F 100%)", padding: "120px 80px 80px", textAlign: "center" }}>
-        <div style={{ maxWidth: "500px", margin: "0 auto 32px", borderRadius: "20px", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
-          <img src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg" alt="Almond Lavender Cookies" style={{ width: "100%", height: "300px", objectFit: "cover", display: "block" }} />
+      {/* Hero Banner */}
+      <div style={{ background: "linear-gradient(135deg, #1A1208 0%, #3D2B1A 100%)", borderRadius: "20px", padding: "36px 40px", marginBottom: "36px", color: "#FEFAF4", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "20px" }}>
+        <div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", opacity: 0.6, marginBottom: "8px" }}>Save more, eat better</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "36px", fontWeight: 300, lineHeight: 1.1, marginBottom: "10px" }}>Build your <em>perfect combo</em></div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", opacity: 0.75, lineHeight: 1.6 }}>Pick a combo size, choose your entrées and sides, and save up to 7% automatically.</div>
         </div>
-        <span className="section-tag">Freshly Baked</span>
-        <h1 className="playfair" style={{ fontSize: "64px", fontWeight: 600, color: "#FEFAF0", lineHeight: 1.1, marginBottom: "20px" }}>
-          Almond Lavender<br /><em className="gold">Cookies</em>
-        </h1>
-        <div className="divider" style={{ margin: "16px auto" }} />
-        <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.75)", maxWidth: "560px", margin: "0 auto", fontWeight: 300, lineHeight: 1.7 }}>
-          Organic, Gluten-Free cookies made with love by Chef Heather Janey. Delicate almond flour base with a hint of lavender — perfectly balanced and irresistible.
-        </p>
+        <div style={{ fontSize: "64px" }}>🍱</div>
       </div>
 
-      {/* Ingredients */}
-      <div style={{ background: "#0F1A0F", padding: "48px 80px", textAlign: "center" }}>
-        <div className="jost" style={{ fontSize: "13px", color: "#B5A48C", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "12px" }}>Ingredients</div>
-        <p className="jost" style={{ fontSize: "14px", color: "rgba(254,250,240,0.7)", maxWidth: "700px", margin: "0 auto", lineHeight: 1.8, fontWeight: 300 }}>
-          Organic Almond Flour · Organic GF Flour · Organic Cane Sugar · Organic Brown Sugar · Organic Butter · Organic Eggs · Organic Vanilla Extract · Non-GMO Lavender Extract · Baking Powder · Baking Soda · Sea Salt
-        </p>
-        <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "20px", flexWrap: "wrap" }}>
-          {["🌿 Organic", "🌾 Gluten-Free", "❤️ Made with Love"].map((tag) => (
-            <span key={tag} className="jost" style={{ background: "rgba(205,180,219,0.15)", color: "#CDB4DB", padding: "6px 16px", borderRadius: "100px", fontSize: "12px", fontWeight: 600 }}>{tag}</span>
+      {/* Step 1 — Choose Tier */}
+      <div style={{ marginBottom: "36px" }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600, marginBottom: "4px" }}>Step 1 — Choose your combo size</div>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", marginBottom: "20px" }}>Bigger combos save more!</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "16px" }}>
+          {COMBO_TIERS.map((t) => (
+            <div key={t.id} onClick={() => { setSelectedTier(t.id); setSelectedEntrees([]); setSelectedSides([]); }}
+              style={{
+                borderRadius: "16px", padding: "20px", cursor: "pointer",
+                border: `2px solid ${selectedTier === t.id ? "#1A1208" : "#EEE8DF"}`,
+                background: selectedTier === t.id ? "#1A120808" : "#fff",
+                transition: "all 0.2s", position: "relative", overflow: "hidden",
+              }}>
+              <div style={{ position: "absolute", top: "12px", right: "12px", background: t.color, color: "#fff", borderRadius: "100px", padding: "2px 10px", fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 700 }}>{t.badge}</div>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600, marginBottom: "4px", marginTop: "8px" }}>{t.label}</div>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Promo Banner */}
-      <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "16px 80px", textAlign: "center" }}>
-        <p className="jost" style={{ fontSize: "14px", fontWeight: 700, color: "#1A1208", margin: 0 }}>
-          🍪 Mix & Match any packages! <strong>Order over $20 and get 20% OFF</strong> with code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px" }}>FALLCOOKIE</span> — automatically applied at checkout!
+      {/* Steps 2 & 3 — only show after tier selected */}
+      {tier && (
+        <>
+          {/* Step 2 — Choose Entrées */}
+          <div style={{ marginBottom: "36px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600 }}>Step 2 — Choose {tier.entrees} entrée{tier.entrees > 1 ? "s" : ""}</div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: selectedEntrees.length === tier.entrees ? "#52B788" : "#B5A48C", fontWeight: 500 }}>
+                {selectedEntrees.length} / {tier.entrees} selected
+              </div>
+            </div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", marginBottom: "16px" }}>Pick from Heather's meal prep menu</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {entrees.length === 0
+                ? <div style={{ fontFamily: "'DM Sans', sans-serif", color: "#B5A48C", fontSize: "14px" }}>No entrées available right now.</div>
+                : entrees.map((item) => (
+                  <SelectableCard key={item.id} item={item}
+                    selected={!!selectedEntrees.find((i) => i.id === item.id)}
+                    onToggle={(i) => toggleItem(i, selectedEntrees, setSelectedEntrees, tier.entrees)}
+                    disabled={selectedEntrees.length >= tier.entrees && !selectedEntrees.find((i) => i.id === item.id)} />
+                ))}
+            </div>
+          </div>
+
+          {/* Step 3 — Choose Sides */}
+          <div style={{ marginBottom: "36px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600 }}>Step 3 — Choose {tier.sides} side{tier.sides > 1 ? "s" : ""}</div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: selectedSides.length === tier.sides ? "#52B788" : "#B5A48C", fontWeight: 500 }}>
+                {selectedSides.length} / {tier.sides} selected
+              </div>
+            </div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", marginBottom: "16px" }}>Complete your combo with sides</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {sides.length === 0
+                ? <div style={{ fontFamily: "'DM Sans', sans-serif", color: "#B5A48C", fontSize: "14px" }}>No sides available right now.</div>
+                : sides.map((item) => (
+                  <SelectableCard key={item.id} item={item}
+                    selected={!!selectedSides.find((i) => i.id === item.id)}
+                    onToggle={(i) => toggleItem(i, selectedSides, setSelectedSides, tier.sides)}
+                    disabled={selectedSides.length >= tier.sides && !selectedSides.find((i) => i.id === item.id)} />
+                ))}
+            </div>
+          </div>
+
+          {/* Summary + Add to Order */}
+          <div style={{ background: isComplete ? "#1A1208" : "#F5F0E8", borderRadius: "16px", padding: "24px", marginBottom: "12px", transition: "background 0.3s" }}>
+            {isComplete ? (
+              <>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                  <div>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "20px", fontWeight: 600, color: "#FEFAF4" }}>{tier.label}</div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C", marginTop: "2px" }}>
+                      {tier.entrees} entrées + {tier.sides} sides
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C", textDecoration: "line-through" }}>${rawTotal.toFixed(2)}</div>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "28px", fontWeight: 600, color: "#FEFAF4" }}>${discountedTotal.toFixed(2)}</div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#52B788", fontWeight: 600 }}>You save ${savings.toFixed(2)}!</div>
+                  </div>
+                </div>
+                <button onClick={handleAdd} style={{ width: "100%", background: "#E76F51", color: "#fff", border: "none", borderRadius: "10px", padding: "14px", fontFamily: "'DM Sans', sans-serif", fontSize: "15px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.03em", transition: "background 0.2s" }}>
+                  {added ? "✓ Added to Order!" : "Add Combo to Order →"}
+                </button>
+              </>
+            ) : (
+              <div style={{ textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", padding: "8px 0" }}>
+                {selectedEntrees.length < tier.entrees
+                  ? `Choose ${tier.entrees - selectedEntrees.length} more entrée${tier.entrees - selectedEntrees.length !== 1 ? "s" : ""} to continue`
+                  : `Choose ${tier.sides - selectedSides.length} more side${tier.sides - selectedSides.length !== 1 ? "s" : ""} to complete your combo`}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Order Form ────────────────────────────────────────────────────────────────
+function OrderForm({ cartItems, comboItems, onSuccess, onCancel }) {
+  const [form, setForm] = useState({
+    customer_name: "", customer_email: "", customer_phone: "",
+    event_date: "", event_time: "",
+    guest_count: "", entree_count: "", appetizer_count: "", side_count: "",
+    gluten_free: false, organic: false,
+    dietary_notes: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+
+  const validate = () => {
+    const e = {};
+    if (!form.customer_name.trim()) e.customer_name = "Name is required";
+    if (!form.customer_email.trim()) e.customer_email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(form.customer_email)) e.customer_email = "Enter a valid email";
+    if (!form.event_date) e.event_date = "Please choose a date";
+    if (!form.guest_count || Number(form.guest_count) < 1) e.guest_count = "Enter number of guests";
+    return e;
+  };
+
+  const submit = async () => {
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
+    setSubmitting(true);
+    try {
+      const regularItems = cartItems.map((i) => ({ id: i.id, name: i.name, price: i.price, qty: i.qty }));
+      const combosSummary = comboItems.map((c) => ({
+        type: "combo", label: c.label, badge: c.badge,
+        entrees: c.entrees.map((i) => i.name),
+        sides: c.sides.map((i) => i.name),
+        rawTotal: c.rawTotal, discountedTotal: c.discountedTotal, savings: c.savings,
+      }));
+      const payload = {
+        customer_name: form.customer_name.trim(), customer_email: form.customer_email.trim(),
+        customer_phone: form.customer_phone.trim() || null, event_date: form.event_date,
+        event_time: form.event_time || null, guest_count: Number(form.guest_count) || null,
+        entree_count: Number(form.entree_count) || null, appetizer_count: Number(form.appetizer_count) || null,
+        side_count: Number(form.side_count) || null, dietary_notes: form.dietary_notes.trim() || null,
+        items: [...regularItems, ...combosSummary],
+        status: "new",
+      };
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+        method: "POST",
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error();
+      onSuccess(form.customer_name);
+    } catch { setErrors({ submit: "Something went wrong. Please try again or contact us directly." }); }
+    finally { setSubmitting(false); }
+  };
+
+  const err = (k) => errors[k] ? <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#E76F51", marginTop: "4px" }}>{errors[k]}</div> : null;
+
+  const allItems = [
+    ...cartItems.map((i) => ({ key: i.id, thumb: getImage(i), name: i.name, sub: `$${i.price} × ${i.qty}` })),
+    ...comboItems.map((c) => ({ key: c.id, thumb: null, name: c.label, sub: `${c.entrees.map(i=>i.name).join(", ")} + ${c.sides.map(i=>i.name).join(", ")} — $${c.discountedTotal.toFixed(2)} (${c.badge})` })),
+  ];
+
+  return (
+    <div style={{ padding: "32px 24px", background: "#fff" }}>
+      <div style={{ marginBottom: "28px" }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "26px", fontWeight: 600, marginBottom: "6px" }}>Request a Quote</div>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", lineHeight: 1.6 }}>Fill in your details and Heather will be in touch to confirm pricing.</div>
+      </div>
+
+      {allItems.length > 0 && (
+        <div style={{ background: "#FEFAF4", borderRadius: "12px", border: "1px solid #EEE8DF", padding: "16px", marginBottom: "24px" }}>
+          <div style={{ ...labelStyle, marginBottom: "12px" }}>Your Order</div>
+          {allItems.map((item) => (
+            <div key={item.key} style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
+              {item.thumb
+                ? <img src={item.thumb} alt={item.name} onError={(e) => { e.target.src = FALLBACK; }} style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 }} />
+                : <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "#1A1208", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>🍱</div>
+              }
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 500 }}>{item.name}</div>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#B5A48C", lineHeight: 1.5 }}>{item.sub}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600, marginBottom: "16px", paddingBottom: "8px", borderBottom: "1px solid #EEE8DF" }}>Contact Information</div>
+      <Field label="Full Name *"><input style={inputStyle} placeholder="Jane Smith" value={form.customer_name} onChange={(e) => set("customer_name", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("customer_name")}</Field>
+      <Field label="Email Address *"><input style={inputStyle} type="email" placeholder="jane@email.com" value={form.customer_email} onChange={(e) => set("customer_email", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("customer_email")}</Field>
+      <Field label="Phone Number"><input style={inputStyle} type="tel" placeholder="(555) 123-4567" value={form.customer_phone} onChange={(e) => set("customer_phone", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
+
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600, margin: "24px 0 16px", paddingBottom: "8px", borderBottom: "1px solid #EEE8DF" }}>Order Details</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        <Field label="Preferred Date *"><input style={inputStyle} type="date" value={form.event_date} min={new Date().toISOString().split("T")[0]} onChange={(e) => set("event_date", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("event_date")}</Field>
+        <Field label="Preferred Time"><input style={inputStyle} type="time" value={form.event_time} onChange={(e) => set("event_time", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
+      </div>
+      <Field label="Number of Guests *"><input style={inputStyle} type="number" min="1" placeholder="e.g. 25" value={form.guest_count} onChange={(e) => set("guest_count", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} />{err("guest_count")}</Field>
+
+
+
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600, margin: "24px 0 16px", paddingBottom: "8px", borderBottom: "1px solid #EEE8DF" }}>Dietary Notes & Allergies</div>
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600, margin: "24px 0 16px", paddingBottom: "8px", borderBottom: "1px solid #EEE8DF" }}>Dietary Preferences</div>
+      <div style={{ background: "#FEFAF0", borderRadius: "12px", padding: "16px", marginBottom: "16px", border: "1px solid #EEE8DF" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+            <input type="checkbox" checked={form.gluten_free || false} onChange={(e) => set("gluten_free", e.target.checked)}
+              style={{ width: "18px", height: "18px", accentColor: "#1A1208", cursor: "pointer" }} />
+            <div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 600, color: "#1A1208" }}>🌾 Gluten-Free</div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C" }}>May increase price depending on ingredients required</div>
+            </div>
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+            <input type="checkbox" checked={form.organic || false} onChange={(e) => set("organic", e.target.checked)}
+              style={{ width: "18px", height: "18px", accentColor: "#1A1208", cursor: "pointer" }} />
+            <div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 600, color: "#1A1208" }}>🌿 Organic Ingredients</div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C" }}>Organic sourcing may increase the final price</div>
+            </div>
+          </label>
+        </div>
+      </div>
+      <Field label="Any allergies or dietary restrictions?"><textarea style={{ ...inputStyle, height: "100px", resize: "vertical" }} placeholder="e.g. 3 guests are gluten-free, 1 is allergic to shellfish…" value={form.dietary_notes} onChange={(e) => set("dietary_notes", e.target.value)} onFocus={(e) => e.target.style.borderColor="#1A1208"} onBlur={(e) => e.target.style.borderColor="#D4C9B8"} /></Field>
+
+      {errors.submit && <div style={{ background: "#FEF0ED", border: "1px solid #E76F51", borderRadius: "10px", padding: "12px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#E76F51", marginBottom: "16px" }}>{errors.submit}</div>}
+
+      {/* Pricing Transparency Notice */}
+      <div style={{ background: "#FEFAF0", borderRadius: "12px", padding: "16px", marginTop: "16px", marginBottom: "8px", border: "1px solid #EEE8DF" }}>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>💡 Pricing Info</div>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#6B5E4E", lineHeight: 1.7, margin: "0 0 8px 0" }}>
+          Prices shown cover all food and ingredients. <strong>In-home services</strong> (Private Dinners, Catering & Dinner Parties) include a chef service fee of <strong>$45/hr</strong> (3-hr minimum) in your final quote. Meal prep has no service fee. Substitutions & custom requests may affect the final price.
+        </p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#6B5E4E", lineHeight: 1.7, margin: 0 }}>
+          🚗 <strong>Delivery:</strong> Within 10 miles $10 · 10–35 miles $18 · <strong>Free on meal prep orders over $150!</strong>
         </p>
       </div>
 
-      {/* Order Section */}
-      <div style={{ padding: "60px 80px", background: "#FEFAF0" }}>
-        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-          <span className="section-tag">Build Your Order</span>
-          <h2 className="playfair" style={{ fontSize: "36px", fontWeight: 600, marginBottom: "8px", marginTop: "8px" }}>Mix & Match Cookie Packages</h2>
-          <div className="divider" style={{ marginBottom: "32px" }} />
+      <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+        <button onClick={onCancel} style={{ flex: 1, padding: "14px", border: "1.5px solid #D4C9B8", borderRadius: "12px", background: "transparent", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, color: "#6B5E4E", cursor: "pointer" }}>← Back</button>
+        <button onClick={submit} disabled={submitting} style={{ flex: 2, padding: "14px", border: "none", borderRadius: "12px", background: submitting ? "#B5A48C" : "#1A1208", color: "#FEFAF4", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, cursor: submitting ? "not-allowed" : "pointer", letterSpacing: "0.03em", transition: "background 0.2s" }}>
+          {submitting ? "Sending…" : "Submit Order Request ✓"}
+        </button>
+      </div>
+      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#B5A48C", textAlign: "center", marginTop: "14px", lineHeight: 1.6 }}>No payment required now. Heather will contact you to confirm details.</div>
+    </div>
+  );
+}
 
-          {/* Package Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "16px", marginBottom: "40px" }}>
-            {COOKIE_TIERS.map((tier) => {
-              const qty = cart[tier.pack] || 0;
-              return (
-                <div key={tier.pack} style={{ background: "#fff", borderRadius: "16px", border: `2px solid ${qty > 0 ? "#4A1B6B" : "#EEE8DF"}`, padding: "20px 16px", textAlign: "center", transition: "all 0.2s" }}>
-                  <div className="playfair" style={{ fontSize: "22px", fontWeight: 700, color: "#1A1208" }}>{tier.pack}</div>
-                  <div className="jost" style={{ fontSize: "11px", color: "#B5A48C", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>cookies</div>
-                  <div className="playfair" style={{ fontSize: "20px", fontWeight: 600, color: "#4A1B6B", marginBottom: "4px" }}>${tier.price}</div>
-                  <div className="jost" style={{ fontSize: "11px", color: "#B5A48C", marginBottom: "12px" }}>+ ${SHIPPING_RATES[tier.pack].toFixed(2)} shipping</div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
-                    <button onClick={() => updateCart(tier.pack, -1)} disabled={qty === 0}
-                      style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1.5px solid #D4C9B8", background: qty === 0 ? "#f5f5f5" : "#fff", cursor: qty === 0 ? "not-allowed" : "pointer", fontSize: "18px", color: "#6B5E4E", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
-                    <span className="jost" style={{ fontSize: "16px", fontWeight: 700, minWidth: "20px", color: "#1A1208" }}>{qty}</span>
-                    <button onClick={() => updateCart(tier.pack, 1)}
-                      style={{ width: "32px", height: "32px", borderRadius: "50%", border: "none", background: "#4A1B6B", cursor: "pointer", fontSize: "18px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
-                  </div>
-                </div>
-              );
-            })}
+// ── Success Screen ────────────────────────────────────────────────────────────
+function SuccessScreen({ name, onReset }) {
+  return (
+    <div style={{ padding: "48px 24px", textAlign: "center" }}>
+      <div style={{ fontSize: "56px", marginBottom: "20px" }}>🎉</div>
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "28px", fontWeight: 600, marginBottom: "12px" }}>Thank you, {name}!</div>
+      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.7, marginBottom: "32px" }}>
+        Your order request has been sent to Heather.<br />She'll be in touch soon to confirm all the details.<br /><br />
+        <em style={{ color: "#B5A48C" }}>Food is Life. Life is Good.™ 🍽️</em>
+      </div>
+      <button onClick={onReset} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "12px", padding: "14px 28px", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer" }}>Back to Menu</button>
+    </div>
+  );
+}
+
+// ── Privacy Policy Modal ──────────────────────────────────────────────────────
+function PrivacyPolicy({ onClose }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(26,18,8,0.6)", zIndex: 200, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px" }}>
+      <div style={{ background: "#FEFAF4", borderRadius: "20px", maxWidth: "720px", width: "100%", padding: "48px 40px", position: "relative", boxShadow: "0 24px 80px rgba(26,18,8,0.2)" }}>
+        <button onClick={onClose} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "12px" }}>Legal</div>
+        <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "36px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>Privacy Policy</h1>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C", marginBottom: "32px" }}>Effective Date: May 1, 2025 · Last Updated: May 1, 2025</p>
+        {[
+          { title: "1. Who We Are", body: 'Flavor Fuzion by Heather Janey ("we," "us," or "our") is a sole proprietorship operating in Massachusetts, transitioning to an LLC. We operate the Flavor Fuzion ordering platform at flavorfuzion.com.' },
+          { title: "2. Information We Collect", body: "We collect information you provide directly when placing an order or inquiry, including: your name, email address, phone number, event date, guest count, dietary notes, and order details. We do not collect payment information directly — all payment processing is handled by secure third-party processors." },
+          { title: "3. How We Use Your Information", body: "We use the information you provide to: respond to your order requests, communicate with you about your event, improve our services, and comply with legal obligations. We do not sell, rent, or share your personal information with third parties for marketing purposes." },
+          { title: "4. Data Storage", body: "Your order information is stored securely using Supabase, a third-party database service. Data is stored on servers located in the United States. We retain your information only as long as necessary to fulfill your order and comply with applicable law." },
+          { title: "5. Cookies", body: "Our website may use cookies or similar technologies to improve your browsing experience. You can disable cookies in your browser settings, though some features of the site may not function properly as a result." },
+          { title: "6. Your Rights (Massachusetts Residents)", body: "Under Massachusetts law, you have the right to request access to, correction of, or deletion of your personal information. To exercise these rights, please contact us at the email below." },
+          { title: "7. Children's Privacy", body: "Our services are not directed to children under the age of 13. We do not knowingly collect personal information from children." },
+          { title: "8. Changes to This Policy", body: "We may update this Privacy Policy from time to time. We will notify you of significant changes by updating the effective date at the top of this page." },
+          { title: "9. Contact Us", body: "If you have questions about this Privacy Policy, please contact us at: FlavorFuzionbHJ@Outlook.com | 131 Samoset Street #1027, Plymouth, MA 02360" },
+        ].map(({ title, body }) => (
+          <div key={title} style={{ marginBottom: "24px" }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "20px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>{title}</h2>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.75 }}>{body}</p>
           </div>
+        ))}
+        <button onClick={onClose} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}>Close</button>
+      </div>
+    </div>
+  );
+}
 
-          {/* Cart Summary */}
-          {cartCount > 0 && (
-            <div style={{ background: "#fff", borderRadius: "20px", border: "1px solid #EEE8DF", padding: "28px 32px", marginBottom: "24px" }}>
-              <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "16px" }}>Your Order</div>
-              {Object.entries(cart).map(([pack, qty]) => {
-                const tier = COOKIE_TIERS.find(t => t.pack === Number(pack));
-                return (
-                  <div key={pack} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #EEE8DF" }}>
-                    <span className="jost" style={{ fontSize: "14px", color: "#1A1208" }}>{pack} Pack × {qty}</span>
-                    <span className="jost" style={{ fontSize: "14px", fontWeight: 600, color: "#1A1208" }}>${(tier.price * qty).toFixed(2)}</span>
-                  </div>
-                );
-              })}
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #EEE8DF" }}>
-                <span className="jost" style={{ fontSize: "14px", color: "#6B5E4E" }}>Shipping</span>
-                <span className="jost" style={{ fontSize: "14px", fontWeight: 600, color: qualifiesForPromo ? "#3A6B3A" : "#1A1208" }}>
-                  {qualifiesForPromo ? `$${shippingCost.toFixed(2)}` : `$${shippingCost.toFixed(2)}`}
-                </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px" }}>
-                <div>
-                  <div className="playfair" style={{ fontSize: "24px", fontWeight: 700, color: "#1A1208" }}>
-                    Total: ${(cartTotal + shippingCost).toFixed(2)}
-                  </div>
-                  {qualifiesForPromo ? (
-                    <div className="jost" style={{ fontSize: "13px", color: "#3A6B3A", fontWeight: 600, marginTop: "4px" }}>✅ 20% off (FALLCOOKIE) will be applied at checkout!</div>
-                  ) : (
-                    <div className="jost" style={{ fontSize: "13px", color: "#B5A48C", marginTop: "4px" }}>Add ${(20 - cartTotal).toFixed(2)} more to unlock 20% off + free shipping!</div>
-                  )}
-                </div>
-                {qualifiesForPromo && (
-                  <div style={{ background: "linear-gradient(135deg, #C9A227, #E8C547)", borderRadius: "100px", padding: "6px 16px" }}>
-                    <span className="jost" style={{ fontSize: "12px", fontWeight: 700, color: "#1A1208" }}>20% OFF 🎉</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+// ── Terms of Service Modal ────────────────────────────────────────────────────
+function TermsOfService({ onClose }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(26,18,8,0.6)", zIndex: 200, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px" }}>
+      <div style={{ background: "#FEFAF4", borderRadius: "20px", maxWidth: "720px", width: "100%", padding: "48px 40px", position: "relative", boxShadow: "0 24px 80px rgba(26,18,8,0.2)" }}>
+        <button onClick={onClose} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "12px" }}>Legal</div>
+        <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "36px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>Terms of Service</h1>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C", marginBottom: "32px" }}>Effective Date: May 1, 2025 · Last Updated: May 1, 2025</p>
+        {[
+          { title: "1. Acceptance of Terms", body: "By accessing or using the Flavor Fuzion ordering platform, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services." },
+          { title: "2. Services Provided", body: "Flavor Fuzion by Heather Janey provides personal chef services including weekly meal preparation, catering, private dinners, and baked goods. All orders are subject to availability and confirmation by Heather Janey." },
+          { title: "3. Order Requests & Confirmation", body: "Submitting an order through our platform constitutes a request only — not a confirmed booking. Orders become confirmed only after Heather Janey contacts you to review details, confirm pricing, and arrange payment. No payment is collected at the time of submission." },
+          { title: "4. Pricing", body: "Prices shown on the menu cover food and ingredient costs. Private dinners, catering, and in-home services include a chef service fee of $45/hr (3-hour minimum), which will be included in your confirmed quote. Delivery fees apply based on distance. Custom requests and substitutions may affect the final price." },
+          { title: "5. Cancellations & Deposits", body: "Cancellation and deposit policies will be communicated during booking confirmation. For large events or catering bookings, a deposit may be required to secure your date. Deposits are generally non-refundable within 48 hours of the event." },
+          { title: "6. Dietary & Allergen Responsibility", body: "While we make every effort to accommodate dietary needs and allergies disclosed at the time of ordering, Flavor Fuzion cannot guarantee a completely allergen-free environment. Customers must disclose all known allergies and dietary restrictions at the time of ordering. Flavor Fuzion is not liable for reactions resulting from undisclosed allergens." },
+          { title: "7. Intellectual Property", body: 'The phrase "Food is Life. Life is Good.™" is a trademark of Flavor Fuzion by Heather Janey. All content on this platform, including menus, images, and branding, is the property of Flavor Fuzion by Heather Janey and may not be used without written permission.' },
+          { title: "8. Limitation of Liability", body: "To the fullest extent permitted by Massachusetts law, Flavor Fuzion by Heather Janey shall not be liable for any indirect, incidental, or consequential damages arising from use of our services." },
+          { title: "9. Governing Law", body: "These Terms of Service are governed by the laws of the Commonwealth of Massachusetts. Any disputes shall be resolved in the courts of Massachusetts." },
+          { title: "10. Changes to These Terms", body: "We reserve the right to update these Terms at any time. Continued use of our platform after changes constitutes acceptance of the updated Terms." },
+          { title: "11. Contact Us", body: "If you have questions about these Terms, please contact us at: FlavorFuzionbHJ@Outlook.com | 131 Samoset Street #1027, Plymouth, MA 02360" },
+        ].map(({ title, body }) => (
+          <div key={title} style={{ marginBottom: "24px" }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "20px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>{title}</h2>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.75 }}>{body}</p>
+          </div>
+        ))}
+        <button onClick={onClose} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}>Close</button>
+      </div>
+    </div>
+  );
+}
 
-          <button onClick={handleCheckout} disabled={cartCount === 0 || loading}
-            style={{ width: "100%", background: cartCount === 0 ? "#D4C9B8" : "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "18px", fontFamily: "'Jost', sans-serif", fontSize: "16px", fontWeight: 700, cursor: cartCount === 0 ? "not-allowed" : "pointer", letterSpacing: "0.05em" }}>
-            {loading ? "Redirecting to checkout..." : cartCount === 0 ? "Add cookies to your order above" : `Checkout — $${(cartTotal + shippingCost).toFixed(2)} →`}
+// ── Burger Builder ────────────────────────────────────────────────────────────
+const BURGER_OPTIONS = {
+  proteins: ["Chicken", "Turkey", "Beef", "Lamb", "Salmon", "Black Bean"],
+  cheeses:  ["Pepper Jack", "American", "Muenster", "Mozzarella", "Cheddar", "Colby Jack", "Vegan Cheese"],
+  sauces:   ["Mushroom Sauce", "Lemon Dill", "Spicy Garlic Aioli", "Broccoli Pesto", "Super Secret FFbyHJ Sauce"],
+};
+const BURGER_PRICE = 16;
+
+function BurgerBuilder({ onAddToCart }) {
+  const [protein, setProtein] = useState("");
+  const [cheese, setCheese]   = useState("");
+  const [sauce, setSauce]     = useState("");
+  const [added, setAdded]     = useState(false);
+  const isVegan = protein === "Black Bean";
+  const isComplete = protein && cheese && sauce;
+  const handleAdd = () => {
+    if (!isComplete) return;
+    const name = `Deluxe Burger — ${protein}, ${cheese}, ${sauce}`;
+    onAddToCart({ id: `burger-${Date.now()}`, name, price: BURGER_PRICE, qty: 1, category: "Burger",
+      description: `${protein} patty · ${cheese} · ${isVegan ? "No bacon (vegan)" : "Lettuce, Tomato & Bacon"} · ${sauce}` });
+    setProtein(""); setCheese(""); setSauce("");
+    setAdded(true); setTimeout(() => setAdded(false), 2500);
+  };
+  const OptionGrid = ({ options, selected, onSelect, label }) => (
+    <div style={{ marginBottom: "28px" }}>
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "20px", fontWeight: 600, marginBottom: "12px" }}>{label}</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+        {options.map((opt) => (
+          <button key={opt} onClick={() => onSelect(opt)}
+            style={{ padding: "9px 18px", borderRadius: "100px", border: `2px solid ${selected === opt ? "#1A1208" : "#D4C9B8"}`,
+              background: selected === opt ? "#1A1208" : "#fff", color: selected === opt ? "#FEFAF4" : "#6B5E4E",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 500, cursor: "pointer", transition: "all 0.2s" }}>
+            {opt}
           </button>
+        ))}
+      </div>
+    </div>
+  );
+  return (
+    <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+      <div style={{ background: "linear-gradient(135deg, #1A1208 0%, #3D2B1A 100%)", borderRadius: "20px", padding: "36px 40px", marginBottom: "36px", color: "#FEFAF4", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "20px" }}>
+        <div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", opacity: 0.6, marginBottom: "8px" }}>Made your way</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "36px", fontWeight: 300, lineHeight: 1.1, marginBottom: "10px" }}>Build Your <em>Deluxe Burger</em></div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", opacity: 0.75, lineHeight: 1.6 }}>All burgers come with lettuce, tomatoes & bacon (vegan option excludes bacon). Served on a brioche bun.</div>
+        </div>
+        <div style={{ fontSize: "64px" }}>🍔</div>
+      </div>
+      <OptionGrid label="Step 1 — Choose Your Protein" options={BURGER_OPTIONS.proteins} selected={protein} onSelect={setProtein} />
+      {isVegan && <div style={{ background: "#52B78820", border: "1px solid #52B788", borderRadius: "10px", padding: "10px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#2D8A5E", marginBottom: "20px" }}>🌱 Vegan option selected — bacon will be omitted.</div>}
+      <OptionGrid label="Step 2 — Choose Your Cheese" options={BURGER_OPTIONS.cheeses} selected={cheese} onSelect={setCheese} />
+      <OptionGrid label="Step 3 — Choose Your Sauce" options={BURGER_OPTIONS.sauces} selected={sauce} onSelect={setSauce} />
+      {isComplete && (
+        <div style={{ background: "#FEFAF4", border: "1px solid #EEE8DF", borderRadius: "16px", padding: "20px 24px", marginBottom: "24px" }}>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Your Burger</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "20px", fontWeight: 600, color: "#1A1208", marginBottom: "4px" }}>{protein} Deluxe Burger</div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#6B5E4E", lineHeight: 1.7 }}>{cheese} · {isVegan ? "No bacon" : "Lettuce, Tomato & Bacon"} · {sauce}</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "26px", fontWeight: 600, marginTop: "12px" }}>${BURGER_PRICE} <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", fontWeight: 400 }}>/ burger</span></div>
+        </div>
+      )}
+      <button onClick={handleAdd} disabled={!isComplete} className="add-btn"
+        style={{ width: "100%", padding: "14px", fontSize: "15px", opacity: isComplete ? 1 : 0.4, cursor: isComplete ? "pointer" : "not-allowed", background: added ? "#52B788" : "#1A1208", transition: "background 0.3s" }}>
+        {added ? "🍔 Added to Order!" : isComplete ? "+ Add Burger to Order" : "Complete all steps above"}
+      </button>
+    </div>
+  );
+}
 
-          <p className="jost" style={{ textAlign: "center", fontSize: "12px", color: "#B5A48C", marginTop: "16px" }}>
-            🔒 Secure checkout powered by Stripe. Orders fulfilled within 3-5 business days.
-          </p>
+// ── Workplace Lunch ───────────────────────────────────────────────────────────
+function WorkplaceLunch() {
+  return (
+    <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+      <div style={{ background: "linear-gradient(135deg, #1A1208 0%, #3D2B1A 100%)", borderRadius: "20px", padding: "36px 40px", marginBottom: "36px", color: "#FEFAF4", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "20px" }}>
+        <div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", opacity: 0.6, marginBottom: "8px" }}>Feed your team</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "36px", fontWeight: 300, lineHeight: 1.1, marginBottom: "10px" }}>Workplace <em>Lunch</em></div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", opacity: 0.75, lineHeight: 1.6 }}>Fresh, chef-prepared lunches delivered to your office. Heather is curating this menu — check back soon!</div>
+        </div>
+        <div style={{ fontSize: "64px" }}>🏢</div>
+      </div>
+      <div style={{ background: "#fff", borderRadius: "16px", border: "1px solid #EEE8DF", padding: "48px 32px", textAlign: "center" }}>
+        <div style={{ fontSize: "48px", marginBottom: "16px" }}>👩‍🍳</div>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "24px", fontWeight: 600, marginBottom: "12px", color: "#1A1208" }}>Coming Soon</div>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.7, maxWidth: "400px", margin: "0 auto 24px" }}>Heather is curating a special menu just for workplace lunches. In the meantime, reach out directly!</p>
+        <a href="tel:7742053071" style={{ display: "inline-block", background: "#1A1208", color: "#FEFAF4", borderRadius: "100px", padding: "12px 28px", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, textDecoration: "none" }}>📞 Call Heather</a>
+      </div>
+    </div>
+  );
+}
+
+// ── Reusable Menu Item Card ───────────────────────────────────────────────────
+function MealCard({ item, onAdd }) {
+  return (
+    <div className="menu-card">
+      <div className="img-wrap">
+        <img src={getImage(item)} alt={item.name} className="food-img" onError={(e) => { e.target.src = FALLBACK; }} />
+        <div className="cat-badge">{item.category?.toUpperCase()}</div>
+      </div>
+      <div style={{ padding: "20px 20px 18px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600, lineHeight: 1.2, flex: 1, paddingRight: "12px", color: "#1A1208" }}>{item.name}</h2>
+          <div style={{ textAlign: "right", flexShrink: 0 }}>
+            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "26px", fontWeight: 600 }}>${item.price}</div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#B5A48C" }}>{item.unit}</div>
+          </div>
+        </div>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", lineHeight: 1.65, color: "#6B5E4E", marginBottom: "14px" }}>{item.description}</p>
+        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "16px" }}>
+          {(item.tags || []).map((tag) => (
+            <span key={tag} className="tag" style={{ background: (tagColors[tag] || "#D4C9B8") + "30", color: tagColors[tag] || "#6B5E4E", border: `1px solid ${(tagColors[tag] || "#D4C9B8")}60` }}>{tag}</span>
+          ))}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid #EEE8DF", paddingTop: "14px" }}>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C" }}>📦 {item.servings}</div>
+          <button className="add-btn" onClick={onAdd}>+ Add to Order</button>
         </div>
       </div>
     </div>
   );
 }
 
-export default function FlavorFuzionWebsite() {
-  const [activePage, setActivePage]         = useState("Home");
-  const [showPrivacy, setShowPrivacy]       = useState(false);
-  const [showTerms, setShowTerms]           = useState(false);
-  const [showPromoPopup, setShowPromoPopup] = useState(true);
-  const [showPromoBanner, setShowPromoBanner] = useState(true);
-  const [activeBanner, setActiveBanner] = useState(0);
+// ── Deluxe Burger Card ────────────────────────────────────────────────────────
+function DeluxeBurgerCard({ onBuildBurger }) {
+  return (
+    <div className="menu-card" style={{ cursor: "pointer" }} onClick={onBuildBurger}>
+      <div className="img-wrap">
+        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80" alt="Deluxe Burgers" className="food-img" />
+        <div className="cat-badge">MEAL PREP</div>
+      </div>
+      <div style={{ padding: "20px 20px 18px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600, lineHeight: 1.2, flex: 1, paddingRight: "12px", color: "#1A1208" }}>Build Your Deluxe Burger</h2>
+          <div style={{ textAlign: "right", flexShrink: 0 }}>
+            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "26px", fontWeight: 600 }}>$16</div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#B5A48C" }}>/ burger</div>
+          </div>
+        </div>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", lineHeight: 1.65, color: "#6B5E4E", marginBottom: "14px" }}>Choose your protein, cheese & sauce. All burgers come with lettuce, tomatoes & bacon on a brioche bun.</p>
+        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "16px" }}>
+          {["Chicken", "Beef", "Salmon", "Vegan Option"].map(tag => (
+            <span key={tag} className="tag" style={{ background: "#D4C9B830", color: "#6B5E4E", border: "1px solid #D4C9B860" }}>{tag}</span>
+          ))}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid #EEE8DF", paddingTop: "14px" }}>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C" }}>🍔 Fully customizable</div>
+          <button className="add-btn" onClick={(e) => { e.stopPropagation(); onBuildBurger(); }}>Build Now →</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveBanner(prev => (prev + 1) % 2);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState(null);
-  const [showInstallBanner, setShowInstallBanner] = useState(false);
-  const [showLessonsForm, setShowLessonsForm] = useState(false);
-  const [selectedLesson, setSelectedLesson] = useState("");
-  const [lessonForm, setLessonForm] = useState({ name: "", email: "", phone: "", lessonType: "", foodTypes: "", guests: "", groceries: "", date1: "", date2: "", location: "", dietary: "" });
-  const [lessonSubmitted, setLessonSubmitted] = useState(false);
-  const [cart, setCart] = useState([]);
-  const [showCart, setShowCart] = useState(false);
-  const [showMerchPopup, setShowMerchPopup] = useState(false);
-  const [selectedMerch, setSelectedMerch] = useState(null);
-  const [merchColor, setMerchColor] = useState("");
-  const [merchSize, setMerchSize] = useState("");
-  const [cartCheckingOut, setCartCheckingOut] = useState(false);
+// ── Main App ──────────────────────────────────────────────────────────────────
+export default function MenuApp() {
+  const [menuItems, setMenuItems]       = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [selectedCookie, setSelectedCookie] = useState("");
+  const [cartItems, setCartItems]       = useState([]);
+  const [comboItems, setComboItems]     = useState([]);
+  const [showCart, setShowCart]         = useState(false);
+  const [view, setView]                 = useState("cart");
+  const [successName, setSuccessName]   = useState("");
+  const [showPrivacy, setShowPrivacy]   = useState(false);
+  const [showTerms, setShowTerms]       = useState(false);
+
+  useEffect(() => { fetchMenu(); }, []);
+
+  const fetchMenu = async () => {
+    try {
+      setLoading(true); setError(null);
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/menu?active=eq.true&order=created_at.asc`,
+        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      if (!res.ok) throw new Error();
+      setMenuItems(await res.json());
+    } catch { setError("Couldn't load the menu right now. Please try again shortly."); }
+    finally { setLoading(false); }
+  };
+
+  const isCombosTab    = activeCategory === "🍱 Combos";
+  const isBurgerTab    = activeCategory === "🍔 Build a Burger";
+  const isWorkplaceTab = activeCategory === "🏢 Workplace Lunch";
+  const categoryKey = activeCategory.replace(/^\p{Emoji}\s*/u, "").trim();
+  const CATEGORY_ORDER = ["Meal Prep", "Sides", "Catering", "Private Dinners", "Cookies"];
+  const filtered = (isCombosTab || isBurgerTab || isWorkplaceTab) ? [] : (activeCategory === "All"
+    ? menuItems.sort((a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category))
+    : activeCategory === "Meal Prep"
+      ? menuItems.filter((i) => i.category === "Meal Prep" || i.category === "Sides").sort((a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category))
+      : menuItems.filter((i) => i.category === categoryKey));
 
   const addToCart = (item) => {
-    setCart(prev => {
-      const key = item.id + (item.color || "") + (item.size || "");
-      const existing = prev.find(i => i.cartKey === key);
-      if (existing) return prev.map(i => i.cartKey === key ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, { ...item, qty: 1, cartKey: key }];
+    setCartItems((prev) => {
+      const existing = prev.find((c) => c.id === item.id);
+      if (existing) return prev.map((c) => c.id === item.id ? { ...c, qty: c.qty + 1 } : c);
+      return [...prev, { ...item, qty: 1 }];
     });
   };
 
-  const removeFromCart = (cartKey) => setCart(prev => prev.filter(i => i.cartKey !== cartKey));
-  const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
-
-  const handleCartCheckout = async () => {
-    setCartCheckingOut(true);
-    try {
-      const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/functions/v1/website-cart-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: cart }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert("Something went wrong. Please try again.");
-    } catch {
-      alert("Something went wrong. Please try again.");
-    }
-    setCartCheckingOut(false);
+  const addCombo = (combo) => {
+    setComboItems((prev) => [...prev, combo]);
   };
 
-  useEffect(() => {
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
-      });
-    }
-    // Capture install prompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-      setShowInstallBanner(true);
-    });
-  }, []);
+  const removeFromCart   = (id) => setCartItems((prev) => prev.filter((c) => c.id !== id));
+  const removeCombo      = (id) => setComboItems((prev) => prev.filter((c) => c.id !== id));
+  const totalItems       = cartItems.reduce((s, c) => s + c.qty, 0) + comboItems.length;
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [activePage]);
-
-  // SEO - Update meta tags per page
-  useEffect(() => {
-    const seoData = {
-      Home: {
-        title: "Flavor Fuzion by Heather Janey | Personal Chef & Catering | Boston & South Shore MA",
-        description: "Chef Heather Janey offers fresh weekly meal prep, bespoke catering, private dinners, and cooking lessons in the Boston and South Shore Massachusetts area. Bold flavors made with love.",
-        keywords: "personal chef Boston, meal prep South Shore MA, catering Massachusetts, private chef dinner, cooking lessons Boston, Heather Janey chef",
-      },
-      Menu: {
-        title: "Menu | Flavor Fuzion by Heather Janey",
-        description: "Browse Flavor Fuzion's full menu — fresh meal prep, catering packages, private dinner experiences, and cookies. All made to order by Chef Heather Janey.",
-        keywords: "meal prep menu Boston, catering menu Massachusetts, personal chef menu, private dinner menu, gluten free meal prep",
-      },
-      About: {
-        title: "About Chef Heather Janey | Flavor Fuzion",
-        description: "Meet Chef Heather Janey — a passionate culinary artist bringing bold, worldly flavors to your table in the Boston and South Shore Massachusetts areas.",
-        keywords: "Chef Heather Janey, personal chef biography, Boston chef, South Shore chef, culinary artist Massachusetts",
-      },
-      Lessons: {
-        title: "Cooking Lessons | Flavor Fuzion by Heather Janey",
-        description: "Learn to cook with Chef Heather Janey! Virtual, in-home, and group cooking lessons available in the Boston and South Shore MA area. Book your lesson today.",
-        keywords: "cooking lessons Boston, virtual cooking class, in-home cooking lesson, group cooking class Massachusetts, personal chef cooking lesson",
-      },
-      Contact: {
-        title: "Contact | Flavor Fuzion by Heather Janey",
-        description: "Get in touch with Chef Heather Janey to book meal prep, catering, private dinners, or cooking lessons in the Boston and South Shore Massachusetts area.",
-        keywords: "contact personal chef Boston, book catering Massachusetts, hire personal chef South Shore",
-      },
-    };
-
-    const page = seoData[activePage] || seoData.Home;
-
-    // Title
-    document.title = page.title;
-
-    // Meta description
-    let desc = document.querySelector('meta[name="description"]');
-    if (!desc) { desc = document.createElement('meta'); desc.name = "description"; document.head.appendChild(desc); }
-    desc.content = page.description;
-
-    // Meta keywords
-    let keywords = document.querySelector('meta[name="keywords"]');
-    if (!keywords) { keywords = document.createElement('meta'); keywords.name = "keywords"; document.head.appendChild(keywords); }
-    keywords.content = page.keywords;
-
-    // Open Graph
-    const ogTags = {
-      "og:title": page.title,
-      "og:description": page.description,
-      "og:type": "website",
-      "og:url": "https://byheatherjaney.com",
-      "og:image": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png",
-      "og:site_name": "Flavor Fuzion by Heather Janey",
-    };
-    Object.entries(ogTags).forEach(([property, content]) => {
-      let tag = document.querySelector(`meta[property="${property}"]`);
-      if (!tag) { tag = document.createElement('meta'); tag.setAttribute('property', property); document.head.appendChild(tag); }
-      tag.content = content;
-    });
-
-    // Twitter Card
-    const twitterTags = {
-      "twitter:card": "summary_large_image",
-      "twitter:title": page.title,
-      "twitter:description": page.description,
-      "twitter:image": "https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png",
-    };
-    Object.entries(twitterTags).forEach(([name, content]) => {
-      let tag = document.querySelector(`meta[name="${name}"]`);
-      if (!tag) { tag = document.createElement('meta'); tag.name = name; document.head.appendChild(tag); }
-      tag.content = content;
-    });
-
-    // Structured Data (JSON-LD)
-    let schema = document.querySelector('#schema-org');
-    if (!schema) { schema = document.createElement('script'); schema.id = "schema-org"; schema.type = "application/ld+json"; document.head.appendChild(schema); }
-    schema.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "FoodEstablishment",
-      "name": "Flavor Fuzion by Heather Janey",
-      "description": "Personal chef, meal prep, catering, private dinners and cooking lessons in Boston and South Shore Massachusetts.",
-      "url": "https://byheatherjaney.com",
-      "telephone": "774-205-3071",
-      "email": "FlavorFuzionbyHJ@gmail.com",
-      "address": { "@type": "PostalAddress", "addressRegion": "MA", "addressCountry": "US" },
-      "areaServed": ["Boston, MA", "South Shore, MA", "Massachusetts"],
-      "sameAs": ["https://instagram.com/flavorfuzionbyhj"],
-      "priceRange": "$$",
-      "servesCuisine": ["American", "International", "Fusion"],
-    });
-  }, [activePage]);
-
-  const handleInstall = async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') setShowInstallBanner(false);
-    setInstallPrompt(null);
-  };
+  const handleSuccess = (name) => { setSuccessName(name); setView("success"); };
+  const handleReset   = () => { setCartItems([]); setComboItems([]); setView("cart"); setShowCart(false); };
 
   return (
-    <div style={{ fontFamily: "'Georgia', serif", background: "#FEFAF0", color: "#0F1A0F", minHeight: "100vh", width: "100%", overflowX: "hidden" }}>
+    <div style={{ fontFamily: "'Georgia', serif", background: "#FEFAF4", minHeight: "100vh", color: "#1A1208" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
-
-        body { overflow-x: hidden; }
-
-        .nav-link {
-          font-family: 'Jost', sans-serif;
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: #FEFAF0;
-          cursor: pointer;
-          padding: 6px 0;
-          border-bottom: 1px solid transparent;
-          transition: border-color 0.2s, color 0.2s;
-          text-decoration: none;
-          background: none;
-          border-top: none;
-          border-left: none;
-          border-right: none;
-        }
-        .nav-link:hover { border-bottom-color: #B8860B; color: #DAA520; }
-        .nav-link.active { border-bottom-color: #B8860B; color: #DAA520; }
-
-        .btn-primary {
-          background: linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%);
-          color: #0F1A0F;
-          border: none;
-          padding: 14px 32px;
-          border-radius: 100px;
-          font-family: 'Jost', sans-serif;
-          font-size: 13px;
-          font-weight: 600;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: transform 0.2s, box-shadow 0.2s;
-          display: inline-block;
-          text-decoration: none;
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,168,76,0.4); }
-
-        .btn-outline {
-          background: transparent;
-          color: #DAA520;
-          border: 2px solid #DAA520;
-          padding: 13px 32px;
-          border-radius: 100px;
-          font-family: 'Jost', sans-serif;
-          font-size: 13px;
-          font-weight: 600;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.2s;
-          display: inline-block;
-          text-decoration: none;
-        }
-        .btn-outline:hover { background: linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%); color: #0F1A0F; border-color: transparent; box-shadow: 0 8px 24px rgba(218,165,32,0.5); transform: translateY(-2px); }
-
-        .service-card:first-child { border-radius: 24px 0 0 24px; }
-        .service-card:last-child { border-radius: 0 24px 24px 0; }
-        .service-card { border-radius: 0;
-          overflow: hidden;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-          cursor: pointer;
-        }
-        .service-card:hover { transform: translateY(-8px); box-shadow: 0 32px 80px rgba(0,0,0,0.15); }
-
-        .gold {
-          background: linear-gradient(135deg, #8B6914 0%, #DAA520 25%, #F5D060 50%, #DAA520 75%, #8B6914 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        .gold-stars {
-          background: linear-gradient(135deg, #DAA520, #F5D060, #DAA520);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-
-        .section-tag {
-          font-family: 'Jost', sans-serif;
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          background: linear-gradient(135deg, #8B6914 0%, #DAA520 25%, #F5D060 50%, #DAA520 75%, #8B6914 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          margin-bottom: 12px;
-          display: block;
-        }
-
-        .playfair { font-family: 'Playfair Display', serif; }
-        .jost { font-family: 'Jost', sans-serif; }
-
-        .testimonial-card {
-          background: #fff;
-          border-radius: 20px;
-          padding: 32px;
-          border: 1px solid #EEE8DF;
-          transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .testimonial-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.08); }
-
-        .form-input {
-          width: 100%;
-          padding: 14px 18px;
-          border: 1.5px solid #D4C9B8;
-          border-radius: 12px;
-          font-family: 'Jost', sans-serif;
-          font-size: 15px;
-          color: #0F1A0F;
-          background: #fff;
-          outline: none;
-          transition: border-color 0.2s;
-          margin-bottom: 16px;
-        }
-        .form-input:focus { border-color: #50C878; }
-
-        .divider {
-          width: 60px;
-          height: 3px;
-          background: linear-gradient(90deg, #50C878, #B8860B);
-          border-radius: 100px;
-          margin: 16px 0 32px;
-        }
-
-        .hero-pattern {
-          position: absolute;
-          inset: 0;
-          background-image: 
-            radial-gradient(circle at 20% 50%, rgba(80,200,120,0.2) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(123,63,160,0.1) 0%, transparent 40%),
-            radial-gradient(circle at 60% 80%, rgba(218,165,32,0.12) 0%, transparent 40%);
-        }
-
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-up { animation: fadeUp 0.8s ease forwards; }
-        .fade-up-2 { animation: fadeUp 0.8s ease 0.2s both; }
-        .fade-up-3 { animation: fadeUp 0.8s ease 0.4s both; }
-        .fade-up-4 { animation: fadeUp 0.8s ease 0.6s both; }
-
-        @media (max-width: 768px) {
-          .hero-title { font-size: 42px !important; }
-          .services-grid { grid-template-columns: 1fr !important; }
-          .services-grid > * { min-width: unset; }
-          .merch-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
-          .merch-grid > div { min-height: unset !important; }
-          .merch-grid .merch-image { height: 140px !important; }
-          .merch-grid .merch-body { padding: 16px !important; }
-          .lessons-title { font-size: 36px !important; }
-          .testimonials-grid { grid-template-columns: 1fr !important; }
-          .about-grid { grid-template-columns: 1fr !important; }
-          .contact-grid { grid-template-columns: 1fr !important; }
-          .footer-grid { grid-template-columns: 1fr !important; }
-          .hero-watermark { display: none !important; }
-          .hero-content { padding: 80px 24px !important; }
-          .section-padding { padding: 60px 24px !important; }
-          /* .parallax-section { background-attachment: scroll !important; } */
-          .testimonials-section { padding: 60px 40px !important; }
-          .desktop-nav { display: none !important; }
-          .mobile-nav { display: flex !important; }
-          nav { padding: 0 24px !important; }
-          footer { padding: 40px 24px 24px !important; }
-        }
+        .menu-card { background: #fff; border-radius: 20px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid #EEE8DF; }
+        .menu-card:hover { transform: translateY(-6px); box-shadow: 0 24px 64px rgba(26,18,8,0.13); }
+        .food-img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.5s ease; }
+        .menu-card:hover .food-img { transform: scale(1.04); }
+        .img-wrap { overflow: hidden; position: relative; height: 200px; }
+        .cat-badge { position: absolute; top: 12px; right: 12px; background: rgba(254,250,244,0.92); backdrop-filter: blur(8px); border-radius: 8px; padding: 4px 10px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: #1A1208; }
+        .cat-btn { border: 1.5px solid #D4C9B8; background: transparent; padding: 8px 20px; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; transition: all 0.2s ease; color: #6B5E4E; }
+        .cat-btn:hover { border-color: #1A1208; color: #1A1208; }
+        .cat-btn.active { background: #1A1208; border-color: #1A1208; color: #FEFAF4; }
+        .cat-btn.combo-btn { border-color: #E76F51; color: #C4400A; }
+        .cat-btn.combo-btn.active { background: #E76F51; border-color: #E76F51; color: #fff; }
+        .add-btn { background: #1A1208; color: #FEFAF4; border: none; padding: 10px 18px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; letter-spacing: 0.03em; white-space: nowrap; }
+        .add-btn:hover { background: #3D2B1A; }
+        .tag { display: inline-block; padding: 3px 9px; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; }
+        .section-label { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: #B5A48C; }
+        .spinner { width: 36px; height: 36px; border: 3px solid #EEE8DF; border-top-color: #1A1208; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 640px) { .hero-title { font-size: 48px !important; } }
       `}</style>
 
-      {/* ── Promo Banner ── */}
-      {showPromoBanner && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 101, background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", transition: "all 0.5s ease" }}>
-          {activeBanner === 0 ? (
-            <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, color: "#1A1208", margin: 0, textAlign: "center" }}>
-              🍪 Mix & Match cookie packages! Use code <span style={{ background: "#1A1208", color: "#F5E4A0", padding: "2px 10px", borderRadius: "100px", letterSpacing: "0.08em" }}>FALLCOOKIE</span> for <strong>20% OFF</strong> orders over $20 ✨
-            </p>
-          ) : (
-            <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, color: "#1A1208", margin: 0, textAlign: "center" }}>
-              🚨 First Responders get <strong>15% off</strong> workplace lunch orders! Just mention it when ordering. Thank you for your service! ❤️
-            </p>
-          )}
-          <button onClick={() => setShowPromoBanner(false)} style={{ background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "#1A1208", marginLeft: "8px", lineHeight: 1, flexShrink: 0 }}>✕</button>
+      {/* Nav */}
+      <nav style={{ position: "sticky", top: 0, zIndex: 50, background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(201,168,76,0.2)", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <img src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png" alt="Flavor Fuzion by Heather Janey" style={{ height: "48px", width: "auto", display: "block", objectFit: "contain" }} />
         </div>
-      )}
-
-      {/* ── Promo Popup ── */}
-      {showPromoPopup && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(10,18,10,0.75)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-          <div style={{ background: "#FEFAF4", borderRadius: "24px", maxWidth: "480px", width: "100%", padding: "48px 40px", position: "relative", boxShadow: "0 24px 80px rgba(10,18,10,0.4)", textAlign: "center" }}>
-            <button onClick={() => setShowPromoPopup(false)} style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
-            <div style={{ fontSize: "52px", marginBottom: "16px" }}>🍪</div>
-            <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Limited Time Offer</div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "32px", fontWeight: 600, color: "#1A1208", marginBottom: "12px", lineHeight: 1.2 }}>20% Off Your Cookie Order! 🎉</h2>
-            <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.7, marginBottom: "24px" }}>
-              <strong>Order over $20 and get 20% OFF!</strong> Mix & Match cookie packages to place your delicious cookie order. Keep some for yourself, give some as tasty gifts. Let's see how the cookie crumbles! 🍪 Enter the code below at checkout:
-            </p>
-            <div style={{ background: "linear-gradient(135deg, #C9A227 0%, #E8C547 100%)", borderRadius: "12px", padding: "16px 24px", marginBottom: "20px" }}>
-              <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1A1208", marginBottom: "4px" }}>Your Promo Code</div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "28px", fontWeight: 700, color: "#1A1208", letterSpacing: "0.08em" }}>FALLCOOKIE</div>
-            </div>
-
-            {/* First Responder Promo */}
-            <div style={{ background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", borderRadius: "12px", padding: "16px 24px", marginBottom: "24px" }}>
-              <div style={{ fontSize: "24px", marginBottom: "6px" }}>🚨</div>
-              <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "4px" }}>First Responders</div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "20px", fontWeight: 700, color: "#F5E4A0" }}>15% Off Workplace Lunch Orders!</div>
-              <div style={{ fontFamily: "'Jost', sans-serif", fontSize: "12px", color: "rgba(254,250,244,0.75)", marginTop: "6px" }}>Just mention it when ordering. Thank you for your service! ❤️</div>
-            </div>
-
-            <button onClick={() => { setShowPromoPopup(false); setActivePage("Get Cookies 🍪"); }}
-              style={{ background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "14px 32px", fontFamily: "'Jost', sans-serif", fontSize: "14px", fontWeight: 600, cursor: "pointer", width: "100%", marginBottom: "12px" }}>
-              🍪 Get Cookies Now
-            </button>
-            <button onClick={() => setShowPromoPopup(false)} style={{ background: "none", border: "none", fontFamily: "'Jost', sans-serif", fontSize: "13px", color: "#B5A48C", cursor: "pointer" }}>
-              Maybe later
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Navigation ── */}
-      <nav style={{
-        position: "fixed", top: showPromoBanner ? "42px" : "0", left: 0, right: 0, zIndex: 100,
-        background: scrolled ? "rgba(15,26,15,0.96)" : "#0F1A0F",
-        backdropFilter: "blur(12px)",
-        borderBottom: scrolled ? "1px solid rgba(201,168,76,0.2)" : "none",
-        padding: "0 80px",
-        height: "72px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        transition: "all 0.3s",
-      }}>
-        <div onClick={() => setActivePage("Home")} style={{ cursor: "pointer" }}>
-          <img
-            src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png"
-            alt="Flavor Fuzion by Heather Janey"
-            style={{ height: "52px", width: "auto", display: "block", objectFit: "contain" }}
-          />
-        </div>
-
-        {/* Desktop Nav */}
-        <div className="desktop-nav" style={{ display: "flex", gap: "36px", alignItems: "center" }}>
-          {PAGES.map((page) => (
-            page === "Menu" ? (
-              <button key={page} className="nav-link"
-                onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
-                {page}
-              </button>
-            ) : (
-              <button key={page} className={`nav-link ${activePage === page ? "active" : ""}`}
-                onClick={() => setActivePage(page)}>
-                {page}
-              </button>
-            )
-          ))}
-          <button className="btn-primary" style={{ padding: "10px 24px", fontSize: "12px" }}
-            onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
-            Order Now
-          </button>
-          <button onClick={() => setShowCart(true)} style={{ position: "relative", background: "none", border: "none", cursor: "pointer", fontSize: "22px", padding: "4px 8px" }}>
-            🛒
-            {cartCount > 0 && <span style={{ position: "absolute", top: "-4px", right: "-4px", background: "#DAA520", color: "#0F1A0F", borderRadius: "50%", width: "18px", height: "18px", fontSize: "10px", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Jost', sans-serif" }}>{cartCount}</span>}
-          </button>
-        </div>
-
-        {/* Mobile Nav */}
-        <div className="mobile-nav" style={{ display: "none", alignItems: "center", gap: "16px" }}>
-          <button onClick={() => setShowCart(true)} style={{ position: "relative", background: "none", border: "none", cursor: "pointer", fontSize: "22px", padding: "4px" }}>
-            🛒
-            {cartCount > 0 && <span style={{ position: "absolute", top: "-4px", right: "-4px", background: "#DAA520", color: "#0F1A0F", borderRadius: "50%", width: "18px", height: "18px", fontSize: "10px", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Jost', sans-serif" }}>{cartCount}</span>}
-          </button>
-          <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", display: "flex", flexDirection: "column", gap: "5px" }}>
-            <span style={{ display: "block", width: "24px", height: "2px", background: "#DAA520", transition: "all 0.3s" }} />
-            <span style={{ display: "block", width: "24px", height: "2px", background: "#DAA520", transition: "all 0.3s" }} />
-            <span style={{ display: "block", width: "24px", height: "2px", background: "#DAA520", transition: "all 0.3s" }} />
-          </button>
-        </div>
+        <button onClick={() => { setShowCart(true); setView("cart"); }} style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "100px", padding: "10px 20px", fontFamily: "'DM Sans', sans-serif", fontSize: "13px", fontWeight: 500, cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
+          <span>🛒</span><span>Order</span>
+          {totalItems > 0 && <span style={{ background: "#E76F51", color: "#fff", borderRadius: "100px", padding: "2px 8px", fontSize: "11px" }}>{totalItems}</span>}
+        </button>
       </nav>
 
-      {/* Mobile Menu Dropdown */}
-      {menuOpen && (
-        <div style={{ position: "fixed", top: "72px", left: 0, right: 0, background: "#0F1A0F", zIndex: 99, padding: "24px", borderBottom: "1px solid rgba(201,168,76,0.2)", display: "flex", flexDirection: "column", gap: "4px" }}>
-          {PAGES.map((page) => (
-            <button key={page}
-              onClick={() => { page === "Menu" ? window.open("https://flavor-fuzion-app.vercel.app", "_blank") : setActivePage(page); setMenuOpen(false); }}
-              style={{ background: "none", border: "none", color: activePage === page ? "#DAA520" : "#FEFAF0", fontFamily: "'Jost', sans-serif", fontSize: "16px", fontWeight: 500, padding: "12px 0", textAlign: "left", cursor: "pointer", borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
-              {page}
-            </button>
-          ))}
-          <button onClick={() => { window.open("https://flavor-fuzion-app.vercel.app", "_blank"); setMenuOpen(false); }}
-            className="btn-primary" style={{ marginTop: "16px", width: "100%", textAlign: "center" }}>
-            Order Now
+      {/* Hero */}
+      <div style={{ padding: "72px 32px 56px", maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
+        <div className="section-label" style={{ marginBottom: "16px" }}>Food is Life. Life is Good.™</div>
+        <h1 className="hero-title" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "72px", fontWeight: 300, lineHeight: 1.05, letterSpacing: "-0.01em", marginBottom: "20px", color: "#1A1208" }}>
+          Bold flavors,<br /><em>made with love</em>
+        </h1>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "16px", color: "#6B5E4E", lineHeight: 1.7, maxWidth: "520px", margin: "0 auto" }}>
+          Welcome to Flavor Fuzion by Heather Janey — fresh weekly meal prep, bespoke catering, and exclusive private dinner experiences, all made to order.
+        </p>
+      </div>
+
+      {/* Category Filter */}
+      <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", padding: "0 32px 48px" }}>
+        {CATEGORIES.map((cat) => (
+          <button key={cat}
+            className={`cat-btn${cat === "🍱 Combos" ? " combo-btn" : ""}${activeCategory === cat ? " active" : ""}`}
+            onClick={() => setActiveCategory(cat)}>
+            {cat}
           </button>
+        ))}
+      </div>
+
+      {/* 🧊 Fresh Never Frozen Banner */}
+      {(activeCategory === "All" || activeCategory === "Meal Prep") && (
+        <div style={{ background: "linear-gradient(135deg, #1A1208 0%, #3D2B1A 100%)", margin: "0 32px 32px", borderRadius: "16px", padding: "18px 28px", display: "flex", alignItems: "center", justifyContent: "center", gap: "14px", flexWrap: "wrap" }}>
+          <span style={{ fontSize: "28px" }}>🧊</span>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontStyle: "italic", color: "#FEFAF4", textAlign: "center" }}>Frozen is for ice cream. Not your meals.</div>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C", letterSpacing: "0.1em", textTransform: "uppercase" }}>— Always Fresh</span>
         </div>
       )}
 
-      {/* ── Install Banner ── */}
-      {showInstallBanner && (
-        <div style={{
-          position: "fixed", bottom: "24px", left: "50%",
-          transform: "translateX(-50%)",
-          background: "#0F1A0F",
-          border: "1px solid rgba(218,165,32,0.4)",
-          borderRadius: "16px",
-          padding: "16px 24px",
-          display: "flex", alignItems: "center", gap: "16px",
-          zIndex: 200,
-          boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
-          maxWidth: "480px", width: "90%",
-        }}>
-          <img src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png"
-            alt="" style={{ width: "44px", height: "44px", objectFit: "contain", flexShrink: 0 }} />
-          <div style={{ flex: 1 }}>
-            <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#FEFAF0", marginBottom: "2px" }}>Add Flavor Fuzion to your phone</div>
-            <div className="jost" style={{ fontSize: "11px", color: "#A0C8A8" }}>Install for quick access, no App Store needed!</div>
-          </div>
-          <button onClick={handleInstall} style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "100px", padding: "8px 18px", fontFamily: "'Jost', sans-serif", fontSize: "12px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
-            Install ↓
-          </button>
-          <button onClick={() => setShowInstallBanner(false)} style={{ background: "none", border: "none", color: "#A0C8A8", cursor: "pointer", fontSize: "18px", padding: "0", flexShrink: 0 }}>✕</button>
-        </div>
-      )}
-
-      {/* ── Pages ── */}
-      <div style={{ paddingTop: showPromoBanner ? "114px" : "72px" }}>
-
-        {/* ════════════════════════════════════════════════════
-            HOME PAGE
-        ════════════════════════════════════════════════════ */}
-        {activePage === "Home" && (
-          <div>
-            {/* Hero */}
-            <div className="parallax-section" style={{
-              background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)",
-              minHeight: "92vh",
-              position: "relative",
-              display: "flex", alignItems: "center",
-              overflow: "hidden",
-            }}>
-              <div className="hero-pattern" />
-
-              {/* Symbol Watermark Left */}
-              <img
-                src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/symbol.svg"
-                alt=""
-                className="hero-watermark"
-                style={{
-                  position: "absolute",
-                  left: "120px", top: "50%",
-                  transform: "translateY(-50%)",
-                  width: "420px", height: "auto",
-                  opacity: 0.08,
-                  pointerEvents: "none",
-                  userSelect: "none",
-                  zIndex: 1,
-                }}
-              />
-              {/* Symbol Watermark Right */}
-              <img
-                src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/symbol.svg"
-                alt=""
-                className="hero-watermark"
-                style={{
-                  position: "absolute",
-                  right: "120px", top: "50%",
-                  transform: "translateY(-50%)",
-                  width: "420px", height: "auto",
-                  opacity: 0.08,
-                  pointerEvents: "none",
-                  userSelect: "none",
-                  zIndex: 1,
-                }}
-              />
-
-              <div className="hero-content" style={{ position: "relative", zIndex: 2, padding: "80px 80px", width: "100%", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <span className="section-tag fade-up">Food is Life. Life is Good.™</span>
-                <h1 className="playfair hero-title fade-up-2" style={{
-                  fontSize: "80px", fontWeight: 700,
-                  color: "#FEFAF0", lineHeight: 1.05,
-                  letterSpacing: "-0.02em", marginBottom: "24px",
-                }}>
-                  Bold flavors,<br />
-                  <em className="gold">made with love</em>
-                </h1>
-                <p className="jost fade-up-3" style={{
-                  fontSize: "17px", color: "#FEFAF0",
-                  lineHeight: 1.8, maxWidth: "560px", marginBottom: "40px",
-                  fontWeight: 400,
-                }}>
-                  Chef Heather Janey brings bold, worldly flavors to your table in the Boston and South Shore Massachusetts areas, Feel Good Food made with love, for every occasion.
+      {/* Content */}
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 32px 80px" }}>
+        {isCombosTab && <ComboBuilder menuItems={menuItems} onAddCombo={(combo) => { addCombo(combo); setShowCart(true); setView("cart"); }} />}
+        {isBurgerTab && <BurgerBuilder onAddToCart={(item) => { addToCart(item); setShowCart(true); setView("cart"); }} />}
+        {isWorkplaceTab && <WorkplaceLunch />}
+        {!isCombosTab && !isBurgerTab && !isWorkplaceTab && (
+          <>
+            {loading && <div style={{ textAlign: "center", paddingTop: "60px" }}><div className="spinner" /><div style={{ fontFamily: "'DM Sans', sans-serif", color: "#B5A48C", fontSize: "14px" }}>Loading the menu…</div></div>}
+            {error && <div style={{ textAlign: "center", paddingTop: "60px" }}><div style={{ fontSize: "48px", marginBottom: "16px" }}>😔</div><div style={{ fontFamily: "'DM Sans', sans-serif", color: "#E76F51", fontSize: "15px", marginBottom: "16px" }}>{error}</div><button className="add-btn" onClick={fetchMenu}>Try Again</button></div>}
+            {!loading && !error && filtered.length === 0 && <div style={{ textAlign: "center", paddingTop: "60px" }}><div style={{ fontSize: "48px", marginBottom: "16px" }}>🍽️</div><div style={{ fontFamily: "'DM Sans', sans-serif", color: "#B5A48C", fontSize: "15px" }}>No items in this category right now.<br />Check back soon!</div></div>}
+            {!loading && !error && filtered.length > 0 && categoryKey === "Cookies" && (
+              <div style={{ maxWidth: "500px", margin: "0 auto", background: "#fff", borderRadius: "20px", padding: "32px", border: "1px solid #EEE8DF", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+                <div style={{ textAlign: "center", marginBottom: "24px" }}>
+                  <div style={{ fontSize: "64px", marginBottom: "12px" }}>🍪</div>
+                  <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "28px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>Almond Lavender Cookies</h2>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#6B5E4E", lineHeight: 1.6 }}>Organic & Gluten-Free. Made with love by Chef Heather Janey.</p>
+                </div>
+                <div style={{ marginBottom: "20px" }}>
+                  <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "8px" }}>Select Pack Size</label>
+                  <select
+                    value={selectedCookie}
+                    onChange={(e) => setSelectedCookie(e.target.value)}
+                    style={{ width: "100%", padding: "12px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none", cursor: "pointer" }}>
+                    <option value="" disabled>Choose a pack size...</option>
+                    {filtered.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name.replace("Almond Lavender Cookies - ", "")} — ${item.price}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  disabled={!selectedCookie}
+                  onClick={() => {
+                    const selected = filtered.find(i => i.id === selectedCookie);
+                    if (selected) { addToCart(selected); setSelectedCookie(""); }
+                  }}
+                  className="add-btn"
+                  style={{ width: "100%", opacity: selectedCookie ? 1 : 0.4, cursor: selectedCookie ? "pointer" : "not-allowed" }}>
+                  + Add to Order
+                </button>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C", textAlign: "center", marginTop: "12px" }}>
+                  💡 Bigger packs = better savings!
                 </p>
-                <div className="fade-up-4" style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
-                  <button className="btn-primary"
-                    onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
-                    Browse the Menu
-                  </button>
-                  <button className="btn-outline" onClick={() => setActivePage("About")}>
-                    Meet Heather
-                  </button>
-                </div>
-
-                {/* Stats */}
-                <div style={{ display: "flex", gap: "48px", marginTop: "72px", flexWrap: "wrap", justifyContent: "center", alignItems: "flex-end" }}>
-                  {[["500+", "Meals Prepped"], ["100+", "Events Catered"]].map(([num, label]) => (
-                    <div key={label} style={{ textAlign: "center" }}>
-                      <div className="playfair gold" style={{ fontSize: "36px", fontWeight: 700 }}>{num}</div>
-                      <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "4px" }}>{label}</div>
-                    </div>
-                  ))}
-                  <div style={{ textAlign: "center" }}>
-                    <div className="playfair gold" style={{ fontSize: "36px", fontWeight: 700 }}>5.0 ★★★★★</div>
-                    <div className="jost" onClick={() => document.getElementById('reviews').scrollIntoView({ behavior: 'smooth' })} style={{ fontSize: "12px", color: "#A0C8A8", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "4px", cursor: "pointer", textDecoration: "underline", textDecorationColor: "rgba(160,200,168,0.4)" }}>Happy Tummies! 🍽️</div>
-                  </div>
-                </div>
               </div>
-            </div>
+            )}
+            {!loading && !error && filtered.length > 0 && categoryKey !== "Cookies" && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "28px" }}>
 
+                {/* Meal Prep & Sides items with burger card injected at position 4 */}
+                {(() => {
+                  const mealPrepItems = filtered.filter(i => i.category === "Meal Prep" || i.category === "Sides");
+                  const burgerCard = (activeCategory === "All" || activeCategory === "Meal Prep")
+                    ? [<DeluxeBurgerCard key="burger-card" onBuildBurger={() => setActiveCategory("🍔 Build a Burger")} />]
+                    : [];
+                  const insertAt = 3; // 0-indexed, so position 4
+                  const before = mealPrepItems.slice(0, insertAt);
+                  const after = mealPrepItems.slice(insertAt);
+                  return [
+                    ...before.map((item) => <MealCard key={item.id} item={item} onAdd={() => addToCart(item)} />),
+                    ...burgerCard,
+                    ...after.map((item) => <MealCard key={item.id} item={item} onAdd={() => addToCart(item)} />),
+                  ];
+                })()}
 
-            {/* Parallax Image 1 - Food Spread */}
-            <div className="parallax-section" style={{
-              height: "400px",
-              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_124530092.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundAttachment: "fixed",
-            }} />
-            {/* Services Section */}
-            <div style={{ padding: "100px 80px", background: "#FEFAF0" }}>
-              <div>
-              <div style={{ textAlign: "center", marginBottom: "60px" }}>
-                <span className="section-tag">What We Offer</span>
-                <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, lineHeight: 1.2 }}>
-                  A culinary experience<br /><em>for every occasion</em>
-                </h2>
-                <div className="divider" style={{ margin: "16px auto 0" }} />
-              </div>
-
-              <div className="services-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px" }}>
-                {services.map((s) => (
-                  <div key={s.title} className="service-card"
-                    style={{ background: s.color }}>
-                    <div style={{ padding: "48px 36px" }}>
-                      <div style={{ fontSize: "48px", marginBottom: "20px" }}>{s.emoji}</div>
-                      <div className="jost" style={{
-                        display: "inline-block", background: "rgba(255,255,255,0.15)",
-                        color: "#fff", padding: "4px 12px", borderRadius: "100px",
-                        fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
-                        textTransform: "uppercase", marginBottom: "16px",
-                      }}>{s.tag}</div>
-                      <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, color: "#fff", marginBottom: "14px" }}>{s.title}</h3>
-                      <p className="jost" style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, fontWeight: 300 }}>{s.description}</p>
-                      <button onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}
-                        style={{
-                          marginTop: "28px",
-                          background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)",
-                          color: "#0F1A0F", border: "none",
-                          padding: "10px 20px", borderRadius: "100px",
-                          fontFamily: "'Jost', sans-serif", fontSize: "12px",
-                          fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-                          cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s",
-                          boxShadow: "0 4px 16px rgba(218,165,32,0.4)",
-                        }}
-                        onMouseOver={(e) => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 8px 24px rgba(218,165,32,0.6)"; }}
-                        onMouseOut={(e) => { e.target.style.transform = "none"; e.target.style.boxShadow = "0 4px 16px rgba(218,165,32,0.4)"; }}>
-                        Order Now →
-                      </button>
-                    </div>
-                  </div>
+                {/* All other categories (Catering, Private Dinners) */}
+                {filtered.filter(i => i.category !== "Meal Prep" && i.category !== "Sides" && i.category !== "Cookies").map((item) => (
+                  <MealCard key={item.id} item={item} onAdd={() => addToCart(item)} />
                 ))}
-              </div>
-              </div>
-            </div>
 
-
-            {/* Cooking Lessons Section */}
-            <div style={{ padding: "100px 80px", background: "#0F1A0F" }}>
-              <div style={{ textAlign: "center", marginBottom: "60px" }}>
-                <span className="section-tag">Learn From a Pro</span>
-                <h2 className="playfair lessons-title" style={{ fontSize: "48px", fontWeight: 600, color: "#FEFAF0", lineHeight: 1.2 }}>
-                  Cooking Lessons<br /><em className="gold">with Chef Heather</em>
-                </h2>
-                <div className="divider" style={{ margin: "16px auto 0" }} />
-                <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.75)", marginTop: "24px", maxWidth: "560px", margin: "24px auto 0", fontWeight: 300, lineHeight: 1.7 }}>
-                  Whether you're a beginner or looking to sharpen your skills, Heather offers personalized cooking lessons tailored to your goals, dietary needs, and favorite flavors.
-                </p>
-              </div>
-
-              <div className="services-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px" }}>
-                {[
-                  {
-                    emoji: "💻",
-                    title: "Virtual",
-                    tag: "1-on-1 Online",
-                    description: "Learn from the comfort of your own kitchen! Heather guides you through recipes and techniques live via video call, tailored to your skill level and culinary interests.",
-                    color: "linear-gradient(160deg, #4A1B6B 0%, #6B2E8A 100%)",
-                  },
-                  {
-                    emoji: "🏠",
-                    title: "In-Home",
-                    tag: "Private Lesson",
-                    description: "Heather comes to your kitchen for a hands-on, personalized cooking experience. Perfect for individuals or couples looking for an intimate, immersive lesson.",
-                    color: "linear-gradient(160deg, #5A2280 0%, #1A7A5E 100%)",
-                  },
-                  {
-                    emoji: "👩🏽‍🍳",
-                    title: "Group",
-                    tag: "Virtual or In-Person",
-                    description: "Fun, interactive group lessons for friends, family, or colleagues. Available virtually or at your home or venue. A unique experience for parties and team building!",
-                    color: "linear-gradient(160deg, #1A7A5E 0%, #50C878 100%)",
-                  },
-                ].map((lesson) => (
-                  <div key={lesson.title} className="service-card" style={{ background: lesson.color }}>
-                    <div style={{ padding: "48px 36px" }}>
-                      <div style={{ fontSize: "48px", marginBottom: "20px" }}>{lesson.emoji}</div>
-                      <div className="jost" style={{
-                        display: "inline-block", background: "rgba(255,255,255,0.15)",
-                        color: "#fff", padding: "4px 12px", borderRadius: "100px",
-                        fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
-                        textTransform: "uppercase", marginBottom: "16px",
-                      }}>{lesson.tag}</div>
-                      <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, color: "#fff", marginBottom: "14px" }}>{lesson.title}</h3>
-                      <p className="jost" style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, fontWeight: 300 }}>{lesson.description}</p>
-                      <button
-                        onClick={(e) => { e.preventDefault(); setSelectedLesson(lesson.title); setLessonForm(f => ({ ...f, lessonType: lesson.title })); setShowLessonsForm(true); }}
-                        style={{
-                          marginTop: "28px",
-                          background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)",
-                          color: "#0F1A0F", border: "none",
-                          padding: "10px 20px", borderRadius: "100px",
-                          fontFamily: "'Jost', sans-serif", fontSize: "12px",
-                          fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-                          cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s",
-                          boxShadow: "0 4px 16px rgba(218,165,32,0.4)",
-                        }}
-                        onMouseOver={(e) => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 8px 24px rgba(218,165,32,0.6)"; }}
-                        onMouseOut={(e) => { e.target.style.transform = "none"; e.target.style.boxShadow = "0 4px 16px rgba(218,165,32,0.4)"; }}>
-                        Book a Lesson →
-                      </button>
+                {/* Cookies Dropdown Card — shows in All tab only */}
+                {activeCategory === "All" && filtered.some(i => i.category === "Cookies") && (
+                  <div className="menu-card">
+                    <div className="img-wrap">
+                      <img src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/20260501_083105(2).jpg" alt="Almond Lavender Cookies" className="food-img" onError={(e) => { e.target.src = FALLBACK; }} />
+                      <div className="cat-badge">COOKIES</div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            
-            <div className="parallax-section" style={{
-              height: "400px",
-              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_220046129.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundAttachment: "fixed",
-            }} />
-            {/* Tagline Banner */}
-            <div className="parallax-section" style={{
-              background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)",
-              padding: "80px 40px", textAlign: "center",
-              position: "relative", overflow: "hidden",
-            }}>
-              <div style={{ position: "relative", zIndex: 1 }}>
-              <div className="playfair" style={{ fontSize: "48px", fontWeight: 400, color: "#FEFAF0", fontStyle: "italic", marginBottom: "16px" }}>
-                "Food is Life. Life is Good.™"
-              </div>
-              <div className="jost" style={{ fontSize: "14px", color: "rgba(254,250,240,0.7)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-               — Chef Heather
-              </div>
-              </div>
-            </div>
-
-
-            {/* Parallax Image 3 - Meal Prep */}
-            <div className="parallax-section" style={{
-              height: "400px",
-              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_114235232.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundAttachment: "fixed",
-            }} />
-            {/* Testimonials */}
-            <div id="reviews" className="testimonials-section" style={{ padding: "100px 80px", background: "#0F1A0F" }}>
-              <div>
-              <div style={{ textAlign: "center", marginBottom: "60px" }}>
-                <span className="section-tag">What People Say</span>
-                <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, color: "#FEFAF0" }}>
-                  Loved by every <em>table</em>
-                </h2>
-                <div className="divider" style={{ margin: "16px auto 0" }} />
-              </div>
-              <div style={{ position: "relative" }}>
-                <button onClick={() => document.querySelector('.reviews-carousel').scrollBy({ left: -360, behavior: 'smooth' })}
-                  style={{ position: "absolute", left: "-20px", top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "#50C878", border: "none", borderRadius: "50%", width: "44px", height: "44px", fontSize: "20px", cursor: "pointer", color: "#0F1A0F", boxShadow: "0 4px 16px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-                <div style={{ display: "flex", overflowX: "auto", gap: "24px", paddingBottom: "16px", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}
-                  className="reviews-carousel">
-                  {testimonials.map((t) => (
-                    <div key={t.name} className="testimonial-card" style={{ minWidth: "min(320px, 80vw)", maxWidth: "min(340px, 85vw)", scrollSnapAlign: "start", flexShrink: 0 }}>
-                      <div className="gold-stars" style={{ fontSize: "20px", marginBottom: "16px" }}>{"★".repeat(t.stars)}</div>
-                      <p className="jost" style={{ fontSize: "15px", color: "#3D3020", lineHeight: 1.7, fontStyle: "italic", marginBottom: "20px", fontWeight: 300 }}>"{t.text}"</p>
-                      <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#50C878", letterSpacing: "0.06em" }}>— {t.name}</div>
-                    </div>
-                  ))}
-                </div>
-                <button onClick={() => document.querySelector('.reviews-carousel').scrollBy({ left: 360, behavior: 'smooth' })}
-                  style={{ position: "absolute", right: "-20px", top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "#50C878", border: "none", borderRadius: "50%", width: "44px", height: "44px", fontSize: "20px", cursor: "pointer", color: "#0F1A0F", boxShadow: "0 4px 16px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
-                <style>{`.reviews-carousel::-webkit-scrollbar { display: none; }`}</style>
-              </div>
-              </div>
-            </div>
-
-            {/* Merch Section */}
-            <div style={{ padding: "100px 80px", background: "#FEFAF0" }}>
-              <div style={{ textAlign: "center", marginBottom: "60px" }}>
-                <span className="section-tag">Flavor Fuzion Merch</span>
-                <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, color: "#0F1A0F", lineHeight: 1.2 }}>
-                  Love the Food?<br /><em className="gold">Wear the Vibe.</em>
-                </h2>
-                <div className="divider" style={{ margin: "16px auto" }} />
-                <p className="jost" style={{ fontSize: "16px", color: "#6B5E4E", marginTop: "24px", maxWidth: "480px", margin: "24px auto 0", fontWeight: 300, lineHeight: 1.7 }}>
-                  Get your Flavor Fuzion merch and let everyone know you've got <span style={{ background: "linear-gradient(135deg, #8B6914, #DAA520, #F5D060, #DAA520, #8B6914)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontWeight: 700 }}>taste!</span>
-                </p>
-              </div>
-
-              <div className="merch-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
-                {[
-                  { emoji: "🧥", name: "Hoodie", price: 30, sizePricing: { "XS": 25, "S": 25, "M": 30, "L": 30, "XL": 30, "2XL": 30, "3XL": 35, "4XL": 35, "5XL": 40 }, sizes: true, colors: ["Black"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo.", link: "https://buy.stripe.com/28E14mgSd7Eqa1Cdlqasg00" },
-                  { emoji: "👕", name: "T-Shirt", price: 20, sizePricing: { "XS": 15, "S": 15, "M": 20, "L": 20, "XL": 20, "2XL": 20, "3XL": 25, "4XL": 25 }, sizes: true, colors: ["Black"], description: "Soft cotton tee with bold Flavor Fuzion print.", link: "https://buy.stripe.com/aFa4gybxTe2Oa1Cbdiasg01" },
-                  { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Black"], description: "Structured snapback with embroidered logo.", link: "https://buy.stripe.com/eVq4gy59v7EqehS2GMasg02" },
-                  { emoji: "🥶", name: "Beanie", price: 15, sizes: false, colors: ["Black", "Royal Purple"], description: "Cozy knit beanie with Flavor Fuzion patch.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
-                ].map((item) => (
-                  <div key={item.name} style={{ background: "#fff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #EEE8DF", display: "flex", flexDirection: "column" }}>
-                    {/* Image placeholder */}
-                    <div className="merch-image" style={{ background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", height: "200px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                      <span style={{ fontSize: "80px" }}>{item.emoji}</span>
-                      <div style={{ position: "absolute", top: "12px", right: "12px", background: "#DAA520", color: "#0F1A0F", padding: "4px 10px", borderRadius: "100px", fontSize: "12px", fontWeight: 700 }}>PRE-ORDER</div>
-                    </div>
-                    <div className="merch-body" style={{ padding: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
-                      <h3 className="playfair" style={{ fontSize: "22px", fontWeight: 600, color: "#0F1A0F", marginBottom: "8px" }}>{item.name}</h3>
-                      <p className="jost" style={{ fontSize: "13px", color: "#6B5E4E", lineHeight: 1.6, marginBottom: "16px", fontWeight: 300 }}>{item.description}</p>
-                      
-                      {/* Colors */}
-                      <div style={{ marginBottom: "16px" }}>
-                        <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Colors</div>
-                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                          {item.colors.map((colorName) => {
-                            const colorMap = { "Black": "#0F1A0F", "Royal Purple": "#4A1B6B", "Forest Green": "#1A5C2A", "Gold": "#DAA520" };
-                            return <div key={colorName} title={colorName} style={{ width: "20px", height: "20px", borderRadius: "50%", background: colorMap[colorName], border: "2px solid #EEE8DF", cursor: "pointer" }} />;
-                          })}
-                        </div>
+                    <div style={{ padding: "20px 20px 18px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
+                        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 600, lineHeight: 1.2, flex: 1, paddingRight: "12px", color: "#1A1208" }}>Almond Lavender Cookies</h2>
                       </div>
-
-                      {/* Sizes */}
-                      {item.sizes && (
-                        <div style={{ marginBottom: "16px" }}>
-                          <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "8px" }}>Sizes</div>
-                          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-                            {[...(["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"]), ...(item.name === "Hoodie" ? ["5XL"] : [])].map((size) => (
-                              <span key={size} className="jost" style={{ fontSize: "10px", padding: "3px 7px", border: "1px solid #D4C9B8", borderRadius: "4px", color: "#6B5E4E" }}>{size}</span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div className="playfair" style={{ fontSize: "24px", fontWeight: 600, color: "#0F1A0F" }}>
-                          {item.sizePricing
-                            ? `$${Math.min(...Object.values(item.sizePricing))} – $${Math.max(...Object.values(item.sizePricing))}`
-                            : `$${item.price}`}
-                        </div>
-                        <a href={item.link} target="_blank" rel="noopener noreferrer"
-                          onClick={(e) => { e.preventDefault(); setSelectedMerch(item); setMerchColor(item.colors[0]); setMerchSize(""); setShowMerchPopup(true); }}
-                          style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", padding: "6px 14px", borderRadius: "100px", fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none" }}>
-                          Pre-Order →
-                        </a>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", lineHeight: 1.65, color: "#6B5E4E", marginBottom: "14px" }}>Organic & Gluten-Free. Made with love by Chef Heather Janey.</p>
+                      <div style={{ marginBottom: "14px" }}>
+                        <select value={selectedCookie} onChange={(e) => setSelectedCookie(e.target.value)}
+                          style={{ width: "100%", padding: "10px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'DM Sans', sans-serif", fontSize: "13px", background: "#FEFAF4", outline: "none", cursor: "pointer" }}>
+                          <option value="" disabled>Choose a pack size...</option>
+                          {filtered.filter(i => i.category === "Cookies").map((item) => (
+                            <option key={item.id} value={item.id}>{item.name.replace("Almond Lavender Cookies - ", "")} — ${item.price}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid #EEE8DF", paddingTop: "14px" }}>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C" }}>💡 Bigger packs = better savings!</div>
+                        <button disabled={!selectedCookie} className="add-btn"
+                          style={{ opacity: selectedCookie ? 1 : 0.4, cursor: selectedCookie ? "pointer" : "not-allowed" }}
+                          onClick={() => { const s = filtered.find(i => i.id === selectedCookie); if (s) { addToCart(s); setSelectedCookie(""); } }}>
+                          + Add to Order
+                        </button>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              <p className="jost" style={{ textAlign: "center", fontSize: "13px", color: "#B5A48C", marginTop: "32px", fontStyle: "italic" }}>
-                * Please allow 7-10 days for shipping. Colors and designs subject to availability.
-              </p>
-            </div>
-
-            {/* CTA Section */}
-            <div style={{ background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)", padding: "100px 80px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-              <img src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/symbol.svg"
-                alt="" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "480px", height: "auto", opacity: 0.06, pointerEvents: "none", userSelect: "none" }} />
-              <div style={{ position: "relative", zIndex: 1 }}>
-              <span className="section-tag">Ready to Order?</span>
-              <h2 className="playfair" style={{ fontSize: "52px", fontWeight: 600, color: "#FEFAF0", marginBottom: "20px" }}>
-                Let's create something<br /><em className="gold">delicious together</em>
-              </h2>
-              <p className="jost" style={{ fontSize: "16px", color: "#A0C8A8", marginBottom: "40px", fontWeight: 300 }}>
-                Browse the full menu and place your order online.
-              </p>
-              <button className="btn-primary" style={{ fontSize: "14px", padding: "16px 40px" }}
-                onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
-                Visit the Menu & Order
-              </button>
-              </div>
-            </div>
-
-            {/* Add to Phone Section */}
-            <div style={{ background: "#0F1A0F", padding: "80px 80px", textAlign: "center", borderTop: "1px solid rgba(218,165,32,0.2)" }}>
-              <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-                <div style={{ fontSize: "48px", marginBottom: "16px" }}>📱</div>
-                <span className="section-tag">No App Store Needed</span>
-                <h2 className="playfair" style={{ fontSize: "40px", fontWeight: 600, color: "#FEFAF0", marginBottom: "16px" }}>
-                  Add us to your <em className="gold">home screen</em>
-                </h2>
-                <p className="jost" style={{ fontSize: "15px", color: "#A0C8A8", lineHeight: 1.8, marginBottom: "32px", fontWeight: 300 }}>
-                  Get instant access to Flavor Fuzion right from your phone, just like a real app, completely free!
-                </p>
-
-                {/* Instructions */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "36px", textAlign: "left" }}>
-                  <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "16px", padding: "24px", border: "1px solid rgba(218,165,32,0.2)" }}>
-                    <div style={{ fontSize: "28px", marginBottom: "10px" }}>🍎</div>
-                    <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#DAA520", marginBottom: "8px", letterSpacing: "0.06em" }}>iPhone / iPad</div>
-                    <ol style={{ paddingLeft: "16px", listStyleType: "decimal" }}>
-                      {["Open in Safari", "Tap the Share button ↑", "Tap \"Add to Home Screen\"", "Tap \"Add\", done!"].map((step) => (
-                        <li key={step} className="jost" style={{ fontSize: "13px", color: "#A0C8A8", marginBottom: "4px", fontWeight: 300 }}>{step}</li>
-                      ))}
-                    </ol>
-                  </div>
-                  <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "16px", padding: "24px", border: "1px solid rgba(218,165,32,0.2)" }}>
-                    <div style={{ fontSize: "28px", marginBottom: "10px" }}>🤖</div>
-                    <div className="jost" style={{ fontSize: "13px", fontWeight: 600, color: "#DAA520", marginBottom: "8px", letterSpacing: "0.06em" }}>Android</div>
-                    <ol style={{ paddingLeft: "16px", listStyleType: "decimal" }}>
-                      {["Open in Chrome", "Tap the menu ⋮", "Tap \"Add to Home Screen\"", "Tap \"Add\", done!"].map((step) => (
-                        <li key={step} className="jost" style={{ fontSize: "13px", color: "#A0C8A8", marginBottom: "4px", fontWeight: 300 }}>{step}</li>
-                      ))}
-                    </ol>
-                  </div>
-                </div>
-
-                {installPrompt && (
-                  <button onClick={handleInstall} style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "100px", padding: "14px 36px", fontFamily: "'Jost', sans-serif", fontSize: "14px", fontWeight: 700, cursor: "pointer", letterSpacing: "0.08em", boxShadow: "0 8px 24px rgba(218,165,32,0.4)" }}>
-                    ↓ Install Flavor Fuzion
-                  </button>
                 )}
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* ════════════════════════════════════════════════════
-            MENU PAGE
-        ════════════════════════════════════════════════════ */}
-        {activePage === "Menu" && (
-          <div>
-            {/* Hero */}
-            <div className="parallax-section" style={{
-              background: "linear-gradient(135deg, #50C878 0%, #4A1B6B 100%)",
-              padding: "100px 40px 80px",
-              textAlign: "center",
-            }}>
-              <span className="section-tag">Fresh & Seasonal</span>
-              <h1 className="playfair" style={{ fontSize: "64px", fontWeight: 700, color: "#FEFAF0", marginBottom: "20px" }}>
-                Our <em className="gold">Menu</em>
-              </h1>
-              <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.75)", maxWidth: "500px", margin: "0 auto 40px", fontWeight: 300, lineHeight: 1.7 }}>
-                Heather's menu changes weekly to feature the freshest seasonal ingredients. Browse everything and place your order online.
-              </p>
-              <button className="btn-primary" style={{ fontSize: "14px", padding: "16px 40px" }}
-                onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
-                Browse Full Menu & Order →
-              </button>
-            </div>
-
-
-            {/* Parallax Image 1 - Food Spread */}
-            <div className="parallax-section" style={{
-              height: "400px",
-              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_133312861.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundAttachment: "fixed",
-            }} />
-            {/* Service Categories */}
-            <div style={{ padding: "80px 80px", background: "#FEFAF0" }}>
-              <div>
-              <div style={{ textAlign: "center", marginBottom: "60px" }}>
-                <span className="section-tag">What's Available</span>
-                <h2 className="playfair" style={{ fontSize: "44px", fontWeight: 600 }}>
-                  Something for <em>every appetite</em>
-                </h2>
-                <div className="divider" style={{ margin: "16px auto 0" }} />
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "28px" }}>
-                {[
-                  { title: "Meal Prep", desc: "Weekly meals planned and prepped for you. Pick your proteins, sides, and dietary needs. Delivered fresh.", emoji: "🥗", color: "#50C878", items: ["Herb-Crusted Salmon Bowl", "Mediterranean Chicken", "Vegan Lentil Curry", "And more weekly specials…"] },
-                  { title: "Catering", desc: "Full-service catering for any size event. BBQ feasts, elegant brunches, taco bars and more.", emoji: "🍽️", color: "#4A1B6B", items: ["BBQ Feast Package", "Elegant Brunch Spread", "Taco & Tequila Bar", "Custom menus available"] },
-                  { title: "Private Dinners", desc: "An intimate chef's table experience at home. Multi-course tasting menus designed just for you.", emoji: "🕯️", color: "#7A5C0A", items: ["Date Night for Two", "Dinner Party Experience", "Custom tasting menus", "Wine pairing available"] },
-                  { title: "Combos & Deals", desc: "Save more with our combo meal prep packages. Mix and match entrées and sides at a discount.", emoji: "💎", color: "#0A2018", items: ["3 Entrées + 3 Sides (5% off)", "4 Entrées + 4 Sides (6% off)", "5 Entrées + 5 Sides (7% off)", "Build your own combo"] },
-                ].map((cat) => (
-                  <div key={cat.title} style={{ background: "#fff", borderRadius: "20px", overflow: "hidden", border: "1px solid #EEE8DF", transition: "transform 0.3s, box-shadow 0.3s" }}
-                    onMouseOver={(e) => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.1)"; }}
-                    onMouseOut={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
-                    <div style={{ background: cat.color, padding: "32px 28px" }}>
-                      <div style={{ fontSize: "40px", marginBottom: "12px" }}>{cat.emoji}</div>
-                      <h3 className="playfair" style={{ fontSize: "26px", fontWeight: 600, color: "#fff" }}>{cat.title}</h3>
-                    </div>
-                    <div style={{ padding: "24px 28px" }}>
-                      <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E", lineHeight: 1.6, marginBottom: "16px", fontWeight: 300 }}>{cat.desc}</p>
-                      <ul style={{ listStyle: "none", marginBottom: "20px" }}>
-                        {cat.items.map((item) => (
-                          <li key={item} className="jost" style={{ fontSize: "13px", color: "#3D3020", padding: "4px 0", borderBottom: "1px solid #F5F0E8", display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span className="gold" style={{ fontSize: "10px" }}>◆</span> {item}
-                          </li>
-                        ))}
-                      </ul>
-                      <button className="btn-primary" style={{ width: "100%", textAlign: "center", fontSize: "12px", padding: "12px" }}
-                        onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
-                        Order Now →
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              </div>
-            </div>
-
-            {/* Note */}
-            <div style={{ padding: "60px 80px", textAlign: "center", background: "#F5F0E8" }}>
-              <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-                <div style={{ fontSize: "32px", marginBottom: "16px" }}>📅</div>
-                <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, marginBottom: "12px" }}>Menu changes weekly</h3>
-                <p className="jost" style={{ fontSize: "15px", color: "#6B5E4E", lineHeight: 1.7, fontWeight: 300, marginBottom: "24px" }}>
-                  Heather updates her menu every week based on seasonal availability and customer favorites. Visit the ordering app to see what's fresh this week!
-                </p>
-                <button className="btn-primary"
-                  onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
-                  See This Week's Menu
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ════════════════════════════════════════════════════
-            ABOUT PAGE
-        ════════════════════════════════════════════════════ */}
-        {activePage === "About" && (
-          <div>
-            {/* Hero */}
-            <div className="parallax-section" style={{
-              background: "linear-gradient(135deg, #4A1B6B 0%, #0F1A0F 100%)",
-              padding: "100px 40px 80px",
-            }}>
-              <div style={{ padding: "0" }}>
-                <span className="section-tag">The Chef Behind the Magic</span>
-                <h1 className="playfair" style={{ fontSize: "64px", fontWeight: 700, color: "#FEFAF0" }}>
-                  Meet <em className="gold">Heather</em>
-                </h1>
-              </div>
-            </div>
-
-            {/* Parallax Image - Lobster Ravioli */}
-            <div className="parallax-section" style={{
-              height: "400px",
-              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/lobster%20ravioli.jpg')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundAttachment: "fixed",
-            }} />
-            {/* About Content */}
-            <div style={{ padding: "80px 80px", background: "#FEFAF0" }}>
-              <div>
-              <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
-                {/* Heather's Photo */}
-                <div style={{
-                  borderRadius: "24px",
-                  overflow: "hidden",
-                  aspectRatio: "3/4",
-                }}>
-                  <img
-                    src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/FB_IMG_1558214697556.jpg"
-                    alt="Chef Heather Janey"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
-                  />
-                </div>
-
-                {/* Story */}
-                <div>
-                  <span className="section-tag">My Story</span>
-                  <h2 className="playfair" style={{ fontSize: "40px", fontWeight: 600, marginBottom: "12px", lineHeight: 1.2 }}>
-                    Cooking has always been<br /><em>my love language</em>
-                  </h2>
-                  <div className="divider" />
-                  <p className="jost" style={{ fontSize: "15px", color: "#4A3728", lineHeight: 1.8, marginBottom: "20px", fontWeight: 300 }}>
-                    I'm Heather Janey, a personal chef and caterer based in the Boston and South Shore Massachusetts areas with a passion for creating healthy, eclectic dishes bursting with big, bold flavors that truly satisfy the soul. Flavor Fuzion was first cooked up in 2016 in New York City, born from a simple but powerful belief: that food made with love has the power to bring people together. Since then, my "Feel Good Food" philosophy has been growing stronger every single day.
-                  </p>
-                  <p className="jost" style={{ fontSize: "15px", color: "#4A3728", lineHeight: 1.8, marginBottom: "20px", fontWeight: 300 }}>
-                    My style of cooking is a direct reflection of who I am, beautifully diverse. I'm African American and Italian, with a little Irish and a dash of Scottish thrown in for good measure. Growing up, my kitchen was a cultural adventure: my mother's traditional Italian and Irish recipes on one side, and my dad's family's finger-licking good Soul Food on the other. Even as a baby I was never shy about trying new flavors, I preferred lobster over Gerber! 🦞
-                  </p>
-                  <p className="jost" style={{ fontSize: "15px", color: "#4A3728", lineHeight: 1.8, marginBottom: "32px", fontWeight: 300 }}>
-                    At its heart, Flavor Fuzion was born from my love of the unique. I draw inspiration from ingredients and culinary traditions from all over the world, fusing regional flavors together in ways that are unexpected, exciting, and deeply satisfying. I consider myself an <em>Interpretive Chef</em>, dedicated to giving every client a one-of-a-kind, worldly inspired, boldly flavored experience they won't soon forget. Thank you for visiting, we can't wait to cook in your kitchen! 🍽️
-                  </p>
-                  <button className="btn-primary" onClick={() => setActivePage("Contact")}>
-                    Work With Me →
-                  </button>
-                </div>
-              </div>
-              </div>
-            </div>
-
-
-            {/* Parallax Image - Kitchen */}
-            <div className="parallax-section" style={{
-              height: "400px",
-              backgroundImage: "url('https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/Photoroom-20260502_130220682.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundAttachment: "fixed",
-            }} />
-            {/* Values */}
-            <div style={{ padding: "80px 80px", background: "#F5F0E8" }}>
-              <div>
-                <div style={{ textAlign: "center", marginBottom: "60px" }}>
-                  <span className="section-tag">What I Stand For</span>
-                  <h2 className="playfair" style={{ fontSize: "44px", fontWeight: 600 }}>
-                    My <em>philosophy</em>
-                  </h2>
-                  <div className="divider" style={{ margin: "16px auto 0" }} />
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "32px" }}>
-                  {[
-                    { emoji: "🌿", title: "Fresh Ingredients", desc: "I source seasonal, high-quality ingredients from local markets whenever possible." },
-                    { emoji: "❤️", title: "Made with Love", desc: "Every dish is prepared with care and intention, you can taste the difference." },
-                    { emoji: "✨", title: "Creative Cuisine", desc: "I blend bold flavors and unexpected combinations to create memorable experiences." },
-                    { emoji: "🤝", title: "Personal Service", desc: "I work closely with every client to understand their tastes and needs." },
-                  ].map((v) => (
-                    <div key={v.title} style={{ textAlign: "center", padding: "32px 20px" }}>
-                      <div style={{ fontSize: "40px", marginBottom: "16px" }}>{v.emoji}</div>
-                      <h3 className="playfair" style={{ fontSize: "20px", fontWeight: 600, marginBottom: "10px" }}>{v.title}</h3>
-                      <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E", lineHeight: 1.6, fontWeight: 300 }}>{v.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* CTA */}
-            <div style={{ background: "#0F1A0F", padding: "80px 40px", textAlign: "center" }}>
-              <h2 className="playfair" style={{ fontSize: "44px", fontWeight: 600, color: "#FEFAF0", marginBottom: "16px" }}>
-                Ready to experience<br /><em className="gold">Flavor Fuzion?</em>
-              </h2>
-              <p className="jost" style={{ fontSize: "15px", color: "#A0C8A8", marginBottom: "32px", fontWeight: 300 }}>
-                Let's create something delicious together.
-              </p>
-              <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
-                <button className="btn-primary" onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>Order Now</button>
-                <button className="btn-outline" onClick={() => setActivePage("Contact")}>Get in Touch</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ════════════════════════════════════════════════════
-            COOKIES PAGE
-        ════════════════════════════════════════════════════ */}
-        {activePage === "Get Cookies 🍪" && (
-          <CookiesPage onAddToCart={addToCart} />
-        )}
-
-        {/* ════════════════════════════════════════════════════
-            CONTACT PAGE
-        ════════════════════════════════════════════════════ */}
-        {activePage === "Contact" && (
-          <div>
-            {/* Hero */}
-            <div className="parallax-section" style={{
-              background: "linear-gradient(135deg, #7A5C0A 0%, #0F1A0F 100%)",
-              padding: "100px 40px 80px",
-            }}>
-              <div style={{ padding: "0" }}>
-                <span className="section-tag">Let's Connect</span>
-                <h1 className="playfair" style={{ fontSize: "64px", fontWeight: 700, color: "#FEFAF0" }}>
-                  Get in <em className="gold">Touch</em>
-                </h1>
-                <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.7)", maxWidth: "500px", marginTop: "16px", fontWeight: 300, lineHeight: 1.7 }}>
-                  Have a question about catering, meal prep, or a private dinner? Heather would love to hear from you.
-                </p>
-              </div>
-            </div>
-
-            {/* Contact Content */}
-            <div style={{ padding: "80px 80px" }}>
-              <div className="contact-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px" }}>
-
-                {/* Contact Info */}
-                <div>
-                  <span className="section-tag">Contact Information</span>
-                  <h2 className="playfair" style={{ fontSize: "36px", fontWeight: 600, marginBottom: "12px" }}>
-                    We'd love to <em>hear from you</em>
-                  </h2>
-                  <div className="divider" />
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: "28px", marginBottom: "40px" }}>
-                    {[
-                      { emoji: "📧", label: "Email", value: "FlavorFuzionbyHJ@gmail.com" },
-                      { emoji: "📞", label: "Phone", value: "774-205-3071" },
-                      { emoji: "📸", label: "Instagram", value: "@flavorfuzionbyhj" },
-                      { emoji: "🌐", label: "Website", value: "byheatherjaney.com" },
-                      { emoji: "📍", label: "Service Area", value: "Available for local & destination events" },
-                      { emoji: "⏰", label: "Response Time", value: "Within 24 hours" },
-                    ].map((info) => (
-                      <div key={info.label} style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
-                        <div style={{
-                          width: "48px", height: "48px", borderRadius: "12px",
-                          background: "linear-gradient(135deg, #50C878, #4A1B6B)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: "20px", flexShrink: 0,
-                        }}>{info.emoji}</div>
-                        <div>
-                          <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "4px" }}>{info.label}</div>
-                          <div className="jost" style={{ fontSize: "15px", color: "#2A1A0A", fontWeight: 400 }}>{info.value}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Pricing Transparency */}
-                  <div style={{ background: "#FEFAF0", borderRadius: "16px", padding: "24px", marginBottom: "28px", border: "1px solid #EEE8DF" }}>
-                    <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "12px" }}>💡 Pricing Info</div>
-                    <p className="jost" style={{ fontSize: "13px", color: "#6B5E4E", lineHeight: 1.8, marginBottom: "12px" }}>
-                      Prices shown are per person and cover all food and ingredients. <strong>In-home services</strong> (Private Dinners, Catering, and Dinner Parties) include a professional chef service fee of <strong>$45/hour</strong> (3-hour minimum) which will be included in your personalized quote. Meal prep orders do not include a service fee. Substitutions and custom requests may affect the final price. Heather will reach out within 24 hours to confirm your details and provide your full quote — no surprises!
-                    </p>
-                    <p className="jost" style={{ fontSize: "13px", color: "#6B5E4E", lineHeight: 1.8 }}>
-                      🚗 <strong>Delivery:</strong> Local (within 10 miles) $10 · Extended (10–35 miles) $18 · <strong>Free delivery on meal prep orders over $150!</strong>
-                    </p>
-                  </div>
-
-                  {/* Order CTA */}
-                  <div style={{ background: "linear-gradient(135deg, #50C878, #4A1B6B)", borderRadius: "20px", padding: "32px" }}>
-                    <div className="playfair" style={{ fontSize: "22px", fontWeight: 600, color: "#FEFAF0", marginBottom: "8px" }}>
-                      Ready to order?
-                    </div>
-                    <p className="jost" style={{ fontSize: "13px", color: "rgba(254,250,240,0.75)", marginBottom: "20px", fontWeight: 300, lineHeight: 1.6 }}>
-                      Browse the full menu and place your order directly through our online ordering app.
-                    </p>
-                    <button className="btn-primary"
-                      onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
-                      Go to Ordering App →
-                    </button>
-                  </div>
-                </div>
-
-                {/* Contact Form */}
-                <div>
-                  <span className="section-tag">Send a Message</span>
-                  <h2 className="playfair" style={{ fontSize: "36px", fontWeight: 600, marginBottom: "12px" }}>
-                    Have a <em>question?</em>
-                  </h2>
-                  <div className="divider" />
-
-                  <ContactForm />
-                </div>
-              </div>
-            </div>
-          </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* ── Merch Popup ── */}
-      {showMerchPopup && selectedMerch && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(15,26,15,0.85)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowMerchPopup(false); }}>
-          <div style={{ background: "#FEFAF0", borderRadius: "24px", padding: "40px", maxWidth: "480px", width: "100%", position: "relative" }}>
-            <button onClick={() => setShowMerchPopup(false)} style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", fontSize: "24px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
-            <div style={{ fontSize: "48px", textAlign: "center", marginBottom: "12px" }}>{selectedMerch.emoji}</div>
-            <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, textAlign: "center", marginBottom: "24px" }}>{selectedMerch.name}</h3>
-
-            {/* Color Selector */}
-            <div style={{ marginBottom: "20px" }}>
-              <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "10px" }}>Color</label>
-              <div style={{ display: "flex", gap: "10px" }}>
-                {selectedMerch.colors.map((color) => {
-                  const colorMap = { "Black": "#0F1A0F", "Royal Purple": "#4A1B6B", "Forest Green": "#1A5C2A", "Gold": "#DAA520" };
-                  return (
-                    <button key={color} onClick={() => setMerchColor(color)} title={color}
-                      style={{ width: "32px", height: "32px", borderRadius: "50%", background: colorMap[color], border: `3px solid ${merchColor === color ? "#DAA520" : "#EEE8DF"}`, cursor: "pointer", transition: "border 0.2s" }} />
-                  );
-                })}
-              </div>
-              {merchColor && <div className="jost" style={{ fontSize: "12px", color: "#6B5E4E", marginTop: "6px" }}>{merchColor}</div>}
-            </div>
-
-            {/* Size Selector */}
-            {selectedMerch.sizes && (
-              <div style={{ marginBottom: "24px" }}>
-                <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "10px" }}>Size</label>
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  {["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", ...(selectedMerch.name === "Hoodie" ? ["5XL"] : [])].map((size) => (
-                    <button key={size} onClick={() => setMerchSize(size)}
-                      style={{ padding: "8px 12px", borderRadius: "8px", border: `2px solid ${merchSize === size ? "#4A1B6B" : "#D4C9B8"}`, background: merchSize === size ? "#4A1B6B" : "transparent", color: merchSize === size ? "#FEFAF0" : "#6B5E4E", fontFamily: "'Jost', sans-serif", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-              <div>
-                <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "4px" }}>Price</div>
-                <div className="playfair" style={{ fontSize: "28px", fontWeight: 700 }}>
-                  ${selectedMerch.sizePricing && merchSize ? selectedMerch.sizePricing[merchSize] : selectedMerch.price}
-                </div>
-                {selectedMerch.sizePricing && !merchSize && <div className="jost" style={{ fontSize: "11px", color: "#B5A48C" }}>Select a size to see price</div>}
-              </div>
-            </div>
-
-            <button
-              disabled={!merchColor || (selectedMerch.sizes && !merchSize)}
-              onClick={() => {
-                const itemPrice = selectedMerch.sizePricing && merchSize ? selectedMerch.sizePricing[merchSize] : selectedMerch.price;
-                const cartKey = `${selectedMerch.name}-${merchColor}-${merchSize}`;
-                addToCart({ ...selectedMerch, price: itemPrice, id: cartKey, color: merchColor, size: merchSize, cartKey });
-                setShowMerchPopup(false);
-                setShowCart(true);
-              }}
-              style={{ width: "100%", background: (!merchColor || (selectedMerch.sizes && !merchSize)) ? "#D4C9B8" : "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'Jost', sans-serif", fontSize: "15px", fontWeight: 700, cursor: (!merchColor || (selectedMerch.sizes && !merchSize)) ? "not-allowed" : "pointer" }}>
-              🛒 Add to Cart
-            </button>
-            {(!merchColor || (selectedMerch.sizes && !merchSize)) && (
-              <p className="jost" style={{ textAlign: "center", fontSize: "12px", color: "#B5A48C", marginTop: "8px" }}>
-                {!merchColor ? "Please select a color" : "Please select a size"}
-              </p>
-            )}
-          </div>
+      {/* Footer */}
+      <div style={{ borderTop: "1px solid #EEE8DF", padding: "40px 32px", textAlign: "center", background: "#1A1208", color: "#FEFAF4" }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "28px", fontWeight: 300, marginBottom: "8px" }}>Planning a large event?</div>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", color: "#B5A48C", marginBottom: "20px" }}>Get in touch for custom menus, tastings, and deposit-based bookings.</p>
+        <button onClick={() => { setShowCart(true); setView("form"); }} style={{ background: "#E76F51", color: "#fff", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'DM Sans', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.04em" }}>Contact Us →</button>
+        <div style={{ marginTop: "28px", display: "flex", justifyContent: "center", gap: "28px", flexWrap: "wrap" }}>
+          <a href="https://instagram.com/flavorfuzionbyhj" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", textDecoration: "none" }}>📸 @flavorfuzionbyhj</a>
+          <a href="tel:7742053071" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", textDecoration: "none" }}>📞 774-205-3071</a>
         </div>
-      )}
-
-      {/* ── Cart Drawer ── */}
-      {showCart && <div onClick={() => setShowCart(false)} style={{ position: "fixed", inset: 0, background: "rgba(15,26,15,0.5)", zIndex: 199 }} />}
-      <div style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: "420px", maxWidth: "100vw", background: "#FEFAF0", boxShadow: "-8px 0 40px rgba(0,0,0,0.15)", zIndex: 200, overflowY: "auto", transform: showCart ? "translateX(0)" : "translateX(100%)", transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-        <div style={{ padding: "28px 24px", borderBottom: "1px solid #EEE8DF", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 className="playfair" style={{ fontSize: "24px", fontWeight: 600 }}>Your Cart 🛒</h2>
-          <button onClick={() => setShowCart(false)} style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
+        <div style={{ marginTop: "20px", display: "flex", justifyContent: "center", gap: "24px", flexWrap: "wrap", paddingTop: "20px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+          <button onClick={() => setShowPrivacy(true)} style={{ background: "none", border: "none", fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#6B5E4E", cursor: "pointer", textDecoration: "underline", padding: 0 }}>Privacy Policy</button>
+          <button onClick={() => setShowTerms(true)} style={{ background: "none", border: "none", fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#6B5E4E", cursor: "pointer", textDecoration: "underline", padding: 0 }}>Terms of Service</button>
         </div>
-
-        {cart.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 24px" }}>
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>🛒</div>
-            <p className="jost" style={{ color: "#B5A48C", fontSize: "15px" }}>Your cart is empty!</p>
-            <p className="jost" style={{ color: "#B5A48C", fontSize: "13px", marginTop: "8px" }}>Add some merch or cookies to get started.</p>
-          </div>
-        ) : (
-          <div style={{ padding: "24px" }}>
-            {cart.map((item) => (
-              <div key={item.cartKey} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0", borderBottom: "1px solid #EEE8DF" }}>
-                <div style={{ flex: 1 }}>
-                  <div className="jost" style={{ fontSize: "14px", fontWeight: 600, color: "#0F1A0F" }}>{item.name}</div>
-                  {item.color && <div className="jost" style={{ fontSize: "12px", color: "#B5A48C" }}>{item.color}{item.size ? ` · ${item.size}` : ""}</div>}
-                  <div className="jost" style={{ fontSize: "13px", color: "#6B5E4E", marginTop: "4px" }}>${item.price} × {item.qty}</div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div className="playfair" style={{ fontSize: "18px", fontWeight: 600 }}>${(item.price * item.qty).toFixed(2)}</div>
-                  <button onClick={() => removeFromCart(item.cartKey)} style={{ background: "none", border: "none", cursor: "pointer", color: "#B5A48C", fontSize: "16px" }}>✕</button>
-                </div>
-              </div>
-            ))}
-
-            <div style={{ padding: "20px 0", borderTop: "2px solid #0F1A0F", marginTop: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div className="jost" style={{ fontSize: "16px", fontWeight: 600 }}>Total</div>
-              <div className="playfair" style={{ fontSize: "24px", fontWeight: 700 }}>${cartTotal.toFixed(2)}</div>
-            </div>
-
-            <button onClick={handleCartCheckout} disabled={cartCheckingOut}
-              style={{ width: "100%", background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'Jost', sans-serif", fontSize: "15px", fontWeight: 700, cursor: cartCheckingOut ? "not-allowed" : "pointer", marginTop: "8px" }}>
-              {cartCheckingOut ? "Redirecting..." : `Checkout — $${cartTotal.toFixed(2)} →`}
-            </button>
-            <p className="jost" style={{ textAlign: "center", fontSize: "11px", color: "#B5A48C", marginTop: "12px" }}>🔒 Secure checkout powered by Stripe</p>
-          </div>
-        )}
+        <div style={{ marginTop: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#4A3D30" }}>© {new Date().getFullYear()} Flavor Fuzion by Heather Janey. All rights reserved. "Food is Life. Life is Good.™"</div>
       </div>
 
-      {/* ── Cooking Lessons Form Overlay ── */}
-      {showLessonsForm && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(15,26,15,0.85)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowLessonsForm(false); }}>
-          <div style={{ background: "#FEFAF0", borderRadius: "24px", padding: "48px", maxWidth: "600px", width: "100%", maxHeight: "90vh", overflowY: "auto", position: "relative" }}>
-            <button onClick={() => setShowLessonsForm(false)} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "24px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
-            {lessonSubmitted ? (
-              <div style={{ textAlign: "center", padding: "40px 0" }}>
-                <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎉</div>
-                <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, marginBottom: "12px" }}>Request Received!</h3>
-                <p className="jost" style={{ fontSize: "15px", color: "#6B5E4E", lineHeight: 1.7 }}>Thanks! Heather will be in touch within 24 hours to confirm your lesson details.</p>
-                <button onClick={() => { setShowLessonsForm(false); setLessonSubmitted(false); }} style={{ marginTop: "24px", background: "#0F1A0F", color: "#FEFAF0", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'Jost', sans-serif", fontSize: "14px", cursor: "pointer" }}>Close</button>
+      {/* Cart Overlay */}
+      {showCart && <div onClick={() => setShowCart(false)} style={{ position: "fixed", inset: 0, background: "rgba(26,18,8,0.4)", zIndex: 99 }} />}
+
+      {/* Side Drawer */}
+      <div style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: "420px", maxWidth: "100vw", background: "#fff", boxShadow: "-8px 0 40px rgba(26,18,8,0.12)", zIndex: 100, overflowY: "auto", transform: showCart ? "translateX(0)" : "translateX(100%)", transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+        <button onClick={() => setShowCart(false)} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#6B5E4E", zIndex: 1 }}>✕</button>
+
+        {/* Cart View */}
+        {view === "cart" && (
+          <div style={{ padding: "32px 24px" }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "26px", fontWeight: 600, marginBottom: "28px" }}>Your Order</h2>
+
+            {cartItems.length === 0 && comboItems.length === 0 ? (
+              <div style={{ textAlign: "center", paddingTop: "60px", fontFamily: "'DM Sans', sans-serif", color: "#B5A48C" }}>
+                <div style={{ fontSize: "48px", marginBottom: "16px" }}>🍽️</div>
+                <div style={{ fontSize: "15px" }}>Your order is empty.</div>
+                <div style={{ fontSize: "13px", marginTop: "8px" }}>Browse the menu and add items!</div>
               </div>
             ) : (
               <>
-                <span className="section-tag">Cooking Lessons</span>
-                <h3 className="playfair" style={{ fontSize: "32px", fontWeight: 600, marginBottom: "8px", marginTop: "8px" }}>{selectedLesson} Lesson Request</h3>
-                <div className="divider" style={{ marginBottom: "32px" }} />
-                {[
-                  { label: "Your Name", key: "name", type: "text", placeholder: "Full name" },
-                  { label: "Email Address", key: "email", type: "email", placeholder: "your@email.com" },
-                  { label: "Phone Number", key: "phone", type: "tel", placeholder: "774-555-1234" },
-                  { label: "Location / Address", key: "location", type: "text", placeholder: "City, State or Zoom for virtual" },
-                  { label: "Number of People", key: "guests", type: "number", placeholder: "e.g. 2" },
-                ].map((f) => (
-                  <div key={f.key} style={{ marginBottom: "18px" }}>
-                    <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>{f.label}</label>
-                    <input type={f.type} placeholder={f.placeholder} value={lessonForm[f.key]} onChange={(e) => setLessonForm(p => ({ ...p, [f.key]: e.target.value }))}
-                      style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "28px" }}>
+                  {/* Regular items */}
+                  {cartItems.map((item) => (
+                    <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px", background: "#FEFAF4", borderRadius: "12px", border: "1px solid #EEE8DF" }}>
+                      <img src={getImage(item)} alt={item.name} onError={(e) => { e.target.src = FALLBACK; }} style={{ width: "52px", height: "52px", objectFit: "cover", borderRadius: "10px", flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "16px", fontWeight: 600 }}>{item.name}</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#B5A48C" }}>${item.price} × {item.qty}</div>
+                      </div>
+                      <button onClick={() => removeFromCart(item.id)} style={{ background: "none", border: "none", color: "#B5A48C", cursor: "pointer", fontSize: "16px" }}>✕</button>
+                    </div>
+                  ))}
+
+                  {/* Combo items */}
+                  {comboItems.map((combo) => (
+                    <div key={combo.id} style={{ padding: "14px", background: "#1A120808", borderRadius: "12px", border: "2px solid #1A1208" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+                            <span style={{ fontSize: "18px" }}>🍱</span>
+                            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "16px", fontWeight: 600 }}>{combo.label}</div>
+                          </div>
+                          <div style={{ background: "#E76F51", color: "#fff", display: "inline-block", borderRadius: "100px", padding: "1px 8px", fontFamily: "'DM Sans', sans-serif", fontSize: "10px", fontWeight: 700, marginBottom: "8px" }}>{combo.badge}</div>
+                        </div>
+                        <button onClick={() => removeCombo(combo.id)} style={{ background: "none", border: "none", color: "#B5A48C", cursor: "pointer", fontSize: "16px" }}>✕</button>
+                      </div>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#6B5E4E", lineHeight: 1.6 }}>
+                        <div>🍽️ {combo.entrees.map(i => i.name).join(", ")}</div>
+                        <div>🥗 {combo.sides.map(i => i.name).join(", ")}</div>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #EEE8DF" }}>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#52B788", fontWeight: 600 }}>You save ${combo.savings.toFixed(2)}</div>
+                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", fontWeight: 600 }}>${combo.discountedTotal.toFixed(2)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ borderTop: "1px solid #EEE8DF", paddingTop: "20px" }}>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#B5A48C", lineHeight: 1.6, marginBottom: "20px" }}>
+                    Final pricing confirmed by Heather before any payment is needed.
                   </div>
-                ))}
-                <div style={{ marginBottom: "18px" }}>
-                  <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>What Would You Like to Cook?</label>
-                  <input type="text" placeholder="e.g. steak, pasta, sauces, vegan dishes..." value={lessonForm.foodTypes} onChange={(e) => setLessonForm(p => ({ ...p, foodTypes: e.target.value }))}
-                    style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }} />
+                  <button onClick={() => setView("form")} style={{ width: "100%", background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: "15px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.03em" }}>
+                    Request a Quote →
+                  </button>
                 </div>
-                <div style={{ marginBottom: "18px" }}>
-                  <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>Who Provides Groceries?</label>
-                  <select value={lessonForm.groceries} onChange={(e) => setLessonForm(p => ({ ...p, groceries: e.target.value }))}
-                    style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }}>
-                    <option value="">Select an option</option>
-                    <option value="I will provide groceries">I will provide groceries</option>
-                    <option value="Heather provides groceries">Heather provides groceries</option>
-                    <option value="We can discuss">We can discuss</option>
-                  </select>
-                </div>
-                <div style={{ marginBottom: "18px" }}>
-                  <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>Preferred Date & Time #1</label>
-                  <input type="datetime-local" value={lessonForm.date1} onChange={(e) => setLessonForm(p => ({ ...p, date1: e.target.value }))}
-                    style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }} />
-                </div>
-                <div style={{ marginBottom: "18px" }}>
-                  <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>Preferred Date & Time #2</label>
-                  <input type="datetime-local" value={lessonForm.date2} onChange={(e) => setLessonForm(p => ({ ...p, date2: e.target.value }))}
-                    style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none" }} />
-                </div>
-                <div style={{ marginBottom: "28px" }}>
-                  <label className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#B5A48C", display: "block", marginBottom: "6px" }}>Dietary Restrictions & Allergies</label>
-                  <textarea placeholder="e.g. nut allergy, gluten free, vegan..." value={lessonForm.dietary} onChange={(e) => setLessonForm(p => ({ ...p, dietary: e.target.value }))}
-                    style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #D4C9B8", borderRadius: "10px", fontFamily: "'Jost', sans-serif", fontSize: "14px", background: "#FEFAF4", outline: "none", minHeight: "80px", resize: "vertical" }} />
-                </div>
-                <button onClick={async () => {
-                  try {
-                    const res = await fetch("https://vqhhwukvheezunccehzm.supabase.co/rest/v1/lesson_requests", {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxaGh3dWt2aGVlenVuY2NlaHptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MzEzNjgsImV4cCI6MjA5MDEwNzM2OH0.7Dno6w4GyX5DXTcCMLnT0C1FvIBpqHrXASr-aDf8pzQ",
-                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxaGh3dWt2aGVlenVuY2NlaHptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MzEzNjgsImV4cCI6MjA5MDEwNzM2OH0.7Dno6w4GyX5DXTcCMLnT0C1FvIBpqHrXASr-aDf8pzQ",
-                        "Prefer": "return=minimal",
-                      },
-                      body: JSON.stringify({
-                        name: lessonForm.name,
-                        email: lessonForm.email,
-                        phone: lessonForm.phone,
-                        lesson_type: selectedLesson,
-                        food_types: lessonForm.foodTypes,
-                        guests: lessonForm.guests,
-                        groceries: lessonForm.groceries,
-                        location: lessonForm.location,
-                        date1: lessonForm.date1,
-                        date2: lessonForm.date2,
-                        dietary: lessonForm.dietary,
-                      }),
-                    });
-                    if (res.ok) {
-                      setLessonSubmitted(true);
-                    } else {
-                      alert("Something went wrong. Please try again.");
-                    }
-                  } catch (err) {
-                    alert("Something went wrong. Please try again.");
-                  }
-                }}
-                  style={{ width: "100%", background: "#0F1A0F", color: "#FEFAF0", border: "none", borderRadius: "12px", padding: "16px", fontFamily: "'Jost', sans-serif", fontSize: "15px", fontWeight: 500, cursor: "pointer", letterSpacing: "0.03em" }}>
-                  Submit Lesson Request →
-                </button>
               </>
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Footer ── */}
-      <footer style={{ background: "#0A120A", padding: "60px 80px 32px", borderTop: "1px solid rgba(201,168,76,0.2)", position: "relative", overflow: "hidden" }}>
-        <img src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/symbol.svg"
-          alt="" style={{ position: "absolute", bottom: "-20px", right: "40px", width: "300px", height: "auto", opacity: 0.06, pointerEvents: "none", userSelect: "none" }} />
-        <div style={{ padding: "0" }}>
-          <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "60px", marginBottom: "48px" }}>
-            <div>
-              <img
-                src="https://vqhhwukvheezunccehzm.supabase.co/storage/v1/object/public/Menu%20Items/noBgColor.png"
-                alt="Flavor Fuzion by Heather Janey"
-                style={{ height: "60px", width: "auto", display: "block", objectFit: "contain", marginBottom: "16px" }}
-              />
-              <p className="jost" style={{ fontSize: "13px", color: "#A0C8A8", lineHeight: 1.7, fontWeight: 300, maxWidth: "280px" }}>
-                Professional personal chef services including meal prep, catering, private dinners, and cooking lessons.
-              </p>
-            </div>
-            <div>
-              <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "20px" }} className="gold jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" }}>Navigation</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {PAGES.map((page) => (
-                  <button key={page} onClick={() => setActivePage(page)}
-                    className="jost" style={{ background: "none", border: "none", color: "#A0C8A8", fontSize: "14px", cursor: "pointer", textAlign: "left", fontWeight: 300, transition: "color 0.2s", padding: 0 }}
-                    onMouseOver={(e) => e.target.style.color = "#DAA520"}
-                    onMouseOut={(e) => e.target.style.color = "#A0C8A8"}>
-                    {page}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "20px" }} className="gold jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" }}>Services</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {["Meal Prep", "Catering", "Private Dinners", "Cooking Lessons", "Combo Deals"].map((s) => (
-                  <div key={s} className="jost" style={{ color: "#A0C8A8", fontSize: "14px", fontWeight: 300 }}>{s}</div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div style={{ borderTop: "1px solid rgba(74,107,74,0.3)", paddingTop: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-            <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8" }}>© 2026 Flavor Fuzion by Heather Janey. All rights reserved.</div>
-            <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-              <a href="https://instagram.com/flavorfuzionbyhj" target="_blank" rel="noopener noreferrer" className="jost" style={{ fontSize: "12px", color: "#A0C8A8", textDecoration: "none" }}>📸 @flavorfuzionbyhj</a>
-              <a href="tel:7742053071" className="jost" style={{ fontSize: "12px", color: "#A0C8A8", textDecoration: "none" }}>📞 774-205-3071</a>
-            </div>
-            <div style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
-              <button onClick={() => setShowPrivacy(true)} className="jost" style={{ background: "none", border: "none", fontSize: "12px", color: "#A0C8A8", cursor: "pointer", textDecoration: "underline", padding: 0 }}>Privacy Policy</button>
-              <button onClick={() => setShowTerms(true)} className="jost" style={{ background: "none", border: "none", fontSize: "12px", color: "#A0C8A8", cursor: "pointer", textDecoration: "underline", padding: 0 }}>Terms of Service</button>
-            </div>
-            <div className="jost" style={{ fontSize: "12px", color: "#A0C8A8" }}>Food is Life. Life is Good.™ 🍽️</div>
-          </div>
-        </div>
-      </footer>
-
-      {/* Privacy Policy Modal */}
-      {showPrivacy && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(10,18,10,0.7)", zIndex: 200, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px" }}>
-          <div style={{ background: "#FEFAF4", borderRadius: "20px", maxWidth: "720px", width: "100%", padding: "48px 40px", position: "relative", boxShadow: "0 24px 80px rgba(10,18,10,0.3)" }}>
-            <button onClick={() => setShowPrivacy(false)} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
-            <div className="jost" style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "12px" }}>Legal</div>
-            <h1 className="playfair" style={{ fontSize: "36px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>Privacy Policy</h1>
-            <p className="jost" style={{ fontSize: "12px", color: "#B5A48C", marginBottom: "32px" }}>Effective Date: May 1, 2025 · Last Updated: May 1, 2025</p>
-            {[
-              { title: "1. Who We Are", body: 'Flavor Fuzion by Heather Janey ("we," "us," or "our") is a sole proprietorship operating in Massachusetts, transitioning to an LLC. We operate the Flavor Fuzion ordering platform at byheatherjaney.com. Our business address is 131 Samoset Street #1027, Plymouth, MA 02360.' },
-              { title: "2. Information We Collect", body: "We collect information you provide directly when placing an order or inquiry, including: your name, email address, phone number, shipping address (for cookie orders), event date, guest count, dietary notes, and order details. We do not collect payment information directly — all payment processing is handled securely by Stripe." },
-              { title: "3. How We Use Your Information", body: "We use the information you provide to: respond to your order requests, communicate with you about your event or order, ship your products, and improve our services. We do not sell, rent, or share your personal information with third parties for marketing purposes." },
-              { title: "4. Third Party Services", body: "We use Stripe for payment processing and Supabase for order data storage. These services have their own privacy policies. Shipping addresses provided for cookie orders are used solely to fulfill your shipment and are never shared for any other purpose." },
-              { title: "5. Data Storage", body: "Your order information is stored securely using Supabase, a third-party database service. Data is stored on servers located in the United States. We retain your information only as long as necessary to fulfill your order and comply with applicable law." },
-              { title: "6. Cookies", body: "Our website may use cookies or similar technologies to improve your browsing experience. You can disable cookies in your browser settings, though some features of the site may not function properly as a result." },
-              { title: "7. Your Rights (Massachusetts Residents)", body: "Under Massachusetts law, you have the right to request access to, correction of, or deletion of your personal information. To exercise these rights, please contact us at the email below." },
-              { title: "8. Children's Privacy", body: "Our services are not directed to children under the age of 13. We do not knowingly collect personal information from children." },
-              { title: "9. Changes to This Policy", body: "We may update this Privacy Policy from time to time. We will notify you of significant changes by updating the effective date at the top of this page." },
-              { title: "10. Contact Us", body: "If you have questions about this Privacy Policy, please contact us at: FlavorFuzionbHJ@Outlook.com | 131 Samoset Street #1027, Plymouth, MA 02360" },
-            ].map(({ title, body }) => (
-              <div key={title} style={{ marginBottom: "24px" }}>
-                <h2 className="playfair" style={{ fontSize: "20px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>{title}</h2>
-                <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E", lineHeight: 1.75 }}>{body}</p>
-              </div>
-            ))}
-            <button onClick={() => setShowPrivacy(false)} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'Jost', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}>Close</button>
-          </div>
-        </div>
-      )}
-
-      {/* Terms of Service Modal */}
-      {showTerms && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(10,18,10,0.7)", zIndex: 200, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px" }}>
-          <div style={{ background: "#FEFAF4", borderRadius: "20px", maxWidth: "720px", width: "100%", padding: "48px 40px", position: "relative", boxShadow: "0 24px 80px rgba(10,18,10,0.3)" }}>
-            <button onClick={() => setShowTerms(false)} style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
-            <div className="jost" style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B5A48C", marginBottom: "12px" }}>Legal</div>
-            <h1 className="playfair" style={{ fontSize: "36px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>Terms of Service</h1>
-            <p className="jost" style={{ fontSize: "12px", color: "#B5A48C", marginBottom: "32px" }}>Effective Date: May 1, 2025 · Last Updated: May 1, 2025</p>
-            {[
-              { title: "1. Acceptance of Terms", body: "By accessing or using the Flavor Fuzion website and ordering platform, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services." },
-              { title: "2. Services Provided", body: "Flavor Fuzion by Heather Janey provides personal chef services including weekly meal preparation, catering, private dinners, and baked goods including our Almond Lavender Cookies." },
-              { title: "3. Order Requests & Confirmation", body: "Submitting an order through our platform constitutes a request only — not a confirmed booking. Orders become confirmed only after Heather Janey contacts you to review details, confirm pricing, and arrange payment. No payment is collected at the time of submission, except for cookie orders processed directly through Stripe." },
-              { title: "4. Cookie Orders & Shipping", body: "Cookie orders are processed through Stripe. Your shipping address is collected solely for fulfillment purposes and is never shared with third parties for marketing. Shipping rates are calculated at checkout. We are not responsible for delays caused by shipping carriers." },
-              { title: "5. Pricing", body: "Prices shown on the menu cover food and ingredient costs. Private dinners, catering, and in-home services include a chef service fee of $45/hr (3-hour minimum), which will be included in your confirmed quote. Delivery fees apply based on distance. Custom requests and substitutions may affect the final price." },
-              { title: "6. Cancellations & Deposits", body: "Cancellation and deposit policies will be communicated during booking confirmation. For large events or catering bookings, a deposit may be required to secure your date. Deposits are generally non-refundable within 48 hours of the event." },
-              { title: "7. Dietary & Allergen Responsibility", body: "While we make every effort to accommodate dietary needs and allergies disclosed at the time of ordering, Flavor Fuzion cannot guarantee a completely allergen-free environment. Customers must disclose all known allergies and dietary restrictions at the time of ordering." },
-              { title: "8. Intellectual Property", body: 'The phrase "Food is Life. Life is Good.™" is a trademark of Flavor Fuzion by Heather Janey. All content on this platform is the property of Flavor Fuzion by Heather Janey and may not be used without written permission.' },
-              { title: "9. Limitation of Liability", body: "To the fullest extent permitted by Massachusetts law, Flavor Fuzion by Heather Janey shall not be liable for any indirect, incidental, or consequential damages arising from use of our services." },
-              { title: "10. Governing Law", body: "These Terms of Service are governed by the laws of the Commonwealth of Massachusetts." },
-              { title: "11. Contact Us", body: "If you have questions about these Terms, please contact us at: FlavorFuzionbHJ@Outlook.com | 131 Samoset Street #1027, Plymouth, MA 02360" },
-            ].map(({ title, body }) => (
-              <div key={title} style={{ marginBottom: "24px" }}>
-                <h2 className="playfair" style={{ fontSize: "20px", fontWeight: 600, color: "#1A1208", marginBottom: "8px" }}>{title}</h2>
-                <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E", lineHeight: 1.75 }}>{body}</p>
-              </div>
-            ))}
-            <button onClick={() => setShowTerms(false)} style={{ background: "#1A1208", color: "#FEFAF4", border: "none", borderRadius: "100px", padding: "12px 28px", fontFamily: "'Jost', sans-serif", fontSize: "14px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}>Close</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Contact Form Component ─────────────────────────────────────────────────────
-function ContactForm() {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [submitted, setSubmitted] = useState(false);
-  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
-
-  const handleSubmit = () => {
-    if (!form.name || !form.email || !form.message) return;
-    const mailto = `mailto:FlavorFuzionbyHJ@gmail.com?subject=${encodeURIComponent(form.subject || "Website Inquiry from " + form.name)}&body=${encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`)}`;
-    window.location.href = mailto;
-    setSubmitted(true);
-  };
-
-  if (submitted) {
-    return (
-      <div style={{ textAlign: "center", padding: "60px 20px" }}>
-        <div style={{ fontSize: "56px", marginBottom: "20px" }}>🎉</div>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "28px", fontWeight: 600, marginBottom: "12px" }}>Thank you!</div>
-        <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "14px", color: "#6B5E4E", lineHeight: 1.7 }}>
-          Your email client should have opened. If not, email Heather directly at<br />
-          <strong>FlavorFuzionbyHJ@gmail.com</strong>
-        </p>
+        {view === "form" && <OrderForm cartItems={cartItems} comboItems={comboItems} onSuccess={handleSuccess} onCancel={() => setView("cart")} />}
+        {view === "success" && <SuccessScreen name={successName} onReset={handleReset} />}
       </div>
-    );
-  }
 
-  return (
-    <div>
-      <input className="form-input" placeholder="Your Name *" value={form.name} onChange={(e) => set("name", e.target.value)} />
-      <input className="form-input" type="email" placeholder="Your Email *" value={form.email} onChange={(e) => set("email", e.target.value)} />
-      <input className="form-input" placeholder="Subject (e.g. Catering inquiry for 50 guests)" value={form.subject} onChange={(e) => set("subject", e.target.value)} />
-      <textarea className="form-input" placeholder="Your message *" rows={5} value={form.message} onChange={(e) => set("message", e.target.value)} style={{ resize: "vertical" }} />
-      <button className="btn-primary" style={{ width: "100%", fontSize: "14px", padding: "16px" }} onClick={handleSubmit}>
-        Send Message →
-      </button>
-      <p style={{ fontFamily: "'Jost', sans-serif", fontSize: "12px", color: "#B5A48C", textAlign: "center", marginTop: "12px" }}>
-        We will respond within 24 hours.
-      </p>
+      {/* Privacy Policy & Terms of Service Modals */}
+      {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
+      {showTerms && <TermsOfService onClose={() => setShowTerms(false)} />}
     </div>
   );
 }
-
