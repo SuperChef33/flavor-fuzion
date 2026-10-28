@@ -250,6 +250,465 @@ function CookiesPage({ onAddToCart }) {
   );
 }
 
+// ── Thanksgiving Dinner Ordering ──────────────────────────────────────────────
+// Prices and menu must match supabase/functions/thanksgiving-checkout (the server is what actually charges).
+const TG = {
+  api: "https://vqhhwukvheezunccehzm.supabase.co/functions/v1/thanksgiving-checkout",
+  earlyEnds: new Date("2026-11-11T05:00:00Z"),   // end of Tue Nov 10
+  closes: new Date("2026-11-19T05:00:00Z"),      // end of Wed Nov 18
+  prices: { 4: { early: 175, regular: 195 }, 6: { early: 245, regular: 270 }, 8: { early: 315, regular: 340 } },
+  cornishPerGuest: 6,
+  extendedFee: 15,
+  proteins: [
+    { name: "Sliced Turkey", options: ["White meat", "Dark meat", "Both"], optionLabel: "Cut" },
+    { name: "Turkey Drumsticks" },
+    { name: "Braised Turkey Wings" },
+    { name: "Whole Roasted Young Chicken", options: ["Garlic Herb", "Orange & Sage"], optionLabel: "Seasoning" },
+    { name: "Cornish Hens", options: ["Garlic Herb", "Orange & Sage"], optionLabel: "Seasoning", note: "one per guest, +$6 per guest" },
+  ],
+  sides: [
+    { name: "Baked Mac & Cheese" },
+    { name: "Mashed Potatoes" },
+    { name: "Classic Stuffing (made with apples)" },
+    { name: "Chorizo Stuffing" },
+    { name: "Stewed Collards", options: ["with smoked turkey", "with ham hocks"] },
+    { name: "Stewed White Beans & Kale with lemon" },
+    { name: "Sweet Potato Carrot Mash", options: ["with mini marshmallows", "no marshmallows"] },
+    { name: "Garlic & Dill Green Beans" },
+    { name: "Roasted Garlic & Herb Mini Potatoes" },
+  ],
+  desserts: ["Addictive Apple Cake", "Hand-Held Cherry Pies", "Peach Cobbler", "Gluten-Free Almond Lavender Cookies"],
+  sideSizes: [
+    { id: "side_quart", label: "Quart (serves 4)", price: 18 },
+    { id: "side_halfpan", label: "Half pan (serves 8–10)", price: 45 },
+  ],
+  extras: [
+    { id: "turkey_lb", name: "Sliced turkey", price: 22, unit: "lb" },
+    { id: "drumstick", name: "Turkey drumstick", price: 10 },
+    { id: "wings", name: "Braised turkey wings (2)", price: 16 },
+    { id: "chicken", name: "Whole roasted young chicken", price: 26, needsSeasoning: true },
+    { id: "cornish_hen", name: "Cornish hen", price: 16, needsSeasoning: true },
+    { id: "quiche", name: "Spinach quiche, whole 9\"", price: 32 },
+    { id: "apple_cake_6", name: "Addictive Apple Cake, 6 pieces", price: 26 },
+    { id: "apple_cake_12", name: "Addictive Apple Cake, 12 pieces", price: 48 },
+    { id: "cobbler", name: "Peach cobbler, 9×13 pan", price: 45 },
+    { id: "cherry_pie", name: "Hand-held cherry pie", price: 6 },
+    { id: "gf_cookies", name: "Gluten-free almond lavender cookies, dozen", price: 30 },
+    { id: "gravy_pint", name: "Extra gravy, pint", price: 8 },
+    { id: "cranberry_pint", name: "Extra cranberry sauce, pint", price: 8 },
+  ],
+  seasonings: ["Garlic Herb", "Orange & Sage"],
+  townsIncluded: ["Plymouth", "Manomet", "Cedarville", "Kingston", "Duxbury", "Plympton", "Pembroke", "Halifax", "Marshfield"],
+  townsExtended: ["Carver", "Hanson", "Hanover", "Norwell", "Middleborough", "Wareham"],
+};
+
+function Choice({ type = "radio", name, checked, onChange, disabled, children }) {
+  return (
+    <label className={`tg-choice ${checked ? "is-on" : ""} ${disabled ? "is-off" : ""}`}>
+      <input type={type} name={name} checked={checked} onChange={onChange} disabled={disabled} />
+      <span>{children}</span>
+    </label>
+  );
+}
+
+function ThanksgivingPage({ onViewFlyer }) {
+  const now = new Date();
+  const [status, setStatus] = useState({ open: now < TG.closes, earlyBird: now < TG.earlyEnds, remaining: null, cap: null });
+  const [wantDinner, setWantDinner] = useState(true);
+  const [size, setSize] = useState(null);
+  const [protein, setProtein] = useState("");
+  const [proteinOption, setProteinOption] = useState("");
+  const [sides, setSides] = useState([]);
+  const [sideOptions, setSideOptions] = useState({});
+  const [dessert, setDessert] = useState("");
+  const [extraQty, setExtraQty] = useState({});
+  const [extraSeasoning, setExtraSeasoning] = useState({});
+  const [sideOrders, setSideOrders] = useState([]);
+  const [newSide, setNewSide] = useState({ side: "", option: "", size: "side_quart", qty: 1 });
+  const [customer, setCustomer] = useState({ name: "", email: "", phone: "", street: "", town: "", notes: "" });
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetch(TG.api).then(r => r.json()).then(d => {
+      if (typeof d.remaining === "number") {
+        setStatus(d);
+        if (d.remaining === 0) setWantDinner(false);
+      }
+    }).catch(() => {});
+  }, []);
+
+  const soldOut = status.remaining === 0;
+  const proteinDef = TG.proteins.find(p => p.name === protein);
+  const dinnerBase = size ? TG.prices[size][status.earlyBird ? "early" : "regular"] : 0;
+  const cornishExtra = size && protein === "Cornish Hens" ? TG.cornishPerGuest * size : 0;
+  const extrasLines = TG.extras.filter(e => extraQty[e.id] > 0).map(e => ({ ...e, qty: extraQty[e.id] }));
+  const sideLines = sideOrders.map(s => ({ ...s, price: TG.sideSizes.find(z => z.id === s.size).price }));
+  const isExtended = TG.townsExtended.includes(customer.town);
+  const subtotal = (wantDinner ? dinnerBase + cornishExtra : 0)
+    + extrasLines.reduce((sum, e) => sum + e.price * e.qty, 0)
+    + sideLines.reduce((sum, s) => sum + s.price * s.qty, 0);
+  const total = subtotal + (isExtended ? TG.extendedFee : 0);
+
+  const toggleSide = (name) => {
+    setSides(prev => prev.includes(name) ? prev.filter(s => s !== name) : prev.length >= 3 ? prev : [...prev, name]);
+  };
+  const setQty = (id, qty) => setExtraQty(prev => ({ ...prev, [id]: Math.max(0, Math.min(20, qty)) }));
+  const addSideOrder = () => {
+    const def = TG.sides.find(s => s.name === newSide.side);
+    if (!def) { setError("Choose which side you'd like to add."); return; }
+    if (def.options && !newSide.option) { setError(`Choose an option for ${def.name}.`); return; }
+    setError("");
+    setSideOrders(prev => [...prev, { ...newSide, key: Date.now() }]);
+    setNewSide({ side: "", option: "", size: "side_quart", qty: 1 });
+  };
+
+  const problems = () => {
+    if (wantDinner) {
+      if (!size) return "Choose how many people your dinner serves.";
+      if (!protein) return "Choose a protein for your dinner.";
+      if (proteinDef?.options && !proteinOption) return `Choose a ${proteinDef.optionLabel.toLowerCase()} for the ${protein.toLowerCase()}.`;
+      if (sides.length !== 3) return `Choose 3 sides (you've picked ${sides.length}).`;
+      for (const s of sides) {
+        const def = TG.sides.find(x => x.name === s);
+        if (def.options && !sideOptions[s]) return `Choose an option for ${s}.`;
+      }
+      if (!dessert) return "Choose a dessert.";
+    }
+    for (const e of extrasLines) if (e.needsSeasoning && !extraSeasoning[e.id]) return `Choose a seasoning for the ${e.name.toLowerCase()}.`;
+    if (!wantDinner && extrasLines.length === 0 && sideLines.length === 0) return "Choose a dinner or at least one à la carte item.";
+    if (!customer.name.trim()) return "Enter your name.";
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(customer.email.trim())) return "Enter a valid email address.";
+    if (customer.phone.replace(/\D/g, "").length < 10) return "Enter a phone number so Heather can reach you on delivery day.";
+    if (!customer.street.trim()) return "Enter your street address.";
+    if (!customer.town) return "Choose your town.";
+    return "";
+  };
+
+  const checkout = async () => {
+    const p = problems();
+    if (p) { setError(p); return; }
+    setError("");
+    setSubmitting(true);
+    try {
+      const res = await fetch(TG.api, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dinner: wantDinner ? { size, protein, proteinOption, sides, sideOptions, dessert } : null,
+          extras: [
+            ...extrasLines.map(e => ({ id: e.id, qty: e.qty, seasoning: extraSeasoning[e.id] })),
+            ...sideLines.map(s => ({ id: s.size, qty: s.qty, side: s.side, sideOption: s.option })),
+          ],
+          customer,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) { window.location.href = data.url; return; }
+      setError(data.error || "Something went wrong. Please try again.");
+    } catch {
+      setError("Something went wrong. Please try again, or call Heather at 774-205-3071.");
+    }
+    setSubmitting(false);
+  };
+
+  if (!status.open) {
+    return (
+      <div style={{ padding: "160px 24px 120px", textAlign: "center", background: "#FEFAF0" }}>
+        <span className="section-tag">Thanksgiving 2026</span>
+        <h1 className="playfair" style={{ fontSize: "44px", margin: "12px 0" }}>Orders are closed</h1>
+        <p className="jost" style={{ color: "#6B5E4E", fontSize: "16px" }}>Thank you so much for your support! See you next year.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="tg-page">
+      <style>{`
+        .tg-page { background: #FEFAF0; }
+        .tg-hero { background: linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%); padding: 140px 80px 64px; text-align: center; color: #FEFAF0; }
+        .tg-wrap { max-width: 1160px; margin: 0 auto; padding: 56px 40px 96px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 40px; align-items: start; }
+        .tg-card { background: #fff; border: 1px solid #EEE8DF; border-radius: 20px; padding: 28px; margin-bottom: 24px; }
+        .tg-card h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600; color: #0F1A0F; margin: 0 0 4px; }
+        .tg-sub { font-family: 'Jost', sans-serif; font-size: 14px; color: #6B5E4E; margin: 0 0 18px; }
+        .tg-label { font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #4A1B6B; margin: 22px 0 10px; }
+        .tg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .tg-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+        .tg-choice { display: flex; gap: 10px; align-items: flex-start; border: 2px solid #E4DCCD; border-radius: 12px; padding: 12px 14px; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 15px; color: #0F1A0F; background: #FFFDF8; min-height: 44px; box-sizing: border-box; transition: border-color .15s, background .15s; }
+        .tg-choice input { margin-top: 3px; accent-color: #4A1B6B; width: 16px; height: 16px; flex-shrink: 0; }
+        .tg-choice.is-on { border-color: #4A1B6B; background: #F6F0FA; }
+        .tg-choice.is-off { opacity: .45; cursor: not-allowed; }
+        .tg-choice small { display: block; color: #6B5E4E; font-size: 13px; }
+        .tg-size { text-align: center; flex-direction: column; align-items: center; gap: 2px; }
+        .tg-size input { position: absolute; opacity: 0; pointer-events: none; }
+        .tg-size:focus-within { outline: 3px solid #DAA520; outline-offset: 2px; }
+        .tg-price { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #0F1A0F; }
+        .tg-strike { font-family: 'Jost', sans-serif; font-size: 13px; color: #6B5E4E; }
+        .tg-sub-opts { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 4px 26px; }
+        .tg-pill { font-family: 'Jost', sans-serif; font-size: 13px; padding: 8px 12px; min-height: 36px; border-radius: 100px; border: 1.5px solid #D4C9B8; background: #fff; color: #4A3F33; cursor: pointer; }
+        .tg-pill[aria-pressed="true"] { background: #4A1B6B; border-color: #4A1B6B; color: #FEFAF0; }
+        .tg-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F0EADF; font-family: 'Jost', sans-serif; font-size: 15px; flex-wrap: wrap; }
+        .tg-step { display: inline-flex; align-items: center; border: 1.5px solid #D4C9B8; border-radius: 100px; overflow: hidden; }
+        .tg-step button { width: 40px; height: 40px; border: none; background: #fff; font-size: 18px; cursor: pointer; color: #4A1B6B; }
+        .tg-step button:disabled { color: #C9BFAF; cursor: default; }
+        .tg-step span { min-width: 36px; text-align: center; font-family: 'Jost', sans-serif; font-weight: 600; }
+        .tg-field { display: flex; flex-direction: column; gap: 6px; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600; color: #4A3F33; }
+        .tg-field input, .tg-field select, .tg-field textarea, .tg-select { font-family: 'Jost', sans-serif; font-size: 16px; padding: 12px 14px; border: 1.5px solid #D4C9B8; border-radius: 10px; background: #fff; color: #0F1A0F; min-height: 46px; box-sizing: border-box; width: 100%; }
+        .tg-field textarea { min-height: 80px; resize: vertical; }
+        .tg-summary { position: sticky; top: 100px; }
+        .tg-sum-line { display: flex; justify-content: space-between; gap: 12px; font-family: 'Jost', sans-serif; font-size: 14px; color: #4A3F33; padding: 6px 0; }
+        .tg-error { background: #FDECEC; color: #8A1C1C; border-radius: 10px; padding: 12px 14px; font-family: 'Jost', sans-serif; font-size: 14px; margin-top: 12px; }
+        .tg-toggle { display: flex; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+        @media (max-width: 900px) {
+          .tg-hero { padding: 120px 24px 48px; }
+          .tg-wrap { grid-template-columns: 1fr; padding: 32px 16px 64px; gap: 0; }
+          .tg-summary { position: static; }
+          .tg-card { padding: 20px; }
+        }
+        @media (max-width: 560px) {
+          .tg-grid, .tg-grid-3 { grid-template-columns: 1fr; }
+          .tg-size-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+          .tg-side-builder { grid-template-columns: 1fr 1fr !important; }
+          .tg-side-builder select { grid-column: 1 / -1; }
+        }
+      `}</style>
+
+      <div className="tg-hero">
+        <span className="section-tag">Thanksgiving 2026</span>
+        <h1 className="playfair" style={{ fontSize: "clamp(36px, 6vw, 60px)", fontWeight: 700, lineHeight: 1.1, margin: "10px 0 14px" }}>
+          Thanksgiving dinner, <em className="gold">handled.</em>
+        </h1>
+        <p className="jost" style={{ fontSize: "16px", color: "rgba(254,250,240,0.85)", maxWidth: "620px", margin: "0 auto 18px", lineHeight: 1.7 }}>
+          Made from scratch and dropped off at your door on Wednesday, Nov 25. Just heat and serve.
+        </p>
+        <p className="jost" style={{ fontSize: "14px", color: "#F5E4A0", margin: "0 0 20px" }}>
+          {status.earlyBird ? <><strong>Early-bird prices through Tue, Nov 10</strong> · </> : null}Order by Wed, Nov 18
+          {typeof status.remaining === "number" && !soldOut && status.remaining <= 5 ? <> · <strong>Only {status.remaining} dinner{status.remaining === 1 ? "" : "s"} left!</strong></> : null}
+        </p>
+        <button className="btn-outline" onClick={onViewFlyer}>View the Flyer</button>
+      </div>
+
+      <div className="tg-wrap">
+        <div>
+          {/* ── Dinner ── */}
+          <section className="tg-card" aria-labelledby="tg-dinner">
+            <h2 id="tg-dinner">The Dinner</h2>
+            <p className="tg-sub">1 protein · 3 sides · 1 dessert · homemade cranberry sauce &amp; gravy · delivery included</p>
+            {soldOut ? (
+              <div className="tg-error" style={{ background: "#F6F0FA", color: "#4A1B6B" }}>
+                <strong>Thanksgiving dinners are sold out — thank you!</strong> You can still order à la carte items below.
+              </div>
+            ) : (
+              <div className="tg-toggle">
+                <button type="button" className="tg-pill" aria-pressed={wantDinner} onClick={() => setWantDinner(true)}>Yes, I want a dinner</button>
+                <button type="button" className="tg-pill" aria-pressed={!wantDinner} onClick={() => setWantDinner(false)}>Just à la carte, no dinner</button>
+              </div>
+            )}
+
+            {wantDinner && !soldOut && (
+              <>
+                <div className="tg-label">How many people?</div>
+                <div className="tg-grid-3 tg-size-grid">
+                  {[4, 6, 8].map(n => (
+                    <label key={n} className={`tg-choice tg-size ${size === n ? "is-on" : ""}`} style={{ position: "relative" }}>
+                      <input type="radio" name="tg-size" checked={size === n} onChange={() => setSize(n)} />
+                      <span className="jost" style={{ fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#4A1B6B", fontWeight: 600 }}>Serves {n}</span>
+                      <span className="tg-price">${TG.prices[n][status.earlyBird ? "early" : "regular"]}</span>
+                      {status.earlyBird && <span className="tg-strike">${TG.prices[n].regular} after Nov 10</span>}
+                    </label>
+                  ))}
+                </div>
+
+                <div className="tg-label">Choose 1 protein</div>
+                <div className="tg-grid">
+                  {TG.proteins.map(p => (
+                    <Choice key={p.name} name="tg-protein" checked={protein === p.name}
+                      onChange={() => { setProtein(p.name); setProteinOption(""); }}>
+                      {p.name}{p.note && <small>{p.note}</small>}
+                    </Choice>
+                  ))}
+                </div>
+                {proteinDef?.options && (
+                  <div style={{ marginTop: "12px" }}>
+                    <div className="jost" style={{ fontSize: "14px", fontWeight: 600, color: "#4A3F33" }}>{proteinDef.optionLabel} for your {protein.toLowerCase()}:</div>
+                    <div className="tg-sub-opts" style={{ marginLeft: 0 }}>
+                      {proteinDef.options.map(o => (
+                        <button key={o} type="button" className="tg-pill" aria-pressed={proteinOption === o} onClick={() => setProteinOption(o)}>{o}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="tg-label">Choose 3 sides <span style={{ color: "#6B5E4E", letterSpacing: 0, textTransform: "none", fontWeight: 500 }}>({sides.length} of 3)</span></div>
+                <div className="tg-grid">
+                  {TG.sides.map(s => {
+                    const on = sides.includes(s.name);
+                    return (
+                      <div key={s.name}>
+                        <Choice type="checkbox" checked={on} disabled={!on && sides.length >= 3} onChange={() => toggleSide(s.name)}>{s.name}</Choice>
+                        {on && s.options && (
+                          <div className="tg-sub-opts">
+                            {s.options.map(o => (
+                              <button key={o} type="button" className="tg-pill" aria-pressed={sideOptions[s.name] === o}
+                                onClick={() => setSideOptions(prev => ({ ...prev, [s.name]: o }))}>{o}</button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="tg-label">Choose 1 dessert</div>
+                <div className="tg-grid">
+                  {TG.desserts.map(d => (
+                    <Choice key={d} name="tg-dessert" checked={dessert === d} onChange={() => setDessert(d)}>{d}</Choice>
+                  ))}
+                </div>
+              </>
+            )}
+          </section>
+
+          {/* ── À la carte ── */}
+          <section className="tg-card" aria-labelledby="tg-extras">
+            <h2 id="tg-extras">À la carte &amp; add-ons</h2>
+            <p className="tg-sub">Order on its own or add to your dinner.</p>
+
+            <div className="tg-label" style={{ marginTop: 0 }}>Extra sides</div>
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1.4fr) auto auto", gap: "8px", alignItems: "center" }} className="tg-side-builder">
+              <select className="tg-select" aria-label="Which side" value={newSide.side} onChange={e => setNewSide(n => ({ ...n, side: e.target.value, option: "" }))}>
+                <option value="">Choose a side…</option>
+                {TG.sides.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+              </select>
+              <select className="tg-select" aria-label="Size" value={newSide.size} onChange={e => setNewSide(n => ({ ...n, size: e.target.value }))}>
+                {TG.sideSizes.map(z => <option key={z.id} value={z.id}>{z.label} — ${z.price}</option>)}
+              </select>
+              <div className="tg-step" aria-label="How many">
+                <button type="button" aria-label="Fewer" disabled={newSide.qty <= 1} onClick={() => setNewSide(n => ({ ...n, qty: n.qty - 1 }))}>−</button>
+                <span>{newSide.qty}</span>
+                <button type="button" aria-label="More" disabled={newSide.qty >= 20} onClick={() => setNewSide(n => ({ ...n, qty: n.qty + 1 }))}>+</button>
+              </div>
+              <button type="button" className="btn-outline" style={{ padding: "10px 18px", color: "#4A1B6B", borderColor: "#4A1B6B" }} onClick={addSideOrder}>Add</button>
+            </div>
+            {TG.sides.find(s => s.name === newSide.side)?.options && (
+              <div className="tg-sub-opts" style={{ marginLeft: 0 }}>
+                {TG.sides.find(s => s.name === newSide.side).options.map(o => (
+                  <button key={o} type="button" className="tg-pill" aria-pressed={newSide.option === o} onClick={() => setNewSide(n => ({ ...n, option: o }))}>{o}</button>
+                ))}
+              </div>
+            )}
+            {sideLines.map(s => (
+              <div key={s.key} className="tg-row">
+                <span>{s.qty} × {s.side}{s.option ? ` (${s.option})` : ""} — {TG.sideSizes.find(z => z.id === s.size).label}</span>
+                <span style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  <strong>${(s.price * s.qty).toFixed(2)}</strong>
+                  <button type="button" aria-label={`Remove ${s.side}`} onClick={() => setSideOrders(prev => prev.filter(x => x.key !== s.key))}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "#6B5E4E", fontSize: "18px", minWidth: "36px", minHeight: "36px" }}>✕</button>
+                </span>
+              </div>
+            ))}
+
+            <div className="tg-label">More add-ons</div>
+            {TG.extras.map(e => {
+              const q = extraQty[e.id] || 0;
+              return (
+                <div key={e.id} className="tg-row">
+                  <div style={{ flex: "1 1 140px" }}>
+                    <div>{e.name}</div>
+                    <div style={{ fontSize: "13px", color: "#6B5E4E" }}>${e.price}{e.unit ? ` per ${e.unit}` : " each"}</div>
+                    {e.needsSeasoning && q > 0 && (
+                      <div className="tg-sub-opts" style={{ marginLeft: 0 }}>
+                        {TG.seasonings.map(s => (
+                          <button key={s} type="button" className="tg-pill" aria-pressed={extraSeasoning[e.id] === s}
+                            onClick={() => setExtraSeasoning(prev => ({ ...prev, [e.id]: s }))}>{s}</button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="tg-step" aria-label={`${e.name} quantity`}>
+                    <button type="button" aria-label={`Fewer ${e.name}`} disabled={q <= 0} onClick={() => setQty(e.id, q - 1)}>−</button>
+                    <span>{q}{e.unit && q > 0 ? ` ${e.unit}` : ""}</span>
+                    <button type="button" aria-label={`More ${e.name}`} disabled={q >= 20} onClick={() => setQty(e.id, q + 1)}>+</button>
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+
+          {/* ── Delivery ── */}
+          <section className="tg-card" aria-labelledby="tg-delivery">
+            <h2 id="tg-delivery">Delivery details</h2>
+            <p className="tg-sub">Drop-off is Wednesday, Nov 25, 10 am–7 pm. Heather will confirm your 1-hour window by Monday, Nov 23.</p>
+            <div className="tg-grid" style={{ gap: "14px" }}>
+              <label className="tg-field">Full name
+                <input autoComplete="name" value={customer.name} onChange={e => setCustomer(c => ({ ...c, name: e.target.value }))} />
+              </label>
+              <label className="tg-field">Phone
+                <input type="tel" autoComplete="tel" value={customer.phone} onChange={e => setCustomer(c => ({ ...c, phone: e.target.value }))} />
+              </label>
+              <label className="tg-field" style={{ gridColumn: "1 / -1" }}>Email
+                <input type="email" autoComplete="email" value={customer.email} onChange={e => setCustomer(c => ({ ...c, email: e.target.value }))} />
+              </label>
+              <label className="tg-field" style={{ gridColumn: "1 / -1" }}>Street address
+                <input autoComplete="street-address" placeholder="123 Main St, Apt 2" value={customer.street} onChange={e => setCustomer(c => ({ ...c, street: e.target.value }))} />
+              </label>
+              <label className="tg-field" style={{ gridColumn: "1 / -1" }}>Town
+                <select value={customer.town} onChange={e => setCustomer(c => ({ ...c, town: e.target.value }))}>
+                  <option value="">Choose your town…</option>
+                  <optgroup label="Delivery included">
+                    {TG.townsIncluded.map(t => <option key={t} value={t}>{t}</option>)}
+                  </optgroup>
+                  <optgroup label="+$15 delivery">
+                    {TG.townsExtended.map(t => <option key={t} value={t}>{t} (+$15)</option>)}
+                  </optgroup>
+                </select>
+              </label>
+              <label className="tg-field" style={{ gridColumn: "1 / -1" }}>Delivery notes or allergies <span style={{ fontWeight: 400, color: "#6B5E4E" }}>(optional)</span>
+                <textarea placeholder="Gate code, leave on porch, food allergies…" value={customer.notes} onChange={e => setCustomer(c => ({ ...c, notes: e.target.value }))} />
+              </label>
+            </div>
+            <p className="jost" style={{ fontSize: "13px", color: "#6B5E4E", marginTop: "14px" }}>
+              Not in a listed town? Call or text Heather at <a href="tel:+17742053071" style={{ color: "#4A1B6B", fontWeight: 600 }}>774-205-3071</a>.
+            </p>
+          </section>
+        </div>
+
+        {/* ── Summary ── */}
+        <aside className="tg-card tg-summary" aria-labelledby="tg-summary">
+          <h2 id="tg-summary">Your order</h2>
+          {wantDinner && size ? (
+            <>
+              <div className="tg-sum-line"><span>Dinner, serves {size}{status.earlyBird ? " (early-bird)" : ""}</span><strong>${dinnerBase.toFixed(2)}</strong></div>
+              {cornishExtra > 0 && <div className="tg-sum-line"><span>Cornish hens (+$6 × {size})</span><strong>${cornishExtra.toFixed(2)}</strong></div>}
+              <div className="jost" style={{ fontSize: "13px", color: "#6B5E4E", lineHeight: 1.6, margin: "2px 0 8px" }}>
+                {[protein && `${protein}${proteinOption ? ` (${proteinOption})` : ""}`, ...sides, dessert].filter(Boolean).join(" · ") || "Make your picks on the left"}
+              </div>
+            </>
+          ) : wantDinner ? (
+            <p className="jost" style={{ fontSize: "14px", color: "#6B5E4E" }}>Choose your dinner size to get started.</p>
+          ) : null}
+          {sideLines.map(s => (
+            <div key={s.key} className="tg-sum-line"><span>{s.qty} × {s.side} ({s.size === "side_quart" ? "quart" : "half pan"})</span><strong>${(s.price * s.qty).toFixed(2)}</strong></div>
+          ))}
+          {extrasLines.map(e => (
+            <div key={e.id} className="tg-sum-line"><span>{e.qty}{e.unit ? ` ${e.unit}` : " ×"} {e.name}</span><strong>${(e.price * e.qty).toFixed(2)}</strong></div>
+          ))}
+          <div className="tg-sum-line"><span>Delivery{customer.town ? ` to ${customer.town}` : ""}</span><strong>{isExtended ? `$${TG.extendedFee.toFixed(2)}` : "Included"}</strong></div>
+          <div className="tg-sum-line" style={{ borderTop: "2px solid #0F1A0F", marginTop: "10px", paddingTop: "14px", fontSize: "18px", color: "#0F1A0F" }}>
+            <span className="playfair" style={{ fontWeight: 600 }}>Total</span><strong className="playfair">${total.toFixed(2)}</strong>
+          </div>
+          {error && <div className="tg-error" role="alert">{error}</div>}
+          <button type="button" className="btn-primary" onClick={checkout} disabled={submitting}
+            style={{ width: "100%", marginTop: "16px", padding: "16px", fontSize: "14px", opacity: submitting ? 0.7 : 1 }}>
+            {submitting ? "Starting secure checkout…" : `Pay $${total.toFixed(2)} →`}
+          </button>
+          <p className="jost" style={{ textAlign: "center", fontSize: "12px", color: "#6B5E4E", marginTop: "10px" }}>🔒 Secure payment by Stripe</p>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
 export default function FlavorFuzionWebsite() {
   const [activePage, setActivePage]         = useState("Home");
   const [showPrivacy, setShowPrivacy]       = useState(false);
@@ -283,6 +742,19 @@ export default function FlavorFuzionWebsite() {
   const [showThanksgivingFlyer, setShowThanksgivingFlyer] = useState(false);
   // Thanksgiving promo hides itself automatically after drop-off day (Nov 25, 2026)
   const showThanksgiving = new Date() < new Date("2026-11-26T00:00:00");
+  const TG_PAGE = "Thanksgiving 🦃";
+  const navPages = showThanksgiving ? ["Home", "Menu", TG_PAGE, ...PAGES.slice(2)] : PAGES;
+  const [showTgSuccess, setShowTgSuccess] = useState(false);
+
+  // Coming back from Stripe checkout
+  useEffect(() => {
+    const result = new URLSearchParams(window.location.search).get("thanksgiving");
+    if (!result) return;
+    setShowPromoPopup(false);
+    if (result === "success") setShowTgSuccess(true);
+    if (result === "cancelled") setActivePage(TG_PAGE);
+    window.history.replaceState({}, "", window.location.pathname);
+  }, []);
 
   useEffect(() => {
     if (!showThanksgivingFlyer) return;
@@ -685,13 +1157,29 @@ export default function FlavorFuzionWebsite() {
           <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", maxWidth: "816px", width: "100%" }}>
             <button onClick={() => setShowThanksgivingFlyer(false)} aria-label="Close flyer"
               style={{ position: "absolute", top: "-4px", right: "-4px", width: "44px", height: "44px", borderRadius: "50%", background: "#FEFAF0", border: "none", fontSize: "20px", cursor: "pointer", color: "#0F1A0F", boxShadow: "0 4px 16px rgba(0,0,0,0.3)", zIndex: 1 }}>✕</button>
-            <img src="/thanksgiving-flyer.png"
-              alt="Flavor Fuzion Thanksgiving Dinner flyer: choose 1 protein, 3 sides and 1 dessert. Serves 4 for $175, serves 6 for $245, serves 8 for $315 (early-bird prices by Nov 10). Order by Wednesday, Nov 18. Drop-off Wednesday, Nov 25. Call 774-205-3071 or email flavorfuzionbyhj@gmail.com."
+            <img src="/thanksgiving-flyer.jpg"
+              alt="Flavor Fuzion Thanksgiving Dinner flyer: choose 1 protein, 3 sides and 1 dessert. Serves 4 for $175, serves 6 for $245, serves 8 for $315 (early-bird prices by Nov 10). Order by Wednesday, Nov 18. Drop-off Wednesday, Nov 25."
               style={{ width: "100%", height: "auto", display: "block", borderRadius: "12px", boxShadow: "0 24px 80px rgba(0,0,0,0.5)" }} />
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", padding: "20px 0 8px" }}>
-              <a className="btn-primary" href="tel:+17742053071">📞 Call to Order</a>
+              <button className="btn-primary" onClick={() => { setShowThanksgivingFlyer(false); setActivePage(TG_PAGE); }}>Order Online</button>
               <a className="btn-outline" href="/thanksgiving-flyer.pdf" download="Flavor-Fuzion-Thanksgiving-Flyer.pdf">Download Flyer</a>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Thanksgiving Order Confirmed ── */}
+      {showTgSuccess && (
+        <div role="dialog" aria-modal="true" aria-labelledby="tg-success-title" onClick={() => setShowTgSuccess(false)}
+          style={{ position: "fixed", inset: 0, background: "rgba(10,18,10,0.8)", zIndex: 220, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: "#FEFAF0", borderRadius: "24px", maxWidth: "460px", width: "100%", padding: "44px 32px", textAlign: "center", position: "relative" }}>
+            <button onClick={() => setShowTgSuccess(false)} aria-label="Close" style={{ position: "absolute", top: "12px", right: "12px", width: "44px", height: "44px", background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
+            <div style={{ fontSize: "48px", marginBottom: "8px" }}>🦃</div>
+            <h2 id="tg-success-title" className="playfair" style={{ fontSize: "30px", fontWeight: 600, color: "#0F1A0F", marginBottom: "12px" }}>You're on the list!</h2>
+            <p className="jost" style={{ fontSize: "15px", color: "#4A3F33", lineHeight: 1.7, marginBottom: "24px" }}>
+              Thank you for your Thanksgiving order. A confirmation is on its way to your email. Heather will send your 1-hour delivery window by Monday, Nov 23. Drop-off is Wednesday, Nov 25.
+            </p>
+            <button className="btn-primary" onClick={() => setShowTgSuccess(false)}>Wonderful!</button>
           </div>
         </div>
       )}
@@ -717,7 +1205,7 @@ export default function FlavorFuzionWebsite() {
 
         {/* Desktop Nav */}
         <div className="desktop-nav" style={{ display: "flex", gap: "36px", alignItems: "center" }}>
-          {PAGES.map((page) => (
+          {navPages.map((page) => (
             page === "Menu" ? (
               <button key={page} className="nav-link"
                 onClick={() => window.open("https://flavor-fuzion-app.vercel.app", "_blank")}>
@@ -757,7 +1245,7 @@ export default function FlavorFuzionWebsite() {
       {/* Mobile Menu Dropdown */}
       {menuOpen && (
         <div style={{ position: "fixed", top: "72px", left: 0, right: 0, background: "#0F1A0F", zIndex: 99, padding: "24px", borderBottom: "1px solid rgba(201,168,76,0.2)", display: "flex", flexDirection: "column", gap: "4px" }}>
-          {PAGES.map((page) => (
+          {navPages.map((page) => (
             <button key={page}
               onClick={() => { page === "Menu" ? window.open("https://flavor-fuzion-app.vercel.app", "_blank") : setActivePage(page); setMenuOpen(false); }}
               style={{ background: "none", border: "none", color: activePage === page ? "#DAA520" : "#FEFAF0", fontFamily: "'Jost', sans-serif", fontSize: "16px", fontWeight: 500, padding: "12px 0", textAlign: "left", cursor: "pointer", borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
@@ -899,7 +1387,7 @@ export default function FlavorFuzionWebsite() {
                 <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", gap: "48px", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
                   <button onClick={() => setShowThanksgivingFlyer(true)} aria-label="View the full Thanksgiving flyer"
                     style={{ flex: "0 1 300px", padding: 0, border: "none", background: "none", cursor: "zoom-in" }}>
-                    <img src="/thanksgiving-flyer.png" alt="" style={{ width: "100%", height: "auto", display: "block", borderRadius: "12px", border: "3px solid #DAA520", boxShadow: "0 24px 60px rgba(0,0,0,0.45)", transform: "rotate(-2deg)" }} />
+                    <img src="/thanksgiving-flyer.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", borderRadius: "12px", border: "3px solid #DAA520", boxShadow: "0 24px 60px rgba(0,0,0,0.45)", transform: "rotate(-2deg)" }} />
                   </button>
                   <div style={{ flex: "1 1 380px", color: "#FEFAF0" }}>
                     <span className="section-tag">Now Taking Thanksgiving Orders</span>
@@ -910,7 +1398,7 @@ export default function FlavorFuzionWebsite() {
                       Made from scratch and dropped off at your door the day before Thanksgiving. Choose 1 protein, 3 sides and 1 dessert, with homemade cranberry sauce and gravy included. Just heat and serve.
                     </p>
                     <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "24px" }}>
-                      {[["Serves 4", "$175"], ["Serves 6", "$245"], ["Serves 8", "$315"]].map(([size, price]) => (
+                      {(new Date() < new Date("2026-11-11T05:00:00Z") ? [["Serves 4", "$175"], ["Serves 6", "$245"], ["Serves 8", "$315"]] : [["Serves 4", "$195"], ["Serves 6", "$270"], ["Serves 8", "$340"]]).map(([size, price]) => (
                         <div key={size} style={{ border: "1px solid rgba(218,165,32,0.5)", borderRadius: "12px", padding: "10px 18px", textAlign: "center", minWidth: "96px" }}>
                           <div className="jost" style={{ fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#A0C8A8" }}>{size}</div>
                           <div className="playfair gold" style={{ fontSize: "24px", fontWeight: 700 }}>{price}</div>
@@ -918,12 +1406,11 @@ export default function FlavorFuzionWebsite() {
                       ))}
                     </div>
                     <p className="jost" style={{ fontSize: "14px", lineHeight: 1.7, color: "#F5E4A0", marginBottom: "28px" }}>
-                      <strong>Early-bird prices through Tue, Nov 10</strong> · Order by Wed, Nov 18 · Drop-off Wed, Nov 25 · Limited orders
+                      {new Date() < new Date("2026-11-11T05:00:00Z") && <><strong>Early-bird prices through Tue, Nov 10</strong> · </>}Order by Wed, Nov 18 · Drop-off Wed, Nov 25 · Limited orders
                     </p>
                     <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                      <button className="btn-primary" onClick={() => setShowThanksgivingFlyer(true)}>View Full Menu & Flyer</button>
-                      <a className="btn-outline" href="tel:+17742053071">Call 774-205-3071</a>
-                      <a className="btn-outline" href="mailto:flavorfuzionbyhj@gmail.com?subject=Thanksgiving%20Dinner%20Order">Email to Order</a>
+                      <button className="btn-primary" onClick={() => setActivePage(TG_PAGE)}>Order Thanksgiving Dinner</button>
+                      <button className="btn-outline" onClick={() => setShowThanksgivingFlyer(true)}>View Full Menu & Flyer</button>
                     </div>
                   </div>
                 </div>
@@ -1485,6 +1972,10 @@ export default function FlavorFuzionWebsite() {
         {/* ════════════════════════════════════════════════════
             COOKIES PAGE
         ════════════════════════════════════════════════════ */}
+        {activePage === TG_PAGE && (
+          <ThanksgivingPage onViewFlyer={() => setShowThanksgivingFlyer(true)} />
+        )}
+
         {activePage === "Get Cookies 🍪" && (
           <CookiesPage onAddToCart={addToCart} />
         )}
@@ -1838,7 +2329,7 @@ export default function FlavorFuzionWebsite() {
             <div>
               <div className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "20px" }} className="gold jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" }}>Navigation</div>
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {PAGES.map((page) => (
+                {navPages.map((page) => (
                   <button key={page} onClick={() => setActivePage(page)}
                     className="jost" style={{ background: "none", border: "none", color: "#A0C8A8", fontSize: "14px", cursor: "pointer", textAlign: "left", fontWeight: 300, transition: "color 0.2s", padding: 0 }}
                     onMouseOver={(e) => e.target.style.color = "#DAA520"}
