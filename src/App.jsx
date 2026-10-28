@@ -278,7 +278,18 @@ export default function FlavorFuzionWebsite() {
   const [selectedMerch, setSelectedMerch] = useState(null);
   const [merchColor, setMerchColor] = useState("");
   const [merchSize, setMerchSize] = useState("");
+  const [merchCardColor, setMerchCardColor] = useState({});
   const [cartCheckingOut, setCartCheckingOut] = useState(false);
+  const [showThanksgivingFlyer, setShowThanksgivingFlyer] = useState(false);
+  // Thanksgiving promo hides itself automatically after drop-off day (Nov 25, 2026)
+  const showThanksgiving = new Date() < new Date("2026-11-26T00:00:00");
+
+  useEffect(() => {
+    if (!showThanksgivingFlyer) return;
+    const onKey = (e) => { if (e.key === "Escape") setShowThanksgivingFlyer(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showThanksgivingFlyer]);
 
   const addToCart = (item) => {
     setCart(prev => {
@@ -666,6 +677,25 @@ export default function FlavorFuzionWebsite() {
         </div>
       )}
 
+      {/* ── Thanksgiving Flyer Popup ── */}
+      {showThanksgivingFlyer && (
+        <div role="dialog" aria-modal="true" aria-label="Thanksgiving dinner flyer"
+          onClick={() => setShowThanksgivingFlyer(false)}
+          style={{ position: "fixed", inset: 0, background: "rgba(10,18,10,0.85)", zIndex: 210, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "24px 16px", overflowY: "auto" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", maxWidth: "816px", width: "100%" }}>
+            <button onClick={() => setShowThanksgivingFlyer(false)} aria-label="Close flyer"
+              style={{ position: "absolute", top: "-4px", right: "-4px", width: "44px", height: "44px", borderRadius: "50%", background: "#FEFAF0", border: "none", fontSize: "20px", cursor: "pointer", color: "#0F1A0F", boxShadow: "0 4px 16px rgba(0,0,0,0.3)", zIndex: 1 }}>✕</button>
+            <img src="/thanksgiving-flyer.png"
+              alt="Flavor Fuzion Thanksgiving Dinner flyer: choose 1 protein, 3 sides and 1 dessert. Serves 4 for $175, serves 6 for $245, serves 8 for $315 (early-bird prices by Nov 10). Order by Wednesday, Nov 18. Drop-off Wednesday, Nov 25. Call 774-205-3071 or email flavorfuzionbyhj@gmail.com."
+              style={{ width: "100%", height: "auto", display: "block", borderRadius: "12px", boxShadow: "0 24px 80px rgba(0,0,0,0.5)" }} />
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", padding: "20px 0 8px" }}>
+              <a className="btn-primary" href="tel:+17742053071">📞 Call to Order</a>
+              <a className="btn-outline" href="/thanksgiving-flyer.pdf" download="Flavor-Fuzion-Thanksgiving-Flyer.pdf">Download Flyer</a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Navigation ── */}
       <nav style={{
         position: "fixed", top: showPromoBanner ? "42px" : "0", left: 0, right: 0, zIndex: 100,
@@ -863,6 +893,43 @@ export default function FlavorFuzionWebsite() {
             </div>
 
 
+            {/* Thanksgiving Dinner Promo */}
+            {showThanksgiving && (
+              <div style={{ background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", padding: "clamp(48px, 8vw, 80px) clamp(20px, 6vw, 80px)" }}>
+                <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", gap: "48px", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+                  <button onClick={() => setShowThanksgivingFlyer(true)} aria-label="View the full Thanksgiving flyer"
+                    style={{ flex: "0 1 300px", padding: 0, border: "none", background: "none", cursor: "zoom-in" }}>
+                    <img src="/thanksgiving-flyer.png" alt="" style={{ width: "100%", height: "auto", display: "block", borderRadius: "12px", border: "3px solid #DAA520", boxShadow: "0 24px 60px rgba(0,0,0,0.45)", transform: "rotate(-2deg)" }} />
+                  </button>
+                  <div style={{ flex: "1 1 380px", color: "#FEFAF0" }}>
+                    <span className="section-tag">Now Taking Thanksgiving Orders</span>
+                    <h2 className="playfair" style={{ fontSize: "clamp(34px, 5vw, 52px)", fontWeight: 700, lineHeight: 1.1, margin: "8px 0 16px", color: "#FEFAF0" }}>
+                      Thanksgiving dinner, <em className="gold">handled.</em>
+                    </h2>
+                    <p className="jost" style={{ fontSize: "16px", lineHeight: 1.7, color: "rgba(254,250,240,0.85)", marginBottom: "24px", maxWidth: "520px" }}>
+                      Made from scratch and dropped off at your door the day before Thanksgiving. Choose 1 protein, 3 sides and 1 dessert, with homemade cranberry sauce and gravy included. Just heat and serve.
+                    </p>
+                    <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "24px" }}>
+                      {[["Serves 4", "$175"], ["Serves 6", "$245"], ["Serves 8", "$315"]].map(([size, price]) => (
+                        <div key={size} style={{ border: "1px solid rgba(218,165,32,0.5)", borderRadius: "12px", padding: "10px 18px", textAlign: "center", minWidth: "96px" }}>
+                          <div className="jost" style={{ fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#A0C8A8" }}>{size}</div>
+                          <div className="playfair gold" style={{ fontSize: "24px", fontWeight: 700 }}>{price}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="jost" style={{ fontSize: "14px", lineHeight: 1.7, color: "#F5E4A0", marginBottom: "28px" }}>
+                      <strong>Early-bird prices through Tue, Nov 10</strong> · Order by Wed, Nov 18 · Drop-off Wed, Nov 25 · Limited orders
+                    </p>
+                    <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                      <button className="btn-primary" onClick={() => setShowThanksgivingFlyer(true)}>View Full Menu & Flyer</button>
+                      <a className="btn-outline" href="tel:+17742053071">Call 774-205-3071</a>
+                      <a className="btn-outline" href="mailto:flavorfuzionbyhj@gmail.com?subject=Thanksgiving%20Dinner%20Order">Email to Order</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Parallax Image 1 - Food Spread */}
             <div className="parallax-section" style={{
               height: "400px",
@@ -1053,7 +1120,7 @@ export default function FlavorFuzionWebsite() {
             </div>
 
             {/* Merch Section */}
-            <div style={{ padding: "100px 80px", background: "#FEFAF0" }}>
+            <div className="section-padding" style={{ padding: "100px 80px", background: "#FEFAF0" }}>
               <div style={{ textAlign: "center", marginBottom: "60px" }}>
                 <span className="section-tag">Flavor Fuzion Merch</span>
                 <h2 className="playfair" style={{ fontSize: "48px", fontWeight: 600, color: "#0F1A0F", lineHeight: 1.2 }}>
@@ -1070,13 +1137,21 @@ export default function FlavorFuzionWebsite() {
                   { emoji: "🧥", name: "Hoodie", price: 30, sizePricing: { "XS": 25, "S": 25, "M": 30, "L": 30, "XL": 30, "2XL": 30, "3XL": 35, "4XL": 35, "5XL": 40 }, sizes: true, colors: ["Black"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo.", link: "https://buy.stripe.com/28E14mgSd7Eqa1Cdlqasg00" },
                   { emoji: "👕", name: "T-Shirt", price: 20, sizePricing: { "XS": 15, "S": 15, "M": 20, "L": 20, "XL": 20, "2XL": 20, "3XL": 25, "4XL": 25 }, sizes: true, colors: ["Black"], description: "Soft cotton tee with bold Flavor Fuzion print.", link: "https://buy.stripe.com/aFa4gybxTe2Oa1Cbdiasg01" },
                   { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Black"], description: "Structured snapback with embroidered logo.", link: "https://buy.stripe.com/eVq4gy59v7EqehS2GMasg02" },
-                  { emoji: "🥶", name: "Beanie", price: 15, sizes: false, colors: ["Black", "Royal Purple"], description: "Cozy knit beanie with Flavor Fuzion patch.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
+                  { emoji: "🥶", name: "Beanie", price: 19, inStock: true, sizes: false, colors: ["Black", "Royal Purple"], images: { "Black": ["/merch/beanie-black-front.jpg", "/merch/beanie-black-back.jpg"], "Royal Purple": ["/merch/beanie-purple-front.jpg", "/merch/beanie-purple-back.jpg"] }, description: "Cozy cuffed knit beanie. Gold logo on the front, byheatherjaney.com on the back.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
                 ].map((item) => (
                   <div key={item.name} style={{ background: "#fff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #EEE8DF", display: "flex", flexDirection: "column" }}>
                     {/* Image placeholder */}
-                    <div className="merch-image" style={{ background: "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", height: "200px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                      <span style={{ fontSize: "80px" }}>{item.emoji}</span>
-                      <div style={{ position: "absolute", top: "12px", right: "12px", background: "#DAA520", color: "#0F1A0F", padding: "4px 10px", borderRadius: "100px", fontSize: "12px", fontWeight: 700 }}>PRE-ORDER</div>
+                    <div className="merch-image" style={{ background: item.images ? "#FFFFFF" : "linear-gradient(135deg, #0F1A0F 0%, #4A1B6B 100%)", height: "200px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                      {item.images ? (
+                        <img src={item.images[merchCardColor[item.name] || item.colors[0]][0]}
+                          alt={`${merchCardColor[item.name] || item.colors[0]} Flavor Fuzion ${item.name.toLowerCase()}, front with logo`}
+                          onMouseEnter={(e) => { e.currentTarget.src = item.images[merchCardColor[item.name] || item.colors[0]][1]; }}
+                          onMouseLeave={(e) => { e.currentTarget.src = item.images[merchCardColor[item.name] || item.colors[0]][0]; }}
+                          loading="lazy" style={{ height: "100%", width: "100%", objectFit: "contain" }} />
+                      ) : (
+                        <span style={{ fontSize: "80px" }}>{item.emoji}</span>
+                      )}
+                      <div style={{ position: "absolute", top: "12px", right: "12px", background: item.inStock ? "#3A7D44" : "#DAA520", color: item.inStock ? "#FFFFFF" : "#0F1A0F", padding: "4px 10px", borderRadius: "100px", fontSize: "12px", fontWeight: 700 }}>{item.inStock ? "IN STOCK" : "PRE-ORDER"}</div>
                     </div>
                     <div className="merch-body" style={{ padding: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
                       <h3 className="playfair" style={{ fontSize: "22px", fontWeight: 600, color: "#0F1A0F", marginBottom: "8px" }}>{item.name}</h3>
@@ -1088,7 +1163,10 @@ export default function FlavorFuzionWebsite() {
                         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                           {item.colors.map((colorName) => {
                             const colorMap = { "Black": "#0F1A0F", "Royal Purple": "#4A1B6B", "Forest Green": "#1A5C2A", "Gold": "#DAA520" };
-                            return <div key={colorName} title={colorName} style={{ width: "20px", height: "20px", borderRadius: "50%", background: colorMap[colorName], border: "2px solid #EEE8DF", cursor: "pointer" }} />;
+                            const isShown = item.images && (merchCardColor[item.name] || item.colors[0]) === colorName;
+                            return <button key={colorName} type="button" title={colorName} aria-label={`Show ${colorName}`}
+                              onClick={() => item.images && setMerchCardColor(prev => ({ ...prev, [item.name]: colorName }))}
+                              style={{ width: "20px", height: "20px", padding: 0, borderRadius: "50%", background: colorMap[colorName], border: `2px solid ${isShown ? "#DAA520" : "#EEE8DF"}`, cursor: item.images ? "pointer" : "default" }} />;
                           })}
                         </div>
                       </div>
@@ -1112,9 +1190,9 @@ export default function FlavorFuzionWebsite() {
                             : `$${item.price}`}
                         </div>
                         <a href={item.link} target="_blank" rel="noopener noreferrer"
-                          onClick={(e) => { e.preventDefault(); setSelectedMerch(item); setMerchColor(item.colors[0]); setMerchSize(""); setShowMerchPopup(true); }}
-                          style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", padding: "6px 14px", borderRadius: "100px", fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none" }}>
-                          Pre-Order →
+                          onClick={(e) => { e.preventDefault(); setSelectedMerch(item); setMerchColor(merchCardColor[item.name] || item.colors[0]); setMerchSize(""); setShowMerchPopup(true); }}
+                          style={{ background: "linear-gradient(135deg, #8B6914 0%, #DAA520 30%, #F5D060 50%, #DAA520 70%, #8B6914 100%)", color: "#0F1A0F", border: "none", padding: "6px 14px", borderRadius: "100px", fontFamily: "'Jost', sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none", whiteSpace: "nowrap" }}>
+                          {item.inStock ? "Buy Now →" : "Pre-Order →"}
                         </a>
                       </div>
                     </div>
@@ -1516,7 +1594,20 @@ export default function FlavorFuzionWebsite() {
           onClick={(e) => { if (e.target === e.currentTarget) setShowMerchPopup(false); }}>
           <div style={{ background: "#FEFAF0", borderRadius: "24px", padding: "40px", maxWidth: "480px", width: "100%", position: "relative" }}>
             <button onClick={() => setShowMerchPopup(false)} style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", fontSize: "24px", cursor: "pointer", color: "#6B5E4E" }}>✕</button>
-            <div style={{ fontSize: "48px", textAlign: "center", marginBottom: "12px" }}>{selectedMerch.emoji}</div>
+            {selectedMerch.images && merchColor ? (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+                {["Front", "Back"].map((side, idx) => (
+                  <figure key={side} style={{ margin: 0, textAlign: "center" }}>
+                    <img src={selectedMerch.images[merchColor][idx]}
+                      alt={`${merchColor} ${selectedMerch.name.toLowerCase()}, ${idx === 0 ? "front with Flavor Fuzion logo" : "back with byheatherjaney.com"}`}
+                      style={{ display: "block", width: "100%", height: "auto", borderRadius: "12px", background: "#fff" }} />
+                    <figcaption className="jost" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#6B5E4E", marginTop: "6px" }}>{side}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: "48px", textAlign: "center", marginBottom: "12px" }}>{selectedMerch.emoji}</div>
+            )}
             <h3 className="playfair" style={{ fontSize: "28px", fontWeight: 600, textAlign: "center", marginBottom: "24px" }}>{selectedMerch.name}</h3>
 
             {/* Color Selector */}
@@ -1564,7 +1655,8 @@ export default function FlavorFuzionWebsite() {
               onClick={() => {
                 const itemPrice = selectedMerch.sizePricing && merchSize ? selectedMerch.sizePricing[merchSize] : selectedMerch.price;
                 const cartKey = `${selectedMerch.name}-${merchColor}-${merchSize}`;
-                addToCart({ ...selectedMerch, price: itemPrice, id: cartKey, color: merchColor, size: merchSize, cartKey });
+                const { images, inStock, ...merchInfo } = selectedMerch;
+                addToCart({ ...merchInfo, price: itemPrice, id: cartKey, color: merchColor, size: merchSize, cartKey });
                 setShowMerchPopup(false);
                 setShowCart(true);
               }}
