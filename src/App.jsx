@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 
 // ── Color Palette ─────────────────────────────────────────────────────────────
 // Emerald: #50C878 / #3DDC84
@@ -1137,7 +1137,7 @@ export default function FlavorFuzionWebsite() {
                   { emoji: "🧥", name: "Hoodie", price: 30, sizePricing: { "XS": 25, "S": 25, "M": 30, "L": 30, "XL": 30, "2XL": 30, "3XL": 35, "4XL": 35, "5XL": 40 }, sizes: true, colors: ["Black"], description: "Premium pullover hoodie with embroidered Flavor Fuzion logo.", link: "https://buy.stripe.com/28E14mgSd7Eqa1Cdlqasg00" },
                   { emoji: "👕", name: "T-Shirt", price: 20, sizePricing: { "XS": 15, "S": 15, "M": 20, "L": 20, "XL": 20, "2XL": 20, "3XL": 25, "4XL": 25 }, sizes: true, colors: ["Black"], description: "Soft cotton tee with bold Flavor Fuzion print.", link: "https://buy.stripe.com/aFa4gybxTe2Oa1Cbdiasg01" },
                   { emoji: "🧢", name: "Hat", price: 15, sizes: false, colors: ["Black"], description: "Structured snapback with embroidered logo.", link: "https://buy.stripe.com/eVq4gy59v7EqehS2GMasg02" },
-                  { emoji: "🥶", name: "Beanie", price: 19, inStock: true, sizes: false, colors: ["Black", "Royal Purple"], images: { "Black": ["/merch/beanie-black-front.jpg", "/merch/beanie-black-back.jpg"], "Royal Purple": ["/merch/beanie-purple-front.jpg", "/merch/beanie-purple-back.jpg"] }, description: "Cozy cuffed knit beanie. Gold logo on the front, byheatherjaney.com on the back.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
+                  { emoji: "🥶", name: "Beanie", price: 19, inStock: true, sizes: false, colors: ["Royal Purple", "Black"], images: { "Black": ["/merch/beanie-black-front.jpg", "/merch/beanie-black-back.jpg"], "Royal Purple": ["/merch/beanie-purple-front.jpg", "/merch/beanie-purple-back.jpg"] }, description: "Cozy cuffed knit beanie. Gold logo on the front, byheatherjaney.com on the back.", link: "https://buy.stripe.com/7sY5kC9pL7EqflW0yEasg03" },
                 ].map((item) => (
                   <div key={item.name} style={{ background: "#fff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #EEE8DF", display: "flex", flexDirection: "column" }}>
                     {/* Image placeholder */}
